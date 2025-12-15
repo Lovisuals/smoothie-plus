@@ -4,29 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>smoothiePlus+ | Liquid Energy</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     
     <script>
-        // Disable Right Click
         document.addEventListener('contextmenu', event => event.preventDefault());
-
-        // Disable Inspector Shortcuts (F12, Ctrl+U, Ctrl+Shift+I, etc.)
         document.onkeydown = function(e) {
-            if(e.keyCode == 123) { return false; } // F12
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) { return false; } // Ctrl+Shift+I
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) { return false; } // Ctrl+Shift+C
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) { return false; } // Ctrl+Shift+J
-            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { return false; } // Ctrl+U
+            if(e.keyCode == 123) { return false; } 
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) { return false; }
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) { return false; }
+            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { return false; }
         }
-    </script>
-
-    <script>
-        window.onerror = function(msg, url, line) {
-            // Only show alert if it's NOT a security block error
-            return false; 
-        };
     </script>
 
     <script>
@@ -40,21 +28,16 @@
         }
     </script>
     <style>
-        /* Disable Text Selection (Prevents copying text) */
         body { 
             background-color: #050508; 
-            color: white;
-            -webkit-user-select: none; /* Safari */
-            -ms-user-select: none; /* IE 10 and IE 11 */
-            user-select: none; /* Standard syntax */
+            color: white; 
+            -webkit-user-select: none; 
+            user-select: none; 
         }
+        /* Allow typing in inputs */
+        input, textarea { -webkit-user-select: text; user-select: text; }
         
-        /* Allow selection only in input fields so they can type name/address */
-        input, textarea {
-            -webkit-user-select: text;
-            user-select: text;
-        }
-
+        /* GLASSMORPHISM */
         .glass-panel {
             background: rgba(20, 20, 30, 0.90);
             backdrop-filter: blur(20px);
@@ -62,30 +45,31 @@
             border-top: 1px solid rgba(255, 255, 255, 0.15);
         }
 
+        /* ANIMATIONS */
         .slide-up { transform: translateY(105%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         .slide-up.active { transform: translateY(0); }
         
         .fade-in { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .fade-in.active { opacity: 1; pointer-events: auto; }
 
-        @keyframes liquid-float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+        @keyframes liquid-float { 
+            0%, 100% { transform: translateY(0px); } 
+            50% { transform: translateY(-10px); } 
         }
         .float-card { animation: liquid-float 6s ease-in-out infinite; }
 
         .icon-pulse { animation: pulse-ring 2s infinite; }
-        @keyframes pulse-ring {
-            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1); }
-            70% { box-shadow: 0 0 0 6px rgba(255, 255, 255, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        @keyframes pulse-ring { 
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1); } 
+            70% { box-shadow: 0 0 0 6px rgba(255, 255, 255, 0); } 
+            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } 
         }
 
         .pulse-glow { animation: pulse-green 2s infinite; }
-        @keyframes pulse-green {
-            0% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(57, 255, 20, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0); }
+        @keyframes pulse-green { 
+            0% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.7); } 
+            70% { box-shadow: 0 0 0 15px rgba(57, 255, 20, 0); } 
+            100% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0); } 
         }
     </style>
 </head>
@@ -100,10 +84,14 @@
     </div>
 
     <main id="menuGrid" class="px-4 grid grid-cols-2 gap-4 max-w-md mx-auto relative z-10 min-h-[50vh]">
-        <div id="loadingMsg" class="col-span-2 text-center text-red-500 mt-10 p-4 border border-red-500 rounded-xl bg-red-900/20">
-            <p class="font-bold">System Loading...</p>
-        </div>
+        <div id="loadingMsg" class="col-span-2 text-center text-gray-500 mt-10">Loading Menu...</div>
     </main>
+
+    <footer class="mt-20 mb-32 text-center">
+        <button onclick="openInvestorLogin()" class="text-[10px] text-gray-700 hover:text-green-500 transition uppercase tracking-widest">
+            🔒 Investor Access
+        </button>
+    </footer>
 
     <button onclick="toggleSheet()" class="fixed bottom-6 right-6 bg-green-500 text-black w-14 h-14 rounded-full shadow-2xl z-40 pulse-glow flex items-center justify-center transform active:scale-90 transition">
         <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
@@ -117,24 +105,98 @@
         </div>
     </div>
 
+    <div id="investorLoginModal" class="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md fade-in">
+        <div class="w-full max-w-sm text-center">
+            <h2 class="text-2xl font-black uppercase text-white mb-2">Restricted Area</h2>
+            <p class="text-gray-500 text-xs mb-6">Enter Passkey to View Business Protocol</p>
+            <input type="password" id="investorPass" placeholder="ENTER KEY" class="w-full bg-gray-800 border border-gray-700 text-center text-white text-xl tracking-widest rounded-xl px-4 py-4 focus:outline-none focus:border-green-500 mb-4 uppercase">
+            <button onclick="checkInvestorPass()" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200">ACCESS</button>
+            <button onclick="closeInvestorLogin()" class="mt-4 text-xs text-gray-600">CANCEL</button>
+        </div>
+    </div>
+
+    <div id="investorVault" class="fixed inset-0 z-[130] bg-black overflow-y-auto fade-in">
+        <div class="max-w-2xl mx-auto p-6 pb-20">
+            <div class="flex justify-between items-center mb-8 sticky top-0 bg-black/90 backdrop-blur-sm py-4 z-10 border-b border-gray-800">
+                <h2 class="text-xl font-black text-green-500">INVESTOR PROTOCOL</h2>
+                <button onclick="closeVault()" class="text-xs bg-gray-800 px-3 py-1 rounded text-white">EXIT</button>
+            </div>
+
+            <section class="mb-12">
+                <h3 class="text-3xl font-black text-white mb-4">01. THE VISION</h3>
+                <p class="text-gray-400 leading-relaxed mb-4">
+                    <span class="text-white font-bold">smoothiePlus+</span> is a bio-hacked hydration station replacing ubiquitous soda with targeted fruit nutrition. We utilize a unique "Zero-Water" blending process, replacing inert water with nutrient-dense Milk, Honey, or Tiger Nut bases.
+                </p>
+                <div class="grid grid-cols-2 gap-4 mt-6">
+                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
+                        <p class="text-green-500 font-bold text-lg">Precision Prep</p>
+                        <p class="text-xs text-gray-500 uppercase">Potato Slicer Consistency</p>
+                    </div>
+                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
+                        <p class="text-green-500 font-bold text-lg">3 Flavor Bases</p>
+                        <p class="text-xs text-gray-500 uppercase">Milk / Honey / Tiger Nut</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-12">
+                <h3 class="text-3xl font-black text-white mb-4">02. PRODUCT LINE</h3>
+                <p class="text-gray-400 text-sm mb-6">Our menu caters to specific health demographics: Diabetics, Depressive states, and High-Performance Workers.</p>
+                <div id="investorProductGrid" class="grid grid-cols-2 gap-3">
+                    </div>
+            </section>
+
+            <section class="mb-12">
+                <h3 class="text-3xl font-black text-white mb-4">03. SCALABILITY</h3>
+                <div class="bg-gray-900 border border-green-500/20 p-6 rounded-2xl">
+                    <h4 class="font-bold text-white mb-2">The "Pod" Model</h4>
+                    <p class="text-gray-400 text-sm mb-4">We do not rent shops. We deploy 4sqm pods in gyms, estates, and co-working spaces.</p>
+                    <ul class="text-sm text-gray-300 space-y-2">
+                        <li>✅ Standardized Slicing (Potato Slicer Tech)</li>
+                        <li>✅ Pre-Squashed Inventory (Casing Technique)</li>
+                        <li>✅ Centralized Base Production</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="mb-12">
+                <h3 class="text-3xl font-black text-white mb-4">04. UNIT ECONOMICS</h3>
+                <div class="glass-panel p-6 rounded-2xl">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-400">Avg. Order Value</span>
+                        <span class="text-white font-bold">₦4,000</span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-400">COGS (Fruit/Base)</span>
+                        <span class="text-red-400 font-bold">-₦1,800</span>
+                    </div>
+                    <div class="border-t border-gray-700 my-2 pt-2 flex justify-between">
+                        <span class="text-green-500 font-bold uppercase">Gross Margin</span>
+                        <span class="text-green-500 font-bold">55%</span>
+                    </div>
+                </div>
+            </section>
+
+            <div class="text-center mt-12 opacity-50">
+                <p class="text-[10px] uppercase tracking-widest">CONFIDENTIAL DOCUMENT • smoothiePlus+</p>
+            </div>
+        </div>
+    </div>
+
     <div id="orderSheet" class="fixed bottom-0 left-0 right-0 glass-panel rounded-t-3xl p-6 z-[100] max-h-[85vh] overflow-y-auto slide-up">
         <div class="w-12 h-1 bg-gray-500 rounded-full mx-auto mb-6 cursor-pointer" onclick="toggleSheet()"></div>
-
         <div class="flex justify-between items-center mb-2">
             <h3 class="text-xs text-gray-400 uppercase font-bold">Order Summary</h3>
             <button onclick="toggleSheet()" class="text-xs text-red-400 font-bold border border-red-400/30 px-2 py-1 rounded">CLOSE</button>
         </div>
-
         <div id="cartItems" class="space-y-2 mb-4 text-sm font-medium text-gray-200">
             <p class="text-gray-500 italic text-xs">Your cart is empty.</p>
         </div>
-
         <div class="border-t border-gray-600 my-4 pt-4">
             <div class="flex justify-between items-end mb-4">
                 <span class="text-gray-400 text-sm">Total to Pay:</span>
                 <span id="totalPrice" class="text-3xl font-black text-green-400">₦0</span>
             </div>
-            
             <div class="bg-gray-800/80 rounded-xl p-3 border border-gray-600 mb-6">
                 <div class="flex justify-between items-center">
                     <div>
@@ -146,21 +208,17 @@
                 </div>
             </div>
         </div>
-
         <div class="space-y-3 mb-6">
             <h3 class="text-xs text-gray-400 uppercase font-bold">Your Details</h3>
             <input type="text" id="custName" placeholder="Your Name" class="w-full bg-gray-900/80 border border-gray-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 transition placeholder-gray-500">
             <textarea id="custAddress" rows="2" placeholder="Delivery Address" class="w-full bg-gray-900/80 border border-gray-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 transition placeholder-gray-500"></textarea>
         </div>
-
         <button onclick="sendOrder()" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-black font-black uppercase py-4 rounded-xl shadow-[0_0_20px_rgba(34,197,94,0.4)] active:scale-95 transition flex items-center justify-center gap-2 mb-4">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.506-.669-.516-.173-.009-.371-.009-.57-.009-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
             Submit Order via WhatsApp
         </button>
     </div>
 
     <script>
-        // --- STORE CONFIG ---
         const STORE_CONFIG = {
             admin: {
                 whatsapp: "2347068516779", 
@@ -171,39 +229,39 @@
             products: [
                 {
                     id: 1,
-                    name: "Neon Detox",
-                    price: 500,
+                    name: "Diabetes Defense",
+                    price: 3500,
                     img: "https://images.unsplash.com/photo-1610970881699-44a5587cabec?auto=format&fit=crop&w=500&q=80",
                     color: "green",
-                    description: "A high-voltage cleanse for your system. Packed with chlorophyll and hydration.",
-                    ingredients: "Cucumber, Green Apple, Mint, Lemon, Spirulina"
+                    description: "Low-glycemic blend. Replaces soda with fiber-rich hydration.",
+                    ingredients: "Sliced Green Apples, Cucumber, Tiger Nut Water Base"
                 },
                 {
                     id: 2,
-                    name: "Cyber Berry",
-                    price: 1200,
+                    name: "Mood Lifter",
+                    price: 4200,
                     img: "https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?auto=format&fit=crop&w=500&q=80",
                     color: "purple",
-                    description: "Antioxidant overload. Designed to protect your cells and boost brain function.",
-                    ingredients: "Blueberries, Acai, Banana, Almond Milk, Chia Seeds"
+                    description: "Antidepressant focus. Packed with mood-boosting vitamins and natural sweetness.",
+                    ingredients: "Banana, Berries, Honey Water Base, Ice Block"
                 },
                 {
                     id: 3,
-                    name: "Golden Volt",
-                    price: 1800,
+                    name: "Workaholic Energy",
+                    price: 3800,
                     img: "https://images.unsplash.com/photo-1595981267035-7b04ca84a82d?auto=format&fit=crop&w=500&q=80",
                     color: "orange",
-                    description: "Tropical energy surge. Natural sugars and immunity boosters for the win.",
-                    ingredients: "Mango, Pineapple, Turmeric, Coconut Water, Ginger"
+                    description: "The ultimate fuel for the always-working individual. Instant natural energy.",
+                    ingredients: "Squashed Watermelon Liquid, Pineapple, Milk Water Base"
                 },
                 {
                     id: 4,
-                    name: "Protein Mainframe",
-                    price: 2000,
-                    img: "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?auto=format&fit=crop&w=500&q=80",
+                    name: "Pure Hydration",
+                    price: 3000,
+                    img: "https://images.unsplash.com/photo-1589984662646-e7b2e4962f18?auto=format&fit=crop&w=500&q=80",
                     color: "cyan",
-                    description: "Muscle recovery protocol. High protein and slow-release carbs.",
-                    ingredients: "Banana, Oats, Peanut Butter, Whey Protein, Cocoa"
+                    description: "Single-fruit variety. Pure hydration with your choice of flavor base.",
+                    ingredients: "100% Squashed Watermelon, Choice of: Milk, Honey, or Tiger Nut Base"
                 }
             ]
         };
@@ -213,6 +271,8 @@
         const orderSheet = document.getElementById('orderSheet');
         const modal = document.getElementById('productModal');
         const loadingMsg = document.getElementById('loadingMsg');
+        const investorLoginModal = document.getElementById('investorLoginModal');
+        const investorVault = document.getElementById('investorVault');
 
         // --- INIT ---
         window.addEventListener('load', () => {
@@ -220,12 +280,46 @@
             renderBankDetails();
         });
 
+        // --- INVESTOR LOGIC ---
+        function openInvestorLogin() {
+            investorLoginModal.classList.remove('fade-in'); 
+            investorLoginModal.style.display = 'flex';
+        }
+        function closeInvestorLogin() { investorLoginModal.style.display = 'none'; }
+        
+        function checkInvestorPass() {
+            const pass = document.getElementById('investorPass').value.toUpperCase();
+            if (pass === "FUTURE") {
+                investorLoginModal.style.display = 'none';
+                renderInvestorProducts();
+                investorVault.style.display = 'block';
+            } else { alert("ACCESS DENIED"); }
+        }
+        function closeVault() { investorVault.style.display = 'none'; }
+        
+        function renderInvestorProducts() {
+            const container = document.getElementById('investorProductGrid');
+            let html = '';
+            STORE_CONFIG.products.forEach(p => {
+                html += `
+                <div class="bg-gray-800 p-2 rounded-lg flex items-center gap-2">
+                    <img src="${p.img}" class="w-10 h-10 rounded-full object-cover">
+                    <div>
+                        <p class="text-white text-xs font-bold">${p.name}</p>
+                        <p class="text-green-400 text-[10px]">₦${p.price}</p>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        // --- APP LOGIC ---
         function renderBankDetails() {
             try {
                 document.getElementById('dispBankName').innerText = STORE_CONFIG.admin.bankName;
                 document.getElementById('dispAcctNum').innerText = STORE_CONFIG.admin.acctNum;
                 document.getElementById('dispAcctName').innerText = STORE_CONFIG.admin.acctName;
-            } catch(e) { console.warn("Bank details render error"); }
+            } catch(e) {}
         }
 
         function renderMenu() {
@@ -233,25 +327,20 @@
             if(!container) return;
             
             let html = '';
-
             STORE_CONFIG.products.forEach((product, index) => {
                 let borderColor = `border-${product.color}-500`;
                 let textColor = `text-${product.color}-400`;
                 let btnColor = `bg-${product.color}-600`;
                 if(product.color === 'cyan' || product.color === 'orange') btnColor = `bg-${product.color}-500`;
-
-                // Calculate Color Match for Info Icon
+                
+                // Matched Info Icon
                 let iconColorClass = `text-${product.color}-400 border-${product.color}-500/60 hover:bg-${product.color}-500/20`;
 
                 const delay = index * 0.5;
 
                 html += `
                 <div class="float-card bg-gray-900 border ${borderColor}/50 rounded-2xl p-3 shadow-lg flex flex-col justify-between hover:border-${product.color}-400 transition relative group" style="animation-delay: -${delay}s">
-                    
-                    <button onclick="showProductDetails(${product.id})" class="absolute top-2 right-2 z-20 ${iconColorClass} bg-gray-900/90 rounded-full w-7 h-7 flex items-center justify-center text-xs backdrop-blur-md icon-pulse shadow-xl border transition-colors">
-                        ℹ️
-                    </button>
-
+                    <button onclick="showProductDetails(${product.id})" class="absolute top-2 right-2 z-20 ${iconColorClass} bg-gray-900/90 rounded-full w-7 h-7 flex items-center justify-center text-xs backdrop-blur-md icon-pulse shadow-xl border transition-colors">ℹ️</button>
                     <div>
                         <h3 class="font-bold text-sm uppercase mb-2">${product.name}</h3>
                         <div class="h-28 w-full rounded-xl mb-2 overflow-hidden relative">
@@ -262,20 +351,16 @@
                         <span class="${textColor} font-bold">₦${product.price.toLocaleString()}</span>
                         <button onclick="addToCart('${product.name}', ${product.price})" class="${btnColor} hover:opacity-80 text-black text-xs font-bold px-3 py-1.5 rounded-lg active:scale-95 transition">+ ADD</button>
                     </div>
-                </div>
-                `;
+                </div>`;
             });
             
-            // REMOVE LOADING MSG
             if(loadingMsg) loadingMsg.style.display = 'none';
             container.innerHTML = html;
         }
 
-        // --- DETAILS MODAL ---
         function showProductDetails(id) {
             const product = STORE_CONFIG.products.find(p => p.id === id);
             if (!product) return;
-
             const content = document.getElementById('modalContent');
             content.innerHTML = `
                 <div class="text-center mb-4">
@@ -298,40 +383,22 @@
             modal.classList.add('active');
         }
 
-        function closeModal() {
-            modal.classList.remove('active');
-        }
-
-        // --- CART ---
+        function closeModal() { modal.classList.remove('active'); }
         function addToCart(name, price) {
-            if (cart[name]) { cart[name].qty += 1; } 
-            else { cart[name] = { price: price, qty: 1 }; }
+            if (cart[name]) { cart[name].qty += 1; } else { cart[name] = { price: price, qty: 1 }; }
             updateUI();
             orderSheet.classList.add('active');
         }
-
-        function toggleSheet() {
-            orderSheet.classList.toggle('active');
-        }
-
+        function toggleSheet() { orderSheet.classList.toggle('active'); }
         function updateUI() {
             const list = document.getElementById('cartItems');
             const totalSpan = document.getElementById('totalPrice');
             const countSpan = document.getElementById('cartCount');
-            
             list.innerHTML = '';
-            let total = 0;
-            let count = 0;
-
-            if (Object.keys(cart).length === 0) {
-                list.innerHTML = '<p class="text-gray-500 italic text-xs">Your cart is empty.</p>';
-            }
-
+            let total = 0; let count = 0;
+            if (Object.keys(cart).length === 0) { list.innerHTML = '<p class="text-gray-500 italic text-xs">Your cart is empty.</p>'; }
             for (const [key, value] of Object.entries(cart)) {
-                const itemTotal = value.price * value.qty;
-                total += itemTotal;
-                count += value.qty;
-
+                const itemTotal = value.price * value.qty; total += itemTotal; count += value.qty;
                 list.innerHTML += `
                     <div class="flex justify-between items-center bg-gray-800/30 p-2 rounded-lg mb-2">
                         <span class="text-gray-300 font-bold">${key} <span class="text-green-400 text-xs ml-2">x${value.qty}</span></span>
@@ -339,54 +406,29 @@
                             <span class="text-white">₦${itemTotal.toLocaleString()}</span>
                             <button onclick="removeFromCart('${key}')" class="text-red-500 text-xs font-bold px-1">x</button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }
-
             totalSpan.innerText = '₦' + total.toLocaleString();
-            
-            if (count > 0) {
-                countSpan.innerText = count;
-                countSpan.classList.remove('hidden');
-            } else {
-                countSpan.classList.add('hidden');
-            }
+            if (count > 0) { countSpan.innerText = count; countSpan.classList.remove('hidden'); } else { countSpan.classList.add('hidden'); }
         }
-
-        function removeFromCart(key) {
-            delete cart[key];
-            updateUI();
-        }
-
-        function copyBank() {
-            navigator.clipboard.writeText(STORE_CONFIG.admin.acctNum);
-            alert('Account Number Copied!');
-        }
-
+        function removeFromCart(key) { delete cart[key]; updateUI(); }
+        function copyBank() { navigator.clipboard.writeText(STORE_CONFIG.admin.acctNum); alert('Account Number Copied!'); }
         function sendOrder() {
             if (Object.keys(cart).length === 0) return alert("Your cart is empty!");
             const name = document.getElementById('custName').value;
             const address = document.getElementById('custAddress').value;
-
-            if (!name || !address) {
-                alert("Please enter your Name and Address.");
-                return;
-            }
-
+            if (!name || !address) { alert("Please enter your Name and Address."); return; }
             let message = `*NEW ORDER ALERT* 🚨%0A%0A`;
             message += `👤 *Customer:* ${name}%0A`;
             message += `📍 *Address:* ${address}%0A%0A`;
             message += `🛒 *Items:*%0A`;
-
             let total = 0;
             for (const [key, value] of Object.entries(cart)) {
                 message += `▫️ ${key} (x${value.qty}) - ₦${(value.price * value.qty).toLocaleString()}%0A`;
                 total += value.price * value.qty;
             }
-
             message += `%0A💰 *TOTAL: ₦${total.toLocaleString()}*`;
             message += `%0A%0A✅ Payment sent to ${STORE_CONFIG.admin.bankName} (${STORE_CONFIG.admin.acctNum}).`;
-
             window.open(`https://wa.me/${STORE_CONFIG.admin.whatsapp}?text=${message}`, '_blank');
         }
     </script>
