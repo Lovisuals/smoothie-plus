@@ -34,10 +34,15 @@
             -webkit-user-select: none; 
             user-select: none; 
         }
-        /* Allow typing in inputs */
         input, textarea { -webkit-user-select: text; user-select: text; }
         
-        /* GLASSMORPHISM */
+        /* ADMIN EDITING HIGHLIGHTS */
+        .admin-editable {
+            border: 1px dashed #ff0000;
+            background: rgba(255, 0, 0, 0.1);
+            cursor: text;
+        }
+
         .glass-panel {
             background: rgba(20, 20, 30, 0.90);
             backdrop-filter: blur(20px);
@@ -45,7 +50,6 @@
             border-top: 1px solid rgba(255, 255, 255, 0.15);
         }
 
-        /* ANIMATIONS */
         .slide-up { transform: translateY(105%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         .slide-up.active { transform: translateY(0); }
         
@@ -75,6 +79,9 @@
 </head>
 <body class="pb-32 overflow-x-hidden font-sans">
 
+    <div id="statusBadge" class="hidden fixed top-4 left-4 z-[200] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl backdrop-blur-md border">
+        </div>
+
     <div class="text-center pt-8 pb-6 relative overflow-hidden">
         <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-green-500 rounded-full blur-[100px] opacity-20 -z-10"></div>
         <h1 class="text-4xl font-black tracking-tighter uppercase leading-none">
@@ -93,6 +100,10 @@
         </button>
     </footer>
 
+    <button id="adminSaveBtn" onclick="generateConfig()" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 bg-red-600 text-white font-bold py-3 px-6 rounded-full shadow-2xl z-[200] border-2 border-white text-xs tracking-wider hover:bg-red-700 transition">
+        💾 SAVE CONFIG
+    </button>
+
     <button onclick="toggleSheet()" class="fixed bottom-6 right-6 bg-green-500 text-black w-14 h-14 rounded-full shadow-2xl z-40 pulse-glow flex items-center justify-center transform active:scale-90 transition">
         <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
         <span id="cartCount" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full hidden border border-black">0</span>
@@ -105,81 +116,58 @@
         </div>
     </div>
 
-    <div id="investorLoginModal" class="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md fade-in">
+    <div id="investorLoginModal" class="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md fade-in" style="display:none;">
         <div class="w-full max-w-sm text-center">
             <h2 class="text-2xl font-black uppercase text-white mb-2">Restricted Area</h2>
-            <p class="text-gray-500 text-xs mb-6">Enter Passkey to View Business Protocol</p>
-            <input type="password" id="investorPass" placeholder="ENTER KEY" class="w-full bg-gray-800 border border-gray-700 text-center text-white text-xl tracking-widest rounded-xl px-4 py-4 focus:outline-none focus:border-green-500 mb-4">
-            <button onclick="checkInvestorPass()" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200">ACCESS</button>
+            <p class="text-gray-500 text-xs mb-6">Enter Passkey</p>
+            
+            <div class="relative w-full mb-4">
+                <input type="password" id="investorPass" placeholder="ENTER KEY" class="w-full bg-gray-800 border border-gray-700 text-center text-white text-xl tracking-widest rounded-xl px-4 py-4 focus:outline-none focus:border-green-500">
+                <button onclick="togglePassVisibility()" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
+                    👁️
+                </button>
+            </div>
+
+            <button onclick="checkInvestorPass()" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 active:scale-95 transition">ACCESS</button>
             <button onclick="closeInvestorLogin()" class="mt-4 text-xs text-gray-600">CANCEL</button>
         </div>
     </div>
 
-    <div id="investorVault" class="fixed inset-0 z-[130] bg-black overflow-y-auto fade-in">
+    <div id="configExportModal" class="hidden fixed inset-0 z-[210] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md">
+        <div class="bg-gray-900 w-full max-w-lg p-6 rounded-2xl border border-red-500">
+            <h2 class="text-xl font-bold text-red-500 mb-2">⚠️ ADMIN: SAVE THIS CODE</h2>
+            <p class="text-gray-400 text-xs mb-4">Copy this block and replace the top section of your <b>index.html</b> in GitHub.</p>
+            <textarea id="configOutput" class="w-full h-64 bg-black text-green-400 font-mono text-xs p-4 rounded-xl border border-gray-700 mb-4 focus:outline-none select-all"></textarea>
+            <button onclick="document.getElementById('configExportModal').style.display='none'" class="w-full bg-gray-800 text-white py-3 rounded-xl hover:bg-gray-700">CLOSE</button>
+        </div>
+    </div>
+
+    <div id="investorVault" class="fixed inset-0 z-[140] bg-black overflow-y-auto" style="display:none;">
         <div class="max-w-2xl mx-auto p-6 pb-20">
             <div class="flex justify-between items-center mb-8 sticky top-0 bg-black/90 backdrop-blur-sm py-4 z-10 border-b border-gray-800">
                 <h2 class="text-xl font-black text-green-500">INVESTOR PROTOCOL</h2>
                 <button onclick="closeVault()" class="text-xs bg-gray-800 px-3 py-1 rounded text-white">EXIT</button>
             </div>
-
             <section class="mb-12">
                 <h3 class="text-3xl font-black text-white mb-4">01. THE VISION</h3>
-                <p class="text-gray-400 leading-relaxed mb-4">
-                    <span class="text-white font-bold">smoothiePlus+</span> is a bio-hacked hydration station replacing ubiquitous soda with targeted fruit nutrition. We utilize a unique "Zero-Water" blending process, replacing inert water with nutrient-dense Milk, Honey, or Tiger Nut bases.
-                </p>
+                <p class="text-gray-400 leading-relaxed mb-4"><span class="text-white font-bold">smoothiePlus+</span> is a bio-hacked hydration station replacing ubiquitous soda with targeted fruit nutrition. We utilize a unique "Zero-Water" blending process, replacing inert water with nutrient-dense Milk, Honey, or Tiger Nut bases.</p>
                 <div class="grid grid-cols-2 gap-4 mt-6">
-                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
-                        <p class="text-green-500 font-bold text-lg">Precision Prep</p>
-                        <p class="text-xs text-gray-500 uppercase">Potato Slicer Consistency</p>
-                    </div>
-                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
-                        <p class="text-green-500 font-bold text-lg">3 Flavor Bases</p>
-                        <p class="text-xs text-gray-500 uppercase">Milk / Honey / Tiger Nut</p>
-                    </div>
+                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800"><p class="text-green-500 font-bold text-lg">Precision Prep</p><p class="text-xs text-gray-500 uppercase">Potato Slicer Consistency</p></div>
+                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800"><p class="text-green-500 font-bold text-lg">3 Flavor Bases</p><p class="text-xs text-gray-500 uppercase">Milk / Honey / Tiger Nut</p></div>
                 </div>
             </section>
-
             <section class="mb-12">
                 <h3 class="text-3xl font-black text-white mb-4">02. PRODUCT LINE</h3>
-                <p class="text-gray-400 text-sm mb-6">Our menu caters to specific health demographics: Diabetics, Depressive states, and High-Performance Workers.</p>
-                <div id="investorProductGrid" class="grid grid-cols-2 gap-3">
-                    </div>
+                <div id="investorProductGrid" class="grid grid-cols-2 gap-3"></div>
             </section>
-
             <section class="mb-12">
                 <h3 class="text-3xl font-black text-white mb-4">03. SCALABILITY</h3>
-                <div class="bg-gray-900 border border-green-500/20 p-6 rounded-2xl">
-                    <h4 class="font-bold text-white mb-2">The "Pod" Model</h4>
-                    <p class="text-gray-400 text-sm mb-4">We do not rent shops. We deploy 4sqm pods in gyms, estates, and co-working spaces.</p>
-                    <ul class="text-sm text-gray-300 space-y-2">
-                        <li>✅ Standardized Slicing (Potato Slicer Tech)</li>
-                        <li>✅ Pre-Squashed Inventory (Casing Technique)</li>
-                        <li>✅ Centralized Base Production</li>
-                    </ul>
-                </div>
+                <div class="bg-gray-900 border border-green-500/20 p-6 rounded-2xl"><h4 class="font-bold text-white mb-2">The "Pod" Model</h4><ul class="text-sm text-gray-300 space-y-2"><li>✅ Standardized Slicing (Potato Slicer Tech)</li><li>✅ Pre-Squashed Inventory (Casing Technique)</li><li>✅ Centralized Base Production</li></ul></div>
             </section>
-
             <section class="mb-12">
                 <h3 class="text-3xl font-black text-white mb-4">04. UNIT ECONOMICS</h3>
-                <div class="glass-panel p-6 rounded-2xl">
-                    <div class="flex justify-between mb-2">
-                        <span class="text-gray-400">Avg. Order Value</span>
-                        <span class="text-white font-bold">₦4,000</span>
-                    </div>
-                    <div class="flex justify-between mb-2">
-                        <span class="text-gray-400">COGS (Fruit/Base)</span>
-                        <span class="text-red-400 font-bold">-₦1,800</span>
-                    </div>
-                    <div class="border-t border-gray-700 my-2 pt-2 flex justify-between">
-                        <span class="text-green-500 font-bold uppercase">Gross Margin</span>
-                        <span class="text-green-500 font-bold">55%</span>
-                    </div>
-                </div>
+                <div class="glass-panel p-6 rounded-2xl"><div class="flex justify-between mb-2"><span class="text-gray-400">Avg. Order Value</span><span class="text-white font-bold">₦4,000</span></div><div class="flex justify-between mb-2"><span class="text-gray-400">COGS</span><span class="text-red-400 font-bold">-₦1,800</span></div><div class="border-t border-gray-700 my-2 pt-2 flex justify-between"><span class="text-green-500 font-bold uppercase">Gross Margin</span><span class="text-green-500 font-bold">55%</span></div></div>
             </section>
-
-            <div class="text-center mt-12 opacity-50">
-                <p class="text-[10px] uppercase tracking-widest">CONFIDENTIAL DOCUMENT • smoothiePlus+</p>
-            </div>
         </div>
     </div>
 
@@ -189,33 +177,17 @@
             <h3 class="text-xs text-gray-400 uppercase font-bold">Order Summary</h3>
             <button onclick="toggleSheet()" class="text-xs text-red-400 font-bold border border-red-400/30 px-2 py-1 rounded">CLOSE</button>
         </div>
-        <div id="cartItems" class="space-y-2 mb-4 text-sm font-medium text-gray-200">
-            <p class="text-gray-500 italic text-xs">Your cart is empty.</p>
-        </div>
+        <div id="cartItems" class="space-y-2 mb-4 text-sm font-medium text-gray-200"><p class="text-gray-500 italic text-xs">Your cart is empty.</p></div>
         <div class="border-t border-gray-600 my-4 pt-4">
-            <div class="flex justify-between items-end mb-4">
-                <span class="text-gray-400 text-sm">Total to Pay:</span>
-                <span id="totalPrice" class="text-3xl font-black text-green-400">₦0</span>
-            </div>
-            <div class="bg-gray-800/80 rounded-xl p-3 border border-gray-600 mb-6">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-[10px] text-gray-400 uppercase tracking-widest">Bank Transfer (<span id="dispBankName"></span>)</p>
-                        <p id="dispAcctNum" class="font-mono text-white font-bold text-lg select-all"></p>
-                        <p id="dispAcctName" class="text-[10px] text-gray-400"></p>
-                    </div>
-                    <button onclick="copyBank()" class="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">Copy</button>
-                </div>
-            </div>
+            <div class="flex justify-between items-end mb-4"><span class="text-gray-400 text-sm">Total to Pay:</span><span id="totalPrice" class="text-3xl font-black text-green-400">₦0</span></div>
+            <div class="bg-gray-800/80 rounded-xl p-3 border border-gray-600 mb-6"><div class="flex justify-between items-center"><div><p class="text-[10px] text-gray-400 uppercase tracking-widest">Bank Transfer (<span id="dispBankName"></span>)</p><p id="dispAcctNum" class="font-mono text-white font-bold text-lg select-all"></p><p id="dispAcctName" class="text-[10px] text-gray-400"></p></div><button onclick="copyBank()" class="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">Copy</button></div></div>
         </div>
         <div class="space-y-3 mb-6">
             <h3 class="text-xs text-gray-400 uppercase font-bold">Your Details</h3>
             <input type="text" id="custName" placeholder="Your Name" class="w-full bg-gray-900/80 border border-gray-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 transition placeholder-gray-500">
             <textarea id="custAddress" rows="2" placeholder="Delivery Address" class="w-full bg-gray-900/80 border border-gray-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 transition placeholder-gray-500"></textarea>
         </div>
-        <button onclick="sendOrder()" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-black font-black uppercase py-4 rounded-xl shadow-[0_0_20px_rgba(34,197,94,0.4)] active:scale-95 transition flex items-center justify-center gap-2 mb-4">
-            Submit Order via WhatsApp
-        </button>
+        <button onclick="sendOrder()" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-black font-black uppercase py-4 rounded-xl shadow-[0_0_20px_rgba(34,197,94,0.4)] active:scale-95 transition flex items-center justify-center gap-2 mb-4">Submit Order via WhatsApp</button>
     </div>
 
     <script>
@@ -266,54 +238,67 @@
             ]
         };
 
-        // --- GLOBAL VARIABLES ---
+        // GLOBAL VARS
         let cart = {}; 
+        let adminMode = false;
         const orderSheet = document.getElementById('orderSheet');
         const modal = document.getElementById('productModal');
         const loadingMsg = document.getElementById('loadingMsg');
         const investorLoginModal = document.getElementById('investorLoginModal');
         const investorVault = document.getElementById('investorVault');
+        const statusBadge = document.getElementById('statusBadge');
 
-        // --- INIT ---
-        window.addEventListener('load', () => {
-            renderMenu();
-            renderBankDetails();
-        });
+        window.addEventListener('load', () => { renderMenu(); renderBankDetails(); });
 
-        // --- INVESTOR LOGIC ---
-        function openInvestorLogin() {
-            investorLoginModal.classList.remove('fade-in'); 
-            investorLoginModal.style.display = 'flex';
+        // --- AUTH LOGIC ---
+        function openInvestorLogin() { 
+            investorLoginModal.style.display = 'flex'; 
+            document.getElementById('investorPass').value = ''; // Clear password
+            document.getElementById('investorPass').type = 'password'; // Reset to hidden
         }
         function closeInvestorLogin() { investorLoginModal.style.display = 'none'; }
         
+        function togglePassVisibility() {
+            const input = document.getElementById('investorPass');
+            input.type = input.type === "password" ? "text" : "password";
+        }
+
         function checkInvestorPass() {
-            const pass = document.getElementById('investorPass').value; // Removed toUpperCase for case sensitive password
+            const pass = document.getElementById('investorPass').value;
+            
             if (pass === "investorpasSworD") {
                 investorLoginModal.style.display = 'none';
                 renderInvestorProducts();
-                investorVault.style.display = 'block';
-            } else { alert("ACCESS DENIED"); }
-        }
-        function closeVault() { investorVault.style.display = 'none'; }
-        
-        function renderInvestorProducts() {
-            const container = document.getElementById('investorProductGrid');
-            let html = '';
-            STORE_CONFIG.products.forEach(p => {
-                html += `
-                <div class="bg-gray-800 p-2 rounded-lg flex items-center gap-2">
-                    <img src="${p.img}" class="w-10 h-10 rounded-full object-cover">
-                    <div>
-                        <p class="text-white text-xs font-bold">${p.name}</p>
-                        <p class="text-green-400 text-[10px]">₦${p.price}</p>
-                    </div>
-                </div>`;
-            });
-            container.innerHTML = html;
+                investorVault.style.display = 'block'; // Force block display
+                showStatusBadge("🔒 INVESTOR VIEW", "green");
+            } 
+            else if (pass === "GODMODE") {
+                investorLoginModal.style.display = 'none';
+                adminMode = true;
+                showStatusBadge("⚡ GODMODE ACTIVE", "red");
+                renderMenu(); 
+                document.getElementById('adminSaveBtn').classList.remove('hidden');
+                alert("ACCESS GRANTED: GODMODE");
+            }
+            else { 
+                alert("ACCESS DENIED: INCORRECT KEY"); 
+            }
         }
 
-        // --- APP LOGIC ---
+        function showStatusBadge(text, color) {
+            statusBadge.innerText = text;
+            statusBadge.classList.remove('hidden', 'text-green-500', 'text-red-500', 'border-green-500', 'border-red-500');
+            statusBadge.classList.add(`text-${color}-500`, `border-${color}-500`);
+            statusBadge.style.display = 'block';
+        }
+
+        function closeVault() { 
+            investorVault.style.display = 'none'; 
+            // If exiting investor view, reset badge unless admin is on
+            if(!adminMode) statusBadge.style.display = 'none';
+        }
+        
+        // --- RENDER FUNCTIONS ---
         function renderBankDetails() {
             try {
                 document.getElementById('dispBankName').innerText = STORE_CONFIG.admin.bankName;
@@ -325,31 +310,34 @@
         function renderMenu() {
             const container = document.getElementById('menuGrid');
             if(!container) return;
-            
             let html = '';
+            
             STORE_CONFIG.products.forEach((product, index) => {
                 let borderColor = `border-${product.color}-500`;
                 let textColor = `text-${product.color}-400`;
                 let btnColor = `bg-${product.color}-600`;
                 if(product.color === 'cyan' || product.color === 'orange') btnColor = `bg-${product.color}-500`;
-                
-                // Matched Info Icon
                 let iconColorClass = `text-${product.color}-400 border-${product.color}-500/60 hover:bg-${product.color}-500/20`;
-
                 const delay = index * 0.5;
+
+                const contentEditable = adminMode ? 'contenteditable="true" class="admin-editable rounded p-1"' : '';
 
                 html += `
                 <div class="float-card bg-gray-900 border ${borderColor}/50 rounded-2xl p-3 shadow-lg flex flex-col justify-between hover:border-${product.color}-400 transition relative group" style="animation-delay: -${delay}s">
                     <button onclick="showProductDetails(${product.id})" class="absolute top-2 right-2 z-20 ${iconColorClass} bg-gray-900/90 rounded-full w-7 h-7 flex items-center justify-center text-xs backdrop-blur-md icon-pulse shadow-xl border transition-colors">ℹ️</button>
                     <div>
-                        <h3 class="font-bold text-sm uppercase mb-2">${product.name}</h3>
+                        <h3 ${contentEditable} id="name-${product.id}" class="font-bold text-sm uppercase mb-2">${product.name}</h3>
                         <div class="h-28 w-full rounded-xl mb-2 overflow-hidden relative">
                             <img src="${product.img}" class="object-cover w-full h-full transform group-hover:scale-110 transition duration-700">
                         </div>
                     </div>
                     <div class="flex justify-between items-center mt-2">
-                        <span class="${textColor} font-bold">₦${product.price.toLocaleString()}</span>
+                        <span class="${textColor} font-bold">₦<span ${contentEditable} id="price-${product.id}">${product.price.toLocaleString()}</span></span>
                         <button onclick="addToCart('${product.name}', ${product.price})" class="${btnColor} hover:opacity-80 text-black text-xs font-bold px-3 py-1.5 rounded-lg active:scale-95 transition">+ ADD</button>
+                    </div>
+                    <div class="hidden">
+                        <span ${contentEditable} id="desc-${product.id}">${product.description}</span>
+                        <span ${contentEditable} id="ingr-${product.id}">${product.ingredients}</span>
                     </div>
                 </div>`;
             });
@@ -358,10 +346,58 @@
             container.innerHTML = html;
         }
 
+        function renderInvestorProducts() {
+            const container = document.getElementById('investorProductGrid');
+            let html = '';
+            STORE_CONFIG.products.forEach(p => {
+                html += `
+                <div class="bg-gray-800 p-2 rounded-lg flex items-center gap-2">
+                    <img src="${p.img}" class="w-10 h-10 rounded-full object-cover">
+                    <div><p class="text-white text-xs font-bold">${p.name}</p><p class="text-green-400 text-[10px]">₦${p.price}</p></div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        // --- ADMIN GENERATOR ---
+        function generateConfig() {
+            const updatedProducts = STORE_CONFIG.products.map(p => {
+                return {
+                    id: p.id,
+                    name: document.getElementById(`name-${p.id}`).innerText,
+                    price: parseInt(document.getElementById(`price-${p.id}`).innerText.replace(/,/g, '')),
+                    img: p.img,
+                    color: p.color,
+                    description: document.getElementById(`desc-${p.id}`).innerText, 
+                    ingredients: document.getElementById(`ingr-${p.id}`).innerText
+                };
+            });
+            const newConfig = { admin: STORE_CONFIG.admin, products: updatedProducts };
+            const configString = "const STORE_CONFIG = " + JSON.stringify(newConfig, null, 4) + ";";
+            document.getElementById('configOutput').value = configString;
+            document.getElementById('configExportModal').style.display = 'flex';
+        }
+
+        // --- APP LOGIC ---
         function showProductDetails(id) {
-            const product = STORE_CONFIG.products.find(p => p.id === id);
+            let product;
+            if(adminMode) {
+                 product = {
+                    name: document.getElementById(`name-${id}`).innerText,
+                    price: parseInt(document.getElementById(`price-${id}`).innerText.replace(/,/g, '')),
+                    img: STORE_CONFIG.products.find(p=>p.id===id).img,
+                    color: STORE_CONFIG.products.find(p=>p.id===id).color,
+                    description: document.getElementById(`desc-${id}`).innerText,
+                    ingredients: document.getElementById(`ingr-${id}`).innerText
+                 };
+            } else {
+                 product = STORE_CONFIG.products.find(p => p.id === id);
+            }
+
             if (!product) return;
             const content = document.getElementById('modalContent');
+            const contentEditable = adminMode ? 'contenteditable="true" class="admin-editable rounded p-1"' : '';
+
             content.innerHTML = `
                 <div class="text-center mb-4">
                     <img src="${product.img}" class="w-24 h-24 rounded-full mx-auto object-cover border-2 border-${product.color}-500 mb-4 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
@@ -371,18 +407,19 @@
                 <div class="space-y-4 text-sm text-gray-300">
                     <div class="bg-gray-800/50 p-3 rounded-xl">
                         <p class="uppercase text-[10px] text-gray-500 font-bold tracking-widest mb-1">Description</p>
-                        <p>${product.description}</p>
+                        <p ${contentEditable} onblur="syncEdits(${id}, 'desc', this.innerText)">${product.description}</p>
                     </div>
                     <div class="bg-gray-800/50 p-3 rounded-xl">
                         <p class="uppercase text-[10px] text-gray-500 font-bold tracking-widest mb-1">Ingredients</p>
-                        <p class="italic text-gray-400">${product.ingredients}</p>
+                        <p class="italic text-gray-400" ${contentEditable} onblur="syncEdits(${id}, 'ingr', this.innerText)">${product.ingredients}</p>
                     </div>
                 </div>
                 <button onclick="addToCart('${product.name}', ${product.price}); closeModal()" class="w-full mt-6 bg-${product.color}-600 text-black font-bold py-3 rounded-xl uppercase hover:opacity-90 transition">Add to Cart</button>
             `;
             modal.classList.add('active');
         }
-
+        
+        function syncEdits(id, type, val) { document.getElementById(`${type}-${id}`).innerText = val; }
         function closeModal() { modal.classList.remove('active'); }
         function addToCart(name, price) {
             if (cart[name]) { cart[name].qty += 1; } else { cart[name] = { price: price, qty: 1 }; }
@@ -402,10 +439,7 @@
                 list.innerHTML += `
                     <div class="flex justify-between items-center bg-gray-800/30 p-2 rounded-lg mb-2">
                         <span class="text-gray-300 font-bold">${key} <span class="text-green-400 text-xs ml-2">x${value.qty}</span></span>
-                        <div class="flex items-center gap-3">
-                            <span class="text-white">₦${itemTotal.toLocaleString()}</span>
-                            <button onclick="removeFromCart('${key}')" class="text-red-500 text-xs font-bold px-1">x</button>
-                        </div>
+                        <div class="flex items-center gap-3"><span class="text-white">₦${itemTotal.toLocaleString()}</span><button onclick="removeFromCart('${key}')" class="text-red-500 text-xs font-bold px-1">x</button></div>
                     </div>`;
             }
             totalSpan.innerText = '₦' + total.toLocaleString();
