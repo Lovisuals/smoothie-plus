@@ -41,24 +41,26 @@
             background: rgba(255, 0, 0, 0.1);
             cursor: text;
         }
+        /* Admin focus state */
+        .admin-editable:focus {
+            outline: none;
+            background: rgba(255, 0, 0, 0.2);
+        }
 
         .glass-panel {
             background: rgba(20, 20, 30, 0.95);
             border-top: 1px solid rgba(255, 255, 255, 0.15);
         }
 
-        /* DRAWER ANIMATION */
         .slide-up { transform: translateY(105%); transition: transform 0.3s ease-out; }
         .slide-up.active { transform: translateY(0); }
         
-        /* FLOAT ANIMATION */
         @keyframes liquid-float { 
             0%, 100% { transform: translateY(0px); } 
             50% { transform: translateY(-10px); } 
         }
         .float-card { animation: liquid-float 6s ease-in-out infinite; }
 
-        /* PULSE ANIMATION */
         .icon-pulse { animation: pulse-ring 2s infinite; }
         @keyframes pulse-ring { 
             0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1); } 
@@ -96,8 +98,8 @@
         </button>
     </footer>
 
-    <button id="adminSaveBtn" onclick="generateConfig()" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 bg-red-600 text-white font-bold py-3 px-6 rounded-full shadow-2xl z-[200] border-2 border-white text-xs tracking-wider hover:bg-red-700 transition">
-        💾 SAVE CONFIG
+    <button id="adminSaveBtn" onclick="compileAndSave()" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 bg-red-600 text-white font-bold py-3 px-6 rounded-full shadow-2xl z-[200] border-2 border-white text-xs tracking-wider hover:bg-red-700 transition">
+        💾 SAVE FULL SITE
     </button>
 
     <button onclick="toggleSheet()" class="fixed bottom-6 right-6 bg-green-500 text-black w-14 h-14 rounded-full shadow-2xl z-40 pulse-glow flex items-center justify-center transform active:scale-90 transition">
@@ -114,21 +116,14 @@
 
     <div id="investorLoginModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95" style="display:none;">
         <div class="w-full max-w-sm text-center bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-2xl relative">
-            
             <h2 class="text-2xl font-black uppercase text-white mb-2">Restricted Area</h2>
             <p class="text-gray-500 text-xs mb-6">Enter Passkey</p>
-            
             <div class="relative w-full mb-6">
                 <input type="password" id="investorPass" placeholder="ENTER KEY" class="w-full bg-gray-800 border border-gray-700 text-center text-white text-xl tracking-widest rounded-xl px-4 py-4 focus:outline-none focus:border-green-500 pr-12">
-                
                 <button type="button" onclick="togglePassVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 z-50 p-2 text-gray-400 hover:text-white cursor-pointer">
-                    <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
+                    <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 </button>
             </div>
-
             <button onclick="checkInvestorPass()" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition">ACCESS</button>
             <button onclick="closeInvestorLogin()" class="mt-6 text-xs text-gray-600 block w-full hover:text-white">CANCEL</button>
         </div>
@@ -136,10 +131,11 @@
 
     <div id="configExportModal" class="hidden fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95">
         <div class="bg-gray-900 w-full max-w-lg p-6 rounded-2xl border border-red-500">
-            <h2 class="text-xl font-bold text-red-500 mb-2">⚠️ ADMIN: SAVE THIS CODE</h2>
-            <p class="text-gray-400 text-xs mb-4">Copy this block and replace the top section of your <b>index.html</b> in GitHub.</p>
-            <textarea id="configOutput" class="w-full h-64 bg-black text-green-400 font-mono text-xs p-4 rounded-xl border border-gray-700 mb-4 focus:outline-none select-all"></textarea>
-            <button onclick="document.getElementById('configExportModal').style.display='none'" class="w-full bg-gray-800 text-white py-3 rounded-xl hover:bg-gray-700">CLOSE</button>
+            <h2 class="text-xl font-bold text-red-500 mb-2">⚠️ COPY THIS CODE</h2>
+            <p class="text-gray-400 text-xs mb-4">Click "COPY ALL". Go to GitHub. Replace your entire <b>index.html</b> file with this new code.</p>
+            <button onclick="copyToClipboard()" class="w-full bg-green-500 text-black font-bold py-4 rounded-xl hover:bg-green-400 mb-4 uppercase">📋 Copy All Code</button>
+            <textarea id="configOutput" class="w-full h-32 bg-black text-green-400 font-mono text-xs p-4 rounded-xl border border-gray-700 mb-4 focus:outline-none select-all"></textarea>
+            <button onclick="document.getElementById('configExportModal').style.display='none'" class="w-full bg-gray-800 text-white py-2 rounded-xl hover:bg-gray-700">CLOSE</button>
         </div>
     </div>
 
@@ -149,25 +145,58 @@
                 <h2 class="text-xl font-black text-green-500">INVESTOR PROTOCOL</h2>
                 <button onclick="closeVault()" class="text-xs bg-gray-800 px-3 py-1 rounded text-white">EXIT</button>
             </div>
+            
             <section class="mb-12">
                 <h3 class="text-3xl font-black text-white mb-4">01. THE VISION</h3>
-                <p class="text-gray-400 leading-relaxed mb-4"><span class="text-white font-bold">smoothiePlus+</span> is a bio-hacked hydration station replacing ubiquitous soda with targeted fruit nutrition. We utilize a unique "Zero-Water" blending process, replacing inert water with nutrient-dense Milk, Honey, or Tiger Nut bases.</p>
+                <p id="plan-vision" class="text-gray-400 leading-relaxed mb-4"><span class="text-white font-bold">smoothiePlus+</span> is a bio-hacked hydration station replacing ubiquitous soda with targeted fruit nutrition. We utilize a unique "Zero-Water" blending process, replacing inert water with nutrient-dense Milk, Honey, or Tiger Nut bases.</p>
+                
                 <div class="grid grid-cols-2 gap-4 mt-6">
-                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800"><p class="text-green-500 font-bold text-lg">Precision Prep</p><p class="text-xs text-gray-500 uppercase">Potato Slicer Consistency</p></div>
-                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800"><p class="text-green-500 font-bold text-lg">3 Flavor Bases</p><p class="text-xs text-gray-500 uppercase">Milk / Honey / Tiger Nut</p></div>
+                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
+                        <p class="text-green-500 font-bold text-lg">Precision Prep</p>
+                        <p id="plan-usp1" class="text-xs text-gray-500 uppercase">Potato Slicer Consistency</p>
+                    </div>
+                    <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
+                        <p class="text-green-500 font-bold text-lg">3 Flavor Bases</p>
+                        <p id="plan-usp2" class="text-xs text-gray-500 uppercase">Milk / Honey / Tiger Nut</p>
+                    </div>
                 </div>
             </section>
+
             <section class="mb-12">
                 <h3 class="text-3xl font-black text-white mb-4">02. PRODUCT LINE</h3>
                 <div id="investorProductGrid" class="grid grid-cols-2 gap-3"></div>
             </section>
+
             <section class="mb-12">
                 <h3 class="text-3xl font-black text-white mb-4">03. SCALABILITY</h3>
-                <div class="bg-gray-900 border border-green-500/20 p-6 rounded-2xl"><h4 class="font-bold text-white mb-2">The "Pod" Model</h4><ul class="text-sm text-gray-300 space-y-2"><li>✅ Standardized Slicing (Potato Slicer Tech)</li><li>✅ Pre-Squashed Inventory (Casing Technique)</li><li>✅ Centralized Base Production</li></ul></div>
+                <div class="bg-gray-900 border border-green-500/20 p-6 rounded-2xl">
+                    <h4 class="font-bold text-white mb-2">The "Pod" Model</h4>
+                    <div id="plan-scale">
+                        <ul class="text-sm text-gray-300 space-y-2">
+                            <li>✅ Standardized Slicing (Potato Slicer Tech)</li>
+                            <li>✅ Pre-Squashed Inventory (Casing Technique)</li>
+                            <li>✅ Centralized Base Production</li>
+                        </ul>
+                    </div>
+                </div>
             </section>
+
             <section class="mb-12">
                 <h3 class="text-3xl font-black text-white mb-4">04. UNIT ECONOMICS</h3>
-                <div class="glass-panel p-6 rounded-2xl"><div class="flex justify-between mb-2"><span class="text-gray-400">Avg. Order Value</span><span class="text-white font-bold">₦4,000</span></div><div class="flex justify-between mb-2"><span class="text-gray-400">COGS</span><span class="text-red-400 font-bold">-₦1,800</span></div><div class="border-t border-gray-700 my-2 pt-2 flex justify-between"><span class="text-green-500 font-bold uppercase">Gross Margin</span><span class="text-green-500 font-bold">55%</span></div></div>
+                <div class="glass-panel p-6 rounded-2xl">
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-400">Avg. Order Value</span>
+                        <span id="plan-aov" class="text-white font-bold">₦4,000</span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span class="text-gray-400">COGS</span>
+                        <span id="plan-cogs" class="text-red-400 font-bold">-₦1,800</span>
+                    </div>
+                    <div class="border-t border-gray-700 my-2 pt-2 flex justify-between">
+                        <span class="text-green-500 font-bold uppercase">Gross Margin</span>
+                        <span id="plan-margin" class="text-green-500 font-bold">55%</span>
+                    </div>
+                </div>
             </section>
         </div>
     </div>
@@ -191,87 +220,78 @@
         <button onclick="sendOrder()" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-black font-black uppercase py-4 rounded-xl shadow-[0_0_20px_rgba(34,197,94,0.4)] active:scale-95 transition flex items-center justify-center gap-2 mb-4">Submit Order via WhatsApp</button>
     </div>
 
-    <script>
+    <script id="main-script">
+        // ⚡ DO NOT EDIT THIS BLOCK MANUALLY. USE GODMODE.
         const STORE_CONFIG = {
-            admin: {
-                whatsapp: "2347068516779", 
-                bankName: "OPay",
-                acctNum: "8083000771",
-                acctName: "LAWAL OPEYEMI MICHAEL"
-            },
-            products: [
-                {
-                    id: 1,
-                    name: "Diabetes Defense",
-                    price: 3500,
-                    img: "https://images.unsplash.com/photo-1610970881699-44a5587cabec?auto=format&fit=crop&w=500&q=80",
-                    color: "green",
-                    description: "Low-glycemic blend. Replaces soda with fiber-rich hydration.",
-                    ingredients: "Sliced Green Apples, Cucumber, Tiger Nut Water Base"
-                },
-                {
-                    id: 2,
-                    name: "Mood Lifter",
-                    price: 4200,
-                    img: "https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?auto=format&fit=crop&w=500&q=80",
-                    color: "purple",
-                    description: "Antidepressant focus. Packed with mood-boosting vitamins and natural sweetness.",
-                    ingredients: "Banana, Berries, Honey Water Base, Ice Block"
-                },
-                {
-                    id: 3,
-                    name: "Workaholic Energy",
-                    price: 3800,
-                    img: "https://images.unsplash.com/photo-1595981267035-7b04ca84a82d?auto=format&fit=crop&w=500&q=80",
-                    color: "orange",
-                    description: "The ultimate fuel for the always-working individual. Instant natural energy.",
-                    ingredients: "Squashed Watermelon Liquid, Pineapple, Milk Water Base"
-                },
-                {
-                    id: 4,
-                    name: "Pure Hydration",
-                    price: 3000,
-                    img: "https://images.unsplash.com/photo-1589984662646-e7b2e4962f18?auto=format&fit=crop&w=500&q=80",
-                    color: "cyan",
-                    description: "Single-fruit variety. Pure hydration with your choice of flavor base.",
-                    ingredients: "100% Squashed Watermelon, Choice of: Milk, Honey, or Tiger Nut Base"
-                }
-            ]
-        };
+    "admin": {
+        "whatsapp": "2347068516779",
+        "bankName": "OPay",
+        "acctNum": "8083000771",
+        "acctName": "LAWAL OPEYEMI MICHAEL"
+    },
+    "products": [
+        {
+            "id": 1,
+            "name": "Diabetes Defense",
+            "price": 3500,
+            "img": "https://images.unsplash.com/photo-1610970881699-44a5587cabec?auto=format&fit=crop&w=500&q=80",
+            "color": "green",
+            "description": "Low-glycemic blend. Replaces soda with fiber-rich hydration.",
+            "ingredients": "Sliced Green Apples, Cucumber, Tiger Nut Water Base"
+        },
+        {
+            "id": 2,
+            "name": "Mood Lifter",
+            "price": 4200,
+            "img": "https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?auto=format&fit=crop&w=500&q=80",
+            "color": "purple",
+            "description": "Antidepressant focus. Packed with mood-boosting vitamins and natural sweetness.",
+            "ingredients": "Banana, Berries, Honey Water Base, Ice Block"
+        },
+        {
+            "id": 3,
+            "name": "Workaholic Energy",
+            "price": 3800,
+            "img": "https://images.unsplash.com/photo-1595981267035-7b04ca84a82d?auto=format&fit=crop&w=500&q=80",
+            "color": "orange",
+            "description": "The ultimate fuel for the always-working individual. Instant natural energy.",
+            "ingredients": "Squashed Watermelon Liquid, Pineapple, Milk Water Base"
+        },
+        {
+            "id": 4,
+            "name": "Pure Hydration",
+            "price": 3000,
+            "img": "https://images.unsplash.com/photo-1589984662646-e7b2e4962f18?auto=format&fit=crop&w=500&q=80",
+            "color": "cyan",
+            "description": "Single-fruit variety. Pure hydration with your choice of flavor base.",
+            "ingredients": "100% Squashed Watermelon, Choice of: Milk, Honey, or Tiger Nut Base"
+        }
+    ]
+};
 
         let cart = {}; 
         let adminMode = false;
-        const orderSheet = document.getElementById('orderSheet');
-        const modal = document.getElementById('productModal');
-        const loadingMsg = document.getElementById('loadingMsg');
-        const investorLoginModal = document.getElementById('investorLoginModal');
-        const investorVault = document.getElementById('investorVault');
-        const statusBadge = document.getElementById('statusBadge');
+        // Business Plan IDs that are editable
+        const editablePlanIds = ['plan-vision', 'plan-usp1', 'plan-usp2', 'plan-scale', 'plan-aov', 'plan-cogs', 'plan-margin'];
 
         window.addEventListener('load', () => { 
             renderMenu(); 
             renderBankDetails();
-            
-            // ENTER KEY LISTENER
             document.getElementById('investorPass').addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') {
-                    checkInvestorPass();
-                }
+                if (e.key === 'Enter') { checkInvestorPass(); }
             });
         });
 
-        // --- AUTH LOGIC (FORCED DISPLAY STYLE) ---
+        // --- AUTH LOGIC ---
         function openInvestorLogin() { 
-            investorLoginModal.style.display = 'flex'; // FORCE FLEX
+            document.getElementById('investorLoginModal').style.display = 'flex'; 
             document.getElementById('investorPass').value = ''; 
             document.getElementById('investorPass').type = 'password'; 
             document.getElementById('investorPass').focus();
         }
 
-        function closeInvestorLogin() { 
-            investorLoginModal.style.display = 'none'; // FORCE HIDE
-        }
-
+        function closeInvestorLogin() { document.getElementById('investorLoginModal').style.display = 'none'; }
+        
         function togglePassVisibility() {
             const input = document.getElementById('investorPass');
             input.type = input.type === "password" ? "text" : "password";
@@ -279,49 +299,120 @@
 
         function checkInvestorPass() {
             const pass = document.getElementById('investorPass').value.trim();
-            
-            if (pass === "investorpasSworD") {
+            if (pass === "iwillinvesT") {
                 closeInvestorLogin();
                 renderInvestorProducts();
-                investorVault.style.display = 'block'; 
+                document.getElementById('investorVault').style.display = 'block'; 
                 showStatusBadge("🔒 INVESTOR VIEW", "green");
             } 
             else if (pass === "GODMODE") {
                 closeInvestorLogin();
-                adminMode = true;
-                showStatusBadge("⚡ GODMODE ACTIVE", "red");
-                renderMenu(); 
-                document.getElementById('adminSaveBtn').classList.remove('hidden');
-                alert("ACCESS GRANTED: GODMODE");
+                activateGodMode();
             }
-            else { 
-                alert("ACCESS DENIED: INCORRECT KEY"); 
-            }
+            else { alert("ACCESS DENIED: INCORRECT KEY"); }
+        }
+
+        // --- GOD MODE LOGIC ---
+        function activateGodMode() {
+            adminMode = true;
+            showStatusBadge("⚡ GODMODE ACTIVE", "red");
+            document.getElementById('adminSaveBtn').classList.remove('hidden');
+            
+            // 1. Open Vault Automatically
+            renderInvestorProducts();
+            document.getElementById('investorVault').style.display = 'block'; 
+            
+            // 2. Make Plan Editable
+            editablePlanIds.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) {
+                    el.contentEditable = "true";
+                    el.classList.add('admin-editable');
+                }
+            });
+
+            // 3. Make Products Editable (Re-render with edit enabled)
+            renderMenu();
+            alert("GODMODE ON:\n1. Edit Business Plan text directly.\n2. Close Plan to edit Product Prices/Names.\n3. Click SAVE FULL SITE when done.");
         }
 
         function showStatusBadge(text, color) {
-            statusBadge.innerText = text;
-            statusBadge.className = `fixed top-4 left-4 z-[300] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl backdrop-blur-md border border-${color}-500 text-${color}-500 animate-pulse bg-black`;
-            statusBadge.classList.remove('hidden');
+            const badge = document.getElementById('statusBadge');
+            badge.innerText = text;
+            badge.className = `fixed top-4 left-4 z-[300] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl backdrop-blur-md border border-${color}-500 text-${color}-500 animate-pulse bg-black`;
+            badge.classList.remove('hidden');
         }
 
         function closeVault() { 
-            investorVault.style.display = 'none'; 
-            if(!adminMode) statusBadge.classList.add('hidden');
+            document.getElementById('investorVault').style.display = 'none'; 
+            if(!adminMode) document.getElementById('statusBadge').classList.add('hidden');
         }
-        
-        // --- RENDER FUNCTIONS ---
+
+        // --- COMPILER ENGINE (THE MAGIC) ---
+        function compileAndSave() {
+            // 1. Scrape Products from DOM
+            const updatedProducts = STORE_CONFIG.products.map(p => {
+                return {
+                    id: p.id,
+                    name: document.getElementById(`name-${p.id}`).innerText.trim(),
+                    price: parseInt(document.getElementById(`price-${p.id}`).innerText.replace(/,/g, '')),
+                    img: p.img,
+                    color: p.color,
+                    description: document.getElementById(`desc-${p.id}`).innerText.trim(), 
+                    ingredients: document.getElementById(`ingr-${p.id}`).innerText.trim()
+                };
+            });
+
+            // 2. Clone the Document to clean it
+            const clone = document.documentElement.cloneNode(true);
+            
+            // 3. CLEANUP: Remove Admin Artifacts from Clone
+            const adminBadges = clone.querySelectorAll('#statusBadge, #adminSaveBtn, #configExportModal, #investorLoginModal, #productModal, #investorVault');
+            adminBadges.forEach(el => el.classList.add('hidden')); // Hide all modals/badges
+            clone.querySelector('#investorVault').style.display = 'none'; // Force hide inline style
+            clone.querySelector('#statusBadge').style.display = 'none';
+            clone.querySelector('#adminSaveBtn').classList.add('hidden');
+
+            // 4. CLEANUP: Remove contentEditable attributes
+            const editables = clone.querySelectorAll('[contenteditable]');
+            editables.forEach(el => {
+                el.removeAttribute('contenteditable');
+                el.classList.remove('admin-editable');
+            });
+
+            // 5. INJECT: New Config Variable
+            const newConfig = { admin: STORE_CONFIG.admin, products: updatedProducts };
+            const scriptContent = clone.querySelector('#main-script').innerHTML;
+            // Regex to replace the STORE_CONFIG object
+            const newScript = scriptContent.replace(
+                /const STORE_CONFIG = \{[\s\S]*?\};/, 
+                "const STORE_CONFIG = " + JSON.stringify(newConfig, null, 4) + ";"
+            );
+            clone.querySelector('#main-script').innerHTML = newScript;
+
+            // 6. OUTPUT
+            const finalHTML = "<!DOCTYPE html>\n" + clone.outerHTML;
+            document.getElementById('configOutput').value = finalHTML;
+            document.getElementById('configExportModal').style.display = 'flex';
+        }
+
+        function copyToClipboard() {
+            const copyText = document.getElementById("configOutput");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); 
+            navigator.clipboard.writeText(copyText.value);
+            alert("CODE COPIED! Now paste this into GitHub.");
+        }
+
+        // --- APP LOGIC ---
         function renderBankDetails() {
-            try {
-                document.getElementById('dispBankName').innerText = STORE_CONFIG.admin.bankName;
-                document.getElementById('dispAcctNum').innerText = STORE_CONFIG.admin.acctNum;
-                document.getElementById('dispAcctName').innerText = STORE_CONFIG.admin.acctName;
-            } catch(e) {}
+            document.getElementById('dispBankName').innerText = STORE_CONFIG.admin.bankName;
+            document.getElementById('dispAcctNum').innerText = STORE_CONFIG.admin.acctNum;
+            document.getElementById('dispAcctName').innerText = STORE_CONFIG.admin.acctName;
         }
 
         function renderMenu() {
             const container = document.getElementById('menuGrid');
-            if(!container) return;
             let html = '';
             
             STORE_CONFIG.products.forEach((product, index) => {
@@ -354,7 +445,7 @@
                 </div>`;
             });
             
-            if(loadingMsg) loadingMsg.style.display = 'none';
+            document.getElementById('loadingMsg').style.display = 'none';
             container.innerHTML = html;
         }
 
@@ -365,32 +456,12 @@
                 html += `
                 <div class="bg-gray-800 p-2 rounded-lg flex items-center gap-2">
                     <img src="${p.img}" class="w-10 h-10 rounded-full object-cover">
-                    <div><p class="text-white text-xs font-bold">${p.name}</p><p class="text-green-400 text-[10px]">₦${p.price}</p></div>
+                    <div><p class="text-white text-xs font-bold">${p.name}</p><p class="text-green-400 text-[10px]">₦${p.price.toLocaleString()}</p></div>
                 </div>`;
             });
             container.innerHTML = html;
         }
 
-        // --- ADMIN GENERATOR ---
-        function generateConfig() {
-            const updatedProducts = STORE_CONFIG.products.map(p => {
-                return {
-                    id: p.id,
-                    name: document.getElementById(`name-${p.id}`).innerText.trim(),
-                    price: parseInt(document.getElementById(`price-${p.id}`).innerText.replace(/,/g, '')),
-                    img: p.img,
-                    color: p.color,
-                    description: document.getElementById(`desc-${p.id}`).innerText.trim(), 
-                    ingredients: document.getElementById(`ingr-${p.id}`).innerText.trim()
-                };
-            });
-            const newConfig = { admin: STORE_CONFIG.admin, products: updatedProducts };
-            const configString = "const STORE_CONFIG = " + JSON.stringify(newConfig, null, 4) + ";";
-            document.getElementById('configOutput').value = configString;
-            document.getElementById('configExportModal').style.display = 'flex';
-        }
-
-        // --- APP LOGIC ---
         function showProductDetails(id) {
             let product;
             if(adminMode) {
@@ -428,18 +499,18 @@
                 </div>
                 <button onclick="addToCart('${product.name}', ${product.price}); closeModal()" class="w-full mt-6 bg-${product.color}-600 text-black font-bold py-3 rounded-xl uppercase hover:opacity-90 transition">Add to Cart</button>
             `;
-            modal.style.display = 'flex';
+            document.getElementById('productModal').style.display = 'flex';
         }
         
         function syncEdits(id, type, val) { document.getElementById(`${type}-${id}`).innerText = val.trim(); }
-        function closeModal() { modal.style.display = 'none'; }
+        function closeModal() { document.getElementById('productModal').style.display = 'none'; }
         
         function addToCart(name, price) {
             if (cart[name]) { cart[name].qty += 1; } else { cart[name] = { price: price, qty: 1 }; }
             updateUI();
-            orderSheet.classList.add('active');
+            document.getElementById('orderSheet').classList.add('active');
         }
-        function toggleSheet() { orderSheet.classList.toggle('active'); }
+        function toggleSheet() { document.getElementById('orderSheet').classList.toggle('active'); }
         function updateUI() {
             const list = document.getElementById('cartItems');
             const totalSpan = document.getElementById('totalPrice');
