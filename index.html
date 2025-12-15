@@ -109,7 +109,7 @@
         <div class="w-full max-w-sm text-center">
             <h2 class="text-2xl font-black uppercase text-white mb-2">Restricted Area</h2>
             <p class="text-gray-500 text-xs mb-6">Enter Passkey to View Business Protocol</p>
-            <input type="password" id="investorPass" placeholder="ENTER KEY" class="w-full bg-gray-800 border border-gray-700 text-center text-white text-xl tracking-widest rounded-xl px-4 py-4 focus:outline-none focus:border-green-500 mb-4 uppercase">
+            <input type="password" id="investorPass" placeholder="ENTER KEY" class="w-full bg-gray-800 border border-gray-700 text-center text-white text-xl tracking-widest rounded-xl px-4 py-4 focus:outline-none focus:border-green-500 mb-4">
             <button onclick="checkInvestorPass()" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200">ACCESS</button>
             <button onclick="closeInvestorLogin()" class="mt-4 text-xs text-gray-600">CANCEL</button>
         </div>
@@ -288,8 +288,8 @@
         function closeInvestorLogin() { investorLoginModal.style.display = 'none'; }
         
         function checkInvestorPass() {
-            const pass = document.getElementById('investorPass').value.toUpperCase();
-            if (pass === "FUTURE") {
+            const pass = document.getElementById('investorPass').value; // Removed toUpperCase for case sensitive password
+            if (pass === "investorpasSworD") {
                 investorLoginModal.style.display = 'none';
                 renderInvestorProducts();
                 investorVault.style.display = 'block';
