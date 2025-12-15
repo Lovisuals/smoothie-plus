@@ -43,25 +43,22 @@
         }
 
         .glass-panel {
-            background: rgba(20, 20, 30, 0.90);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(20, 20, 30, 0.95);
             border-top: 1px solid rgba(255, 255, 255, 0.15);
         }
 
-        .slide-up { transform: translateY(105%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        /* DRAWER ANIMATION ONLY */
+        .slide-up { transform: translateY(105%); transition: transform 0.3s ease-out; }
         .slide-up.active { transform: translateY(0); }
         
-        /* Fixed Fade Logic: Only fade in when explicitly active */
-        .modal-animate { animation: fadeIn 0.3s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-
+        /* FLOAT ANIMATION */
         @keyframes liquid-float { 
             0%, 100% { transform: translateY(0px); } 
             50% { transform: translateY(-10px); } 
         }
         .float-card { animation: liquid-float 6s ease-in-out infinite; }
 
+        /* PULSE ANIMATION */
         .icon-pulse { animation: pulse-ring 2s infinite; }
         @keyframes pulse-ring { 
             0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1); } 
@@ -79,7 +76,7 @@
 </head>
 <body class="pb-32 overflow-x-hidden font-sans">
 
-    <div id="statusBadge" class="hidden fixed top-4 left-4 z-[200] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl backdrop-blur-md border animate-bounce"></div>
+    <div id="statusBadge" class="hidden fixed top-4 left-4 z-[300] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl bg-black border animate-bounce"></div>
 
     <div class="text-center pt-8 pb-6 relative overflow-hidden">
         <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-green-500 rounded-full blur-[100px] opacity-20 -z-10"></div>
@@ -94,7 +91,7 @@
     </main>
 
     <footer class="mt-20 mb-32 text-center">
-        <button onclick="openInvestorLogin()" class="text-[10px] text-gray-700 hover:text-green-500 transition uppercase tracking-widest py-4 px-6">
+        <button onclick="openInvestorLogin()" class="text-[10px] text-gray-700 hover:text-green-500 transition uppercase tracking-widest py-4 px-6 border border-transparent hover:border-gray-800 rounded">
             🔒 Investor Access
         </button>
     </footer>
@@ -108,22 +105,23 @@
         <span id="cartCount" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full hidden border border-black">0</span>
     </button>
 
-    <div id="productModal" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" style="display:none;">
-        <div class="bg-gray-900 border border-gray-700 w-full max-w-sm rounded-3xl p-6 relative shadow-2xl modal-animate">
+    <div id="productModal" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm" style="display:none;">
+        <div class="bg-gray-900 border border-gray-700 w-full max-w-sm rounded-3xl p-6 relative shadow-2xl">
             <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white font-bold bg-gray-800 rounded-full w-8 h-8 flex items-center justify-center">✕</button>
             <div id="modalContent"></div>
         </div>
     </div>
 
-    <div id="investorLoginModal" class="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md" style="display:none;">
-        <div class="w-full max-w-sm text-center bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-2xl modal-animate">
+    <div id="investorLoginModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95" style="display:none;">
+        <div class="w-full max-w-sm text-center bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-2xl relative">
+            
             <h2 class="text-2xl font-black uppercase text-white mb-2">Restricted Area</h2>
             <p class="text-gray-500 text-xs mb-6">Enter Passkey</p>
             
-            <div class="relative w-full mb-4">
+            <div class="relative w-full mb-6">
                 <input type="password" id="investorPass" placeholder="ENTER KEY" class="w-full bg-gray-800 border border-gray-700 text-center text-white text-xl tracking-widest rounded-xl px-4 py-4 focus:outline-none focus:border-green-500 pr-12">
                 
-                <button type="button" onclick="togglePassVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 z-10 p-2 text-gray-400 hover:text-white focus:outline-none">
+                <button type="button" onclick="togglePassVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 z-50 p-2 text-gray-400 hover:text-white cursor-pointer">
                     <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -131,12 +129,12 @@
                 </button>
             </div>
 
-            <button onclick="checkInvestorPass()" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 active:scale-95 transition">ACCESS</button>
-            <button onclick="closeInvestorLogin()" class="mt-4 text-xs text-gray-600">CANCEL</button>
+            <button onclick="checkInvestorPass()" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition">ACCESS</button>
+            <button onclick="closeInvestorLogin()" class="mt-6 text-xs text-gray-600 block w-full hover:text-white">CANCEL</button>
         </div>
     </div>
 
-    <div id="configExportModal" class="hidden fixed inset-0 z-[210] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md">
+    <div id="configExportModal" class="hidden fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95">
         <div class="bg-gray-900 w-full max-w-lg p-6 rounded-2xl border border-red-500">
             <h2 class="text-xl font-bold text-red-500 mb-2">⚠️ ADMIN: SAVE THIS CODE</h2>
             <p class="text-gray-400 text-xs mb-4">Copy this block and replace the top section of your <b>index.html</b> in GitHub.</p>
@@ -254,7 +252,7 @@
             renderMenu(); 
             renderBankDetails();
             
-            // Add Enter Key Listener for Password
+            // ENTER KEY LISTENER
             document.getElementById('investorPass').addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') {
                     checkInvestorPass();
@@ -276,7 +274,7 @@
         }
 
         function checkInvestorPass() {
-            const pass = document.getElementById('investorPass').value.trim(); // Trim spaces
+            const pass = document.getElementById('investorPass').value.trim();
             
             if (pass === "investorpasSworD") {
                 investorLoginModal.style.display = 'none';
@@ -299,7 +297,7 @@
 
         function showStatusBadge(text, color) {
             statusBadge.innerText = text;
-            statusBadge.className = `fixed top-4 left-4 z-[200] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl backdrop-blur-md border border-${color}-500 text-${color}-500 animate-pulse`;
+            statusBadge.className = `fixed top-4 left-4 z-[300] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl backdrop-blur-md border border-${color}-500 text-${color}-500 animate-pulse bg-black`;
             statusBadge.style.display = 'block';
         }
 
@@ -426,7 +424,7 @@
                 </div>
                 <button onclick="addToCart('${product.name}', ${product.price}); closeModal()" class="w-full mt-6 bg-${product.color}-600 text-black font-bold py-3 rounded-xl uppercase hover:opacity-90 transition">Add to Cart</button>
             `;
-            modal.style.display = 'flex'; // FORCE FLEX
+            modal.style.display = 'flex';
         }
         
         function syncEdits(id, type, val) { document.getElementById(`${type}-${id}`).innerText = val; }
