@@ -52,8 +52,9 @@
         .slide-up { transform: translateY(105%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         .slide-up.active { transform: translateY(0); }
         
-        .fade-in { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
-        .fade-in.active { opacity: 1; pointer-events: auto; }
+        /* Fixed Fade Logic: Only fade in when explicitly active */
+        .modal-animate { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
         @keyframes liquid-float { 
             0%, 100% { transform: translateY(0px); } 
@@ -93,7 +94,7 @@
     </main>
 
     <footer class="mt-20 mb-32 text-center">
-        <button onclick="openInvestorLogin()" class="text-[10px] text-gray-700 hover:text-green-500 transition uppercase tracking-widest">
+        <button onclick="openInvestorLogin()" class="text-[10px] text-gray-700 hover:text-green-500 transition uppercase tracking-widest py-4 px-6">
             🔒 Investor Access
         </button>
     </footer>
@@ -107,15 +108,15 @@
         <span id="cartCount" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full hidden border border-black">0</span>
     </button>
 
-    <div id="productModal" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm fade-in">
-        <div class="bg-gray-900 border border-gray-700 w-full max-w-sm rounded-3xl p-6 relative shadow-2xl">
+    <div id="productModal" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" style="display:none;">
+        <div class="bg-gray-900 border border-gray-700 w-full max-w-sm rounded-3xl p-6 relative shadow-2xl modal-animate">
             <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white font-bold bg-gray-800 rounded-full w-8 h-8 flex items-center justify-center">✕</button>
             <div id="modalContent"></div>
         </div>
     </div>
 
-    <div id="investorLoginModal" class="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md fade-in" style="display:none;">
-        <div class="w-full max-w-sm text-center bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-2xl">
+    <div id="investorLoginModal" class="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md" style="display:none;">
+        <div class="w-full max-w-sm text-center bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-2xl modal-animate">
             <h2 class="text-2xl font-black uppercase text-white mb-2">Restricted Area</h2>
             <p class="text-gray-500 text-xs mb-6">Enter Passkey</p>
             
@@ -425,11 +426,12 @@
                 </div>
                 <button onclick="addToCart('${product.name}', ${product.price}); closeModal()" class="w-full mt-6 bg-${product.color}-600 text-black font-bold py-3 rounded-xl uppercase hover:opacity-90 transition">Add to Cart</button>
             `;
-            modal.classList.add('active');
+            modal.style.display = 'flex'; // FORCE FLEX
         }
         
         function syncEdits(id, type, val) { document.getElementById(`${type}-${id}`).innerText = val; }
-        function closeModal() { modal.classList.remove('active'); }
+        function closeModal() { modal.style.display = 'none'; }
+        
         function addToCart(name, price) {
             if (cart[name]) { cart[name].qty += 1; } else { cart[name] = { price: price, qty: 1 }; }
             updateUI();
