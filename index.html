@@ -249,7 +249,17 @@
         const investorVault = document.getElementById('investorVault');
         const statusBadge = document.getElementById('statusBadge');
 
-        window.addEventListener('load', () => { renderMenu(); renderBankDetails(); });
+        window.addEventListener('load', () => { 
+            renderMenu(); 
+            renderBankDetails();
+            
+            // Add Enter Key Listener for Password
+            document.getElementById('investorPass').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    checkInvestorPass();
+                }
+            });
+        });
 
         // --- AUTH LOGIC ---
         function openInvestorLogin() { 
