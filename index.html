@@ -36,7 +36,6 @@
         }
         input, textarea { -webkit-user-select: text; user-select: text; }
         
-        /* ADMIN EDITING HIGHLIGHTS */
         .admin-editable {
             border: 1px dashed #ff0000;
             background: rgba(255, 0, 0, 0.1);
@@ -79,8 +78,7 @@
 </head>
 <body class="pb-32 overflow-x-hidden font-sans">
 
-    <div id="statusBadge" class="hidden fixed top-4 left-4 z-[200] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl backdrop-blur-md border">
-        </div>
+    <div id="statusBadge" class="hidden fixed top-4 left-4 z-[200] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl backdrop-blur-md border animate-bounce"></div>
 
     <div class="text-center pt-8 pb-6 relative overflow-hidden">
         <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-green-500 rounded-full blur-[100px] opacity-20 -z-10"></div>
@@ -117,14 +115,18 @@
     </div>
 
     <div id="investorLoginModal" class="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md fade-in" style="display:none;">
-        <div class="w-full max-w-sm text-center">
+        <div class="w-full max-w-sm text-center bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-2xl">
             <h2 class="text-2xl font-black uppercase text-white mb-2">Restricted Area</h2>
             <p class="text-gray-500 text-xs mb-6">Enter Passkey</p>
             
             <div class="relative w-full mb-4">
-                <input type="password" id="investorPass" placeholder="ENTER KEY" class="w-full bg-gray-800 border border-gray-700 text-center text-white text-xl tracking-widest rounded-xl px-4 py-4 focus:outline-none focus:border-green-500">
-                <button onclick="togglePassVisibility()" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
-                    👁️
+                <input type="password" id="investorPass" placeholder="ENTER KEY" class="w-full bg-gray-800 border border-gray-700 text-center text-white text-xl tracking-widest rounded-xl px-4 py-4 focus:outline-none focus:border-green-500 pr-12">
+                
+                <button type="button" onclick="togglePassVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 z-10 p-2 text-gray-400 hover:text-white focus:outline-none">
+                    <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
                 </button>
             </div>
 
@@ -238,7 +240,6 @@
             ]
         };
 
-        // GLOBAL VARS
         let cart = {}; 
         let adminMode = false;
         const orderSheet = document.getElementById('orderSheet');
@@ -253,8 +254,8 @@
         // --- AUTH LOGIC ---
         function openInvestorLogin() { 
             investorLoginModal.style.display = 'flex'; 
-            document.getElementById('investorPass').value = ''; // Clear password
-            document.getElementById('investorPass').type = 'password'; // Reset to hidden
+            document.getElementById('investorPass').value = ''; 
+            document.getElementById('investorPass').type = 'password'; 
         }
         function closeInvestorLogin() { investorLoginModal.style.display = 'none'; }
         
@@ -264,12 +265,12 @@
         }
 
         function checkInvestorPass() {
-            const pass = document.getElementById('investorPass').value;
+            const pass = document.getElementById('investorPass').value.trim(); // Trim spaces
             
             if (pass === "investorpasSworD") {
                 investorLoginModal.style.display = 'none';
                 renderInvestorProducts();
-                investorVault.style.display = 'block'; // Force block display
+                investorVault.style.display = 'block'; 
                 showStatusBadge("🔒 INVESTOR VIEW", "green");
             } 
             else if (pass === "GODMODE") {
@@ -287,14 +288,12 @@
 
         function showStatusBadge(text, color) {
             statusBadge.innerText = text;
-            statusBadge.classList.remove('hidden', 'text-green-500', 'text-red-500', 'border-green-500', 'border-red-500');
-            statusBadge.classList.add(`text-${color}-500`, `border-${color}-500`);
+            statusBadge.className = `fixed top-4 left-4 z-[200] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl backdrop-blur-md border border-${color}-500 text-${color}-500 animate-pulse`;
             statusBadge.style.display = 'block';
         }
 
         function closeVault() { 
             investorVault.style.display = 'none'; 
-            // If exiting investor view, reset badge unless admin is on
             if(!adminMode) statusBadge.style.display = 'none';
         }
         
