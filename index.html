@@ -47,7 +47,7 @@
             border-top: 1px solid rgba(255, 255, 255, 0.15);
         }
 
-        /* DRAWER ANIMATION ONLY */
+        /* DRAWER ANIMATION */
         .slide-up { transform: translateY(105%); transition: transform 0.3s ease-out; }
         .slide-up.active { transform: translateY(0); }
         
@@ -260,14 +260,18 @@
             });
         });
 
-        // --- AUTH LOGIC ---
+        // --- AUTH LOGIC (FORCED DISPLAY STYLE) ---
         function openInvestorLogin() { 
-            investorLoginModal.style.display = 'flex'; 
+            investorLoginModal.style.display = 'flex'; // FORCE FLEX
             document.getElementById('investorPass').value = ''; 
             document.getElementById('investorPass').type = 'password'; 
+            document.getElementById('investorPass').focus();
         }
-        function closeInvestorLogin() { investorLoginModal.style.display = 'none'; }
-        
+
+        function closeInvestorLogin() { 
+            investorLoginModal.style.display = 'none'; // FORCE HIDE
+        }
+
         function togglePassVisibility() {
             const input = document.getElementById('investorPass');
             input.type = input.type === "password" ? "text" : "password";
@@ -277,13 +281,13 @@
             const pass = document.getElementById('investorPass').value.trim();
             
             if (pass === "investorpasSworD") {
-                investorLoginModal.style.display = 'none';
+                closeInvestorLogin();
                 renderInvestorProducts();
                 investorVault.style.display = 'block'; 
                 showStatusBadge("🔒 INVESTOR VIEW", "green");
             } 
             else if (pass === "GODMODE") {
-                investorLoginModal.style.display = 'none';
+                closeInvestorLogin();
                 adminMode = true;
                 showStatusBadge("⚡ GODMODE ACTIVE", "red");
                 renderMenu(); 
@@ -298,12 +302,12 @@
         function showStatusBadge(text, color) {
             statusBadge.innerText = text;
             statusBadge.className = `fixed top-4 left-4 z-[300] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl backdrop-blur-md border border-${color}-500 text-${color}-500 animate-pulse bg-black`;
-            statusBadge.style.display = 'block';
+            statusBadge.classList.remove('hidden');
         }
 
         function closeVault() { 
             investorVault.style.display = 'none'; 
-            if(!adminMode) statusBadge.style.display = 'none';
+            if(!adminMode) statusBadge.classList.add('hidden');
         }
         
         // --- RENDER FUNCTIONS ---
@@ -372,12 +376,12 @@
             const updatedProducts = STORE_CONFIG.products.map(p => {
                 return {
                     id: p.id,
-                    name: document.getElementById(`name-${p.id}`).innerText,
+                    name: document.getElementById(`name-${p.id}`).innerText.trim(),
                     price: parseInt(document.getElementById(`price-${p.id}`).innerText.replace(/,/g, '')),
                     img: p.img,
                     color: p.color,
-                    description: document.getElementById(`desc-${p.id}`).innerText, 
-                    ingredients: document.getElementById(`ingr-${p.id}`).innerText
+                    description: document.getElementById(`desc-${p.id}`).innerText.trim(), 
+                    ingredients: document.getElementById(`ingr-${p.id}`).innerText.trim()
                 };
             });
             const newConfig = { admin: STORE_CONFIG.admin, products: updatedProducts };
@@ -391,12 +395,12 @@
             let product;
             if(adminMode) {
                  product = {
-                    name: document.getElementById(`name-${id}`).innerText,
+                    name: document.getElementById(`name-${id}`).innerText.trim(),
                     price: parseInt(document.getElementById(`price-${id}`).innerText.replace(/,/g, '')),
                     img: STORE_CONFIG.products.find(p=>p.id===id).img,
                     color: STORE_CONFIG.products.find(p=>p.id===id).color,
-                    description: document.getElementById(`desc-${id}`).innerText,
-                    ingredients: document.getElementById(`ingr-${id}`).innerText
+                    description: document.getElementById(`desc-${id}`).innerText.trim(),
+                    ingredients: document.getElementById(`ingr-${id}`).innerText.trim()
                  };
             } else {
                  product = STORE_CONFIG.products.find(p => p.id === id);
@@ -427,7 +431,7 @@
             modal.style.display = 'flex';
         }
         
-        function syncEdits(id, type, val) { document.getElementById(`${type}-${id}`).innerText = val; }
+        function syncEdits(id, type, val) { document.getElementById(`${type}-${id}`).innerText = val.trim(); }
         function closeModal() { modal.style.display = 'none'; }
         
         function addToCart(name, price) {
