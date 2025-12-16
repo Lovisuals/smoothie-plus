@@ -73,6 +73,16 @@
             70% { box-shadow: 0 0 0 15px rgba(57, 255, 20, 0); } 
             100% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0); } 
         }
+
+        /* Chat & Task Styles */
+        .chat-bubble { position: relative; max-width: 80%; padding: 10px; border-radius: 12px; margin-bottom: 10px; font-size: 12px; }
+        .chat-self { background-color: #2563eb; color: white; align-self: flex-end; border-bottom-right-radius: 2px; margin-left: auto; }
+        .chat-other { background-color: #1f2937; color: #e5e7eb; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #374151; }
+        .task-check:checked + label span { background-color: #22c55e; border-color: #22c55e; }
+        .task-check:checked + label p { text-decoration: line-through; color: #6b7280; }
+        
+        .tab-active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
+        .tab-inactive { border-bottom: 2px solid transparent; color: #6b7280; }
     </style>
 </head>
 <body class="pb-32 overflow-x-hidden font-sans">
@@ -219,58 +229,66 @@
     </div>
 
     <div id="teamPanelVault" class="fixed inset-0 z-[140] bg-[#0f172a] overflow-y-auto flex flex-col" style="display:none;">
+        
         <div class="flex justify-between items-center bg-gray-900/95 backdrop-blur-md py-4 px-4 border-b border-gray-800 flex-shrink-0">
             <div>
                 <h2 class="text-lg font-black text-blue-500 tracking-tighter flex items-center gap-2">
                     <span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span></span>
-                    NEURAL LINK
+                    COMMAND CENTER
                 </h2>
-                <p class="text-[10px] text-gray-500 uppercase">Live Operations Stream</p>
+                <p class="text-[10px] text-gray-500 uppercase">Live Operations</p>
             </div>
             <button onclick="closeVault()" class="text-xs bg-gray-800 px-3 py-1 rounded text-white">EXIT</button>
         </div>
-        <div id="chatStream" class="flex-1 p-4 overflow-y-auto flex flex-col space-y-2"></div>
-        <div class="bg-gray-900 p-4 border-t border-gray-800 flex-shrink-0">
-            <div class="flex gap-2 mb-2 overflow-x-auto pb-2">
-                <button onclick="setRole('ALCHEMIST')" id="role-alch" class="role-btn text-[10px] bg-gray-800 text-gray-400 px-3 py-1 rounded-full border border-gray-700 hover:border-purple-500">⚗️ ALCHEMIST</button>
-                <button onclick="setRole('ARCHITECT')" id="role-arch" class="role-btn text-[10px] bg-gray-800 text-gray-400 px-3 py-1 rounded-full border border-gray-700 hover:border-blue-500">🏗️ ARCHITECT</button>
-                <button onclick="setRole('AMPLIFIER')" id="role-amp" class="role-btn text-[10px] bg-gray-800 text-gray-400 px-3 py-1 rounded-full border border-gray-700 hover:border-orange-500">📢 AMPLIFIER</button>
-            </div>
-            <div class="flex gap-2">
-                <input type="text" id="chatInput" placeholder="Transmit data..." class="flex-1 bg-black border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 text-sm">
-                <button onclick="sendChatMessage()" class="bg-blue-600 text-white font-bold px-4 rounded-xl hover:bg-blue-500">➤</button>
-            </div>
-            <button onclick="broadcastToTelegram()" class="w-full mt-3 text-[10px] text-gray-500 border border-gray-800 py-2 rounded-lg hover:bg-gray-800 hover:text-blue-400 transition flex items-center justify-center gap-1">
-                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.361 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.693-1.653-1.124-2.678-1.8-1.185-.781-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.141.119.098.152.228.166.33.016.115.022.242.018.365z"/></svg> BROADCAST TO TELEGRAM
-            </button>
-        </div>
-    </div>
 
-    <div id="orderSheet" class="fixed bottom-0 left-0 right-0 glass-panel rounded-t-3xl p-6 z-[100] max-h-[85vh] overflow-y-auto slide-up">
-        <div class="w-12 h-1 bg-gray-500 rounded-full mx-auto mb-6 cursor-pointer" onclick="toggleSheet()"></div>
-        <div class="flex justify-between items-center mb-2">
-            <h3 class="text-xs text-gray-400 uppercase font-bold">Order Summary</h3>
-            <button onclick="toggleSheet()" class="text-xs text-red-400 font-bold border border-red-400/30 px-2 py-1 rounded">CLOSE</button>
+        <div class="flex border-b border-gray-800 bg-gray-900">
+            <button onclick="switchTab('CHAT')" id="tab-chat" class="flex-1 py-3 text-xs font-bold uppercase tab-active transition">Neural Link</button>
+            <button onclick="switchTab('TASKS')" id="tab-tasks" class="flex-1 py-3 text-xs font-bold uppercase tab-inactive transition">Directives</button>
         </div>
-        <div id="cartItems" class="space-y-2 mb-4 text-sm font-medium text-gray-200"><p class="text-gray-500 italic text-xs">Your cart is empty.</p></div>
-        <div class="border-t border-gray-600 my-4 pt-4">
-            <div class="flex justify-between items-end mb-4"><span class="text-gray-400 text-sm">Total to Pay:</span><span id="totalPrice" class="text-3xl font-black text-green-400">₦0</span></div>
-            <div class="bg-gray-800/80 rounded-xl p-3 border border-gray-600 mb-6"><div class="flex justify-between items-center"><div><p class="text-[10px] text-gray-400 uppercase tracking-widest">Bank Transfer (<span id="dispBankName"></span>)</p><p id="dispAcctNum" class="font-mono text-white font-bold text-lg select-all"></p><p id="dispAcctName" class="text-[10px] text-gray-400"></p></div><button onclick="copyBank()" class="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">Copy</button></div></div>
+
+        <div id="view-chat" class="flex-1 flex flex-col h-full overflow-hidden">
+            <div id="chatStream" class="flex-1 p-4 overflow-y-auto flex flex-col space-y-2"></div>
+            <div class="bg-gray-900 p-4 border-t border-gray-800 flex-shrink-0">
+                <div class="flex gap-2 mb-2 overflow-x-auto pb-2">
+                    <button onclick="setRole('ALCHEMIST')" id="role-alch" class="role-btn text-[10px] bg-gray-800 text-gray-400 px-3 py-1 rounded-full border border-gray-700 hover:border-purple-500">⚗️ ALCHEMIST</button>
+                    <button onclick="setRole('ARCHITECT')" id="role-arch" class="role-btn text-[10px] bg-gray-800 text-gray-400 px-3 py-1 rounded-full border border-gray-700 hover:border-blue-500">🏗️ ARCHITECT</button>
+                    <button onclick="setRole('AMPLIFIER')" id="role-amp" class="role-btn text-[10px] bg-gray-800 text-gray-400 px-3 py-1 rounded-full border border-gray-700 hover:border-orange-500">📢 AMPLIFIER</button>
+                </div>
+                <div class="flex gap-2">
+                    <input type="text" id="chatInput" placeholder="Transmit data..." class="flex-1 bg-black border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 text-sm">
+                    <button onclick="sendChatMessage()" class="bg-blue-600 text-white font-bold px-4 rounded-xl hover:bg-blue-500">➤</button>
+                </div>
+            </div>
         </div>
-        <div class="space-y-3 mb-6">
-            <h3 class="text-xs text-gray-400 uppercase font-bold">Your Details</h3>
-            <input type="text" id="custName" placeholder="Your Name" class="w-full bg-gray-900/80 border border-gray-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 transition placeholder-gray-500">
-            <textarea id="custAddress" rows="2" placeholder="Delivery Address" class="w-full bg-gray-900/80 border border-gray-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 transition placeholder-gray-500"></textarea>
+
+        <div id="view-tasks" class="hidden flex-1 flex flex-col h-full overflow-hidden p-4">
+            <div class="bg-black border border-gray-800 p-4 rounded-2xl mb-4 shadow-lg">
+                <input type="text" id="newTaskInput" placeholder="New Directive..." class="w-full bg-gray-900 border border-gray-700 text-white rounded-lg px-3 py-3 mb-3 focus:outline-none focus:border-blue-500 text-sm">
+                <div class="flex gap-2">
+                    <select id="taskAssignee" class="bg-gray-900 border border-gray-700 text-gray-300 text-xs rounded-lg px-2 py-3 flex-1 focus:outline-none">
+                        <option value="ALCHEMIST">ALCHEMIST</option>
+                        <option value="ARCHITECT">ARCHITECT</option>
+                        <option value="AMPLIFIER">AMPLIFIER</option>
+                    </select>
+                    <button onclick="addNewTask()" class="bg-blue-600 text-white font-bold px-4 rounded-lg text-xs hover:bg-blue-500">ADD</button>
+                </div>
+            </div>
+            <div id="taskListContainer" class="flex-1 overflow-y-auto space-y-3 pb-20">
+                </div>
+            <div class="fixed bottom-0 left-0 right-0 p-4 bg-gray-900 border-t border-gray-800">
+                <button onclick="broadcastToTelegram()" class="w-full text-[10px] text-gray-500 border border-gray-800 py-3 rounded-lg hover:bg-gray-800 hover:text-blue-400 transition flex items-center justify-center gap-1">
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.361 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.693-1.653-1.124-2.678-1.8-1.185-.781-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.141.119.098.152.228.166.33.016.115.022.242.018.365z"/></svg>
+                    SYNC TO TELEGRAM
+                </button>
+            </div>
         </div>
-        <button onclick="sendOrder()" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-black font-black uppercase py-4 rounded-xl shadow-[0_0_20px_rgba(34,197,94,0.4)] active:scale-95 transition flex items-center justify-center gap-2 mb-4">Submit Order via WhatsApp</button>
     </div>
 
     <script id="main-script">
         // 🔒 ADMIN CONFIGURATION
-        // 'ACTIVE' = Normal | 'MAINTENANCE' = Upgrading | 'KILLED' = Offline
         const SITE_STATE = 'ACTIVE'; 
 
-        // ⚡ DO NOT EDIT THIS BLOCK MANUALLY. USE GODMODE.
+        // ⚡ DO NOT EDIT THIS BLOCK MANUALLY. USE BUILDER MODE.
         const STORE_CONFIG = {
     "admin": {
         "whatsapp": "2347068516779",
@@ -321,8 +339,9 @@
         let cart = {}; 
         let adminMode = false;
         let messages = JSON.parse(localStorage.getItem('teamMessages')) || [];
+        let tasks = JSON.parse(localStorage.getItem('smoothieTasks')) || [];
         let currentRole = 'ALCHEMIST'; 
-        let localUserPin = localStorage.getItem('mySmoothiePin'); // Get stored PIN
+        let localUserPin = localStorage.getItem('mySmoothiePin'); 
 
         const editablePlanIds = ['plan-vision', 'plan-usp1', 'plan-usp2', 'plan-scale', 'plan-aov', 'plan-cogs', 'plan-margin'];
 
@@ -330,6 +349,7 @@
             checkSiteHealth();
             renderMenu(); 
             renderBankDetails();
+            renderTasks();
             document.getElementById('accessKey').addEventListener('keypress', function (e) {
                 if (e.key === 'Enter') { checkAccess(); }
             });
@@ -384,17 +404,22 @@
         function checkAccess() {
             const inputVal = document.getElementById('accessKey').value.trim();
             
-            // 1. ADMIN MASTER KEY (Setup Mode)
-            if (inputVal === "Admin GODMODE") {
+            // 1. BUILDER MODE (AdminEDITGODMODE) -> Visual Editor Only
+            if (inputVal === "AdminEDITGODMODE") {
+                closeLoginModal();
+                activateBuilderMode();
+            }
+            // 2. OPS SETUP (Admin GODMODE) -> Create PIN
+            else if (inputVal === "Admin GODMODE") {
                 document.getElementById('authStage').classList.add('hidden');
                 document.getElementById('createPinStage').classList.remove('hidden');
                 document.getElementById('newPin').focus();
             }
-            // 2. CHECK LOCAL PIN (Team Access)
+            // 3. OPS LOGIN (User PIN) -> Neural Chat
             else if (localUserPin && inputVal === localUserPin) {
-                grantTeamAccess();
+                grantOpsAccess();
             }
-            // 3. INVESTOR READ-ONLY
+            // 4. INVESTOR -> Read Only
             else if (inputVal === "iwillinvesT") {
                 closeLoginModal();
                 renderInvestorProducts();
@@ -407,21 +432,67 @@
         function saveNewPin() {
             const pin = document.getElementById('newPin').value.trim();
             if(pin.length < 4) return alert("PIN too short.");
-            
             localStorage.setItem('mySmoothiePin', pin);
             localUserPin = pin;
-            
-            // Auto login after creating PIN
-            grantTeamAccess();
+            grantOpsAccess();
         }
 
-        function grantTeamAccess() {
+        function grantOpsAccess() {
             closeLoginModal();
-            // Enable God Mode + Team Chat
-            activateGodMode(); 
+            // Open Dashboard, but NO Editing tools
             document.getElementById('teamPanelVault').style.display = 'flex';
             renderChat();
             showStatusBadge("⚔️ COMMANDER ACTIVE", "blue");
+        }
+
+        function activateBuilderMode() {
+            adminMode = true;
+            document.getElementById('adminSaveBtn').classList.remove('hidden');
+            showStatusBadge("⚡ BUILDER MODE", "red");
+            
+            // Open Vault for editing
+            renderInvestorProducts();
+            document.getElementById('investorVault').style.display = 'block';
+            
+            editablePlanIds.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) { el.contentEditable = "true"; el.classList.add('admin-editable'); }
+            });
+            renderMenu(); // Refresh menu to make items editable
+            alert("BUILDER MODE ACTIVE:\nEdit Text & Prices on screen.\nClick SAVE FULL SITE when done.");
+        }
+
+        function showStatusBadge(text, color) {
+            const badge = document.getElementById('statusBadge');
+            badge.innerText = text;
+            badge.className = `fixed top-4 left-4 z-[300] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl backdrop-blur-md border border-${color}-500 text-${color}-500 animate-pulse bg-black`;
+            badge.classList.remove('hidden');
+        }
+
+        function closeVault() { 
+            document.getElementById('investorVault').style.display = 'none'; 
+            document.getElementById('teamPanelVault').style.display = 'none';
+            if(!adminMode) document.getElementById('statusBadge').classList.add('hidden');
+        }
+
+        // --- DASHBOARD TABS ---
+        function switchTab(tab) {
+            const chatView = document.getElementById('view-chat');
+            const tasksView = document.getElementById('view-tasks');
+            const tabChat = document.getElementById('tab-chat');
+            const tabTasks = document.getElementById('tab-tasks');
+
+            if (tab === 'CHAT') {
+                chatView.classList.remove('hidden');
+                tasksView.classList.add('hidden');
+                tabChat.className = "flex-1 py-3 text-xs font-bold uppercase tab-active transition";
+                tabTasks.className = "flex-1 py-3 text-xs font-bold uppercase tab-inactive transition";
+            } else {
+                chatView.classList.add('hidden');
+                tasksView.classList.remove('hidden');
+                tabChat.className = "flex-1 py-3 text-xs font-bold uppercase tab-inactive transition";
+                tabTasks.className = "flex-1 py-3 text-xs font-bold uppercase tab-active transition";
+            }
         }
 
         // --- NEURAL CHAT LOGIC ---
@@ -474,35 +545,56 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        function broadcastToTelegram() {
-            if(messages.length === 0) return alert("Neural Link Empty.");
-            let text = "🚀 *TEAM SYNC UPDATE*\n\n";
-            messages.slice(-10).forEach(m => { text += `[${m.role}] ${m.text}\n`; });
-            window.open(`tg://msg?text=${encodeURIComponent(text)}`, '_blank');
+        // --- TASK LOGIC ---
+        function addNewTask() {
+            const txt = document.getElementById('newTaskInput').value.trim();
+            const role = document.getElementById('taskAssignee').value;
+            if(!txt) return;
+            tasks.unshift({ id: Date.now(), text: txt, role: role, done: false });
+            localStorage.setItem('smoothieTasks', JSON.stringify(tasks));
+            document.getElementById('newTaskInput').value = '';
+            renderTasks();
         }
 
-        // --- GOD MODE LOGIC ---
-        function activateGodMode() {
-            adminMode = true;
-            document.getElementById('adminSaveBtn').classList.remove('hidden');
-            editablePlanIds.forEach(id => {
-                const el = document.getElementById(id);
-                if(el) { el.contentEditable = "true"; el.classList.add('admin-editable'); }
+        function toggleTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if(task) task.done = !task.done;
+            localStorage.setItem('smoothieTasks', JSON.stringify(tasks));
+            renderTasks();
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            localStorage.setItem('smoothieTasks', JSON.stringify(tasks));
+            renderTasks();
+        }
+
+        function renderTasks() {
+            const list = document.getElementById('taskListContainer');
+            list.innerHTML = '';
+            if(tasks.length === 0) { list.innerHTML = '<p class="text-gray-600 text-xs text-center mt-4">No Active Directives.</p>'; return; }
+            tasks.forEach(task => {
+                let badgeColor = 'bg-gray-600';
+                if(task.role === 'ALCHEMIST') badgeColor = 'bg-purple-600';
+                if(task.role === 'ARCHITECT') badgeColor = 'bg-blue-600';
+                if(task.role === 'AMPLIFIER') badgeColor = 'bg-orange-600';
+                list.innerHTML += `
+                <div class="flex items-start gap-3 bg-gray-900/50 border border-gray-800 p-3 rounded-xl hover:border-gray-700 transition">
+                    <input type="checkbox" onchange="toggleTask(${task.id})" class="task-check hidden" id="task-${task.id}" ${task.done ? 'checked' : ''}>
+                    <label for="task-${task.id}" class="flex-shrink-0 w-5 h-5 border border-gray-600 rounded cursor-pointer flex items-center justify-center mt-1"><span class="w-3 h-3 rounded-sm"></span></label>
+                    <div class="flex-1"><span class="${badgeColor} text-[8px] px-1.5 py-0.5 rounded text-white font-bold mb-1 inline-block">${task.role}</span><p class="text-sm text-gray-300 leading-snug ${task.done ? 'line-through opacity-50' : ''}">${task.text}</p></div>
+                    <button onclick="deleteTask(${task.id})" class="text-gray-600 hover:text-red-500 text-xs">✕</button>
+                </div>`;
             });
-            renderMenu();
         }
 
-        function showStatusBadge(text, color) {
-            const badge = document.getElementById('statusBadge');
-            badge.innerText = text;
-            badge.className = `fixed top-4 left-4 z-[300] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl backdrop-blur-md border border-${color}-500 text-${color}-500 animate-pulse bg-black`;
-            badge.classList.remove('hidden');
-        }
-
-        function closeVault() { 
-            document.getElementById('investorVault').style.display = 'none'; 
-            document.getElementById('teamPanelVault').style.display = 'none';
-            if(!adminMode) document.getElementById('statusBadge').classList.add('hidden');
+        function broadcastToTelegram() {
+            let text = "🚀 *STATUS REPORT*\n\n*CHAT LOG:*\n";
+            messages.slice(-5).forEach(m => { text += `[${m.role}] ${m.text}\n`; });
+            text += "\n*DIRECTIVES:*\n";
+            const pending = tasks.filter(t => !t.done);
+            if(pending.length > 0) { pending.forEach(t => text += `🔴 [${t.role}] ${t.text}\n`); } else { text += "✅ All Clear\n"; }
+            window.open(`tg://msg?text=${encodeURIComponent(text)}`, '_blank');
         }
 
         // --- COMPILER ENGINE ---
@@ -520,7 +612,7 @@
             });
 
             const clone = document.documentElement.cloneNode(true);
-            const adminBadges = clone.querySelectorAll('#statusBadge, #adminSaveBtn, #configExportModal, #investorLoginModal, #productModal, #investorVault, #teamPanelVault, #systemLockdown');
+            const adminBadges = clone.querySelectorAll('#statusBadge, #adminSaveBtn, #configExportModal, #loginModal, #productModal, #investorVault, #teamPanelVault, #systemLockdown');
             adminBadges.forEach(el => el.classList.add('hidden')); 
             clone.querySelector('#investorVault').style.display = 'none';
             clone.querySelector('#teamPanelVault').style.display = 'none';
