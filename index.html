@@ -28,19 +28,51 @@
         }
     </script>
     <style>
-        body { background-color: #050508; color: white; -webkit-user-select: none; user-select: none; }
+        body { 
+            background-color: #050508; 
+            color: white; 
+            -webkit-user-select: none; 
+            user-select: none; 
+        }
         input, textarea { -webkit-user-select: text; user-select: text; }
-        .glass-panel { background: rgba(20, 20, 30, 0.95); border-top: 1px solid rgba(255, 255, 255, 0.15); }
+        
+        .admin-editable {
+            border: 1px dashed #ff0000;
+            background: rgba(255, 0, 0, 0.1);
+            cursor: text;
+        }
+        .admin-editable:focus {
+            outline: none;
+            background: rgba(255, 0, 0, 0.2);
+        }
+
+        .glass-panel {
+            background: rgba(20, 20, 30, 0.95);
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
         .slide-up { transform: translateY(105%); transition: transform 0.3s ease-out; }
         .slide-up.active { transform: translateY(0); }
-        @keyframes liquid-float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        
+        @keyframes liquid-float { 
+            0%, 100% { transform: translateY(0px); } 
+            50% { transform: translateY(-10px); } 
+        }
         .float-card { animation: liquid-float 6s ease-in-out infinite; }
+
         .icon-pulse { animation: pulse-ring 2s infinite; }
-        @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1); } 70% { box-shadow: 0 0 0 6px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
+        @keyframes pulse-ring { 
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1); } 
+            70% { box-shadow: 0 0 0 6px rgba(255, 255, 255, 0); } 
+            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } 
+        }
+
         .pulse-glow { animation: pulse-green 2s infinite; }
-        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(57, 255, 20, 0); } 100% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0); } }
-        .admin-editable { border: 1px dashed #ff0000; background: rgba(255, 0, 0, 0.1); cursor: text; }
-        .admin-editable:focus { outline: none; background: rgba(255, 0, 0, 0.2); }
+        @keyframes pulse-green { 
+            0% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.7); } 
+            70% { box-shadow: 0 0 0 15px rgba(57, 255, 20, 0); } 
+            100% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0); } 
+        }
     </style>
 </head>
 <body class="pb-32 overflow-x-hidden font-sans">
@@ -64,9 +96,13 @@
         <div id="loadingMsg" class="col-span-2 text-center text-gray-500 mt-10">Loading Menu...</div>
     </main>
 
-    <footer class="mt-20 mb-32 text-center">
-        <button onclick="openLoginModal()" class="text-[10px] text-gray-600 hover:text-white transition uppercase tracking-widest py-4 px-6 border border-transparent hover:border-gray-800 rounded flex items-center justify-center gap-2 mx-auto">
-            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Employee Login
+    <footer class="mt-20 mb-32 text-center space-y-6">
+        <button onclick="openLoginModal()" class="text-[10px] text-gray-600 hover:text-white transition uppercase tracking-widest py-3 px-6 border border-gray-800 rounded-full flex items-center justify-center gap-2 mx-auto bg-gray-900/50">
+            <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> Employee Portal
+        </button>
+        
+        <button onclick="openLoginModal()" class="text-[9px] text-gray-700 hover:text-green-500 transition uppercase tracking-widest">
+            💼 Investor Relations
         </button>
     </footer>
 
@@ -88,12 +124,12 @@
 
     <div id="loginModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95" style="display:none;">
         <div class="w-full max-w-sm text-center bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-2xl relative">
-            <h2 class="text-2xl font-black uppercase text-white mb-2">Employee Portal</h2>
+            <h2 class="text-2xl font-black uppercase text-white mb-2">Corporate Access</h2>
             
             <div id="authStage">
-                <p id="authPrompt" class="text-gray-500 text-xs mb-6">Enter Master Key or Personal PIN</p>
+                <p id="authPrompt" class="text-gray-500 text-xs mb-6">Enter Passkey / Employee PIN</p>
                 <div class="relative w-full mb-6">
-                    <input type="password" id="accessKey" placeholder="ACCESS KEY" class="w-full bg-gray-800 border border-gray-700 text-center text-white text-xl tracking-widest rounded-xl px-4 py-4 focus:outline-none focus:border-green-500 pr-12">
+                    <input type="password" id="accessKey" placeholder="ENTER KEY" class="w-full bg-gray-800 border border-gray-700 text-center text-white text-xl tracking-widest rounded-xl px-4 py-4 focus:outline-none focus:border-green-500 pr-12">
                     <button type="button" onclick="togglePassVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 z-50 p-2 text-gray-400 hover:text-white cursor-pointer">
                         <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                     </button>
