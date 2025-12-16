@@ -28,55 +28,27 @@
         }
     </script>
     <style>
-        body { 
-            background-color: #050508; 
-            color: white; 
-            -webkit-user-select: none; 
-            user-select: none; 
-        }
+        body { background-color: #050508; color: white; -webkit-user-select: none; user-select: none; }
         input, textarea { -webkit-user-select: text; user-select: text; }
-        
-        .admin-editable {
-            border: 1px dashed #ff0000;
-            background: rgba(255, 0, 0, 0.1);
-            cursor: text;
-        }
-        /* Admin focus state */
-        .admin-editable:focus {
-            outline: none;
-            background: rgba(255, 0, 0, 0.2);
-        }
-
-        .glass-panel {
-            background: rgba(20, 20, 30, 0.95);
-            border-top: 1px solid rgba(255, 255, 255, 0.15);
-        }
-
+        .glass-panel { background: rgba(20, 20, 30, 0.95); border-top: 1px solid rgba(255, 255, 255, 0.15); }
         .slide-up { transform: translateY(105%); transition: transform 0.3s ease-out; }
         .slide-up.active { transform: translateY(0); }
-        
-        @keyframes liquid-float { 
-            0%, 100% { transform: translateY(0px); } 
-            50% { transform: translateY(-10px); } 
-        }
+        @keyframes liquid-float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
         .float-card { animation: liquid-float 6s ease-in-out infinite; }
-
         .icon-pulse { animation: pulse-ring 2s infinite; }
-        @keyframes pulse-ring { 
-            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1); } 
-            70% { box-shadow: 0 0 0 6px rgba(255, 255, 255, 0); } 
-            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } 
-        }
-
+        @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1); } 70% { box-shadow: 0 0 0 6px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
         .pulse-glow { animation: pulse-green 2s infinite; }
-        @keyframes pulse-green { 
-            0% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.7); } 
-            70% { box-shadow: 0 0 0 15px rgba(57, 255, 20, 0); } 
-            100% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0); } 
-        }
+        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(57, 255, 20, 0); } 100% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0); } }
+        .admin-editable { border: 1px dashed #ff0000; background: rgba(255, 0, 0, 0.1); cursor: text; }
+        .admin-editable:focus { outline: none; background: rgba(255, 0, 0, 0.2); }
     </style>
 </head>
 <body class="pb-32 overflow-x-hidden font-sans">
+
+    <div id="systemLockdown" class="fixed inset-0 z-[99999] bg-black hidden flex-col items-center justify-center text-center p-6">
+        <h1 id="lockdownTitle" class="text-4xl font-black text-red-600 mb-4">SYSTEM OFFLINE</h1>
+        <p id="lockdownMsg" class="text-gray-500 font-mono text-xs">CONNECTION TERMINATED BY HOST</p>
+    </div>
 
     <div id="statusBadge" class="hidden fixed top-4 left-4 z-[300] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl bg-black border animate-bounce"></div>
 
@@ -93,8 +65,8 @@
     </main>
 
     <footer class="mt-20 mb-32 text-center">
-        <button onclick="openInvestorLogin()" class="text-[10px] text-gray-700 hover:text-green-500 transition uppercase tracking-widest py-4 px-6 border border-transparent hover:border-gray-800 rounded">
-            🔒 Investor Access
+        <button onclick="openLoginModal()" class="text-[10px] text-gray-600 hover:text-white transition uppercase tracking-widest py-4 px-6 border border-transparent hover:border-gray-800 rounded flex items-center justify-center gap-2 mx-auto">
+            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Employee Login
         </button>
     </footer>
 
@@ -114,34 +86,38 @@
         </div>
     </div>
 
-    <div id="investorLoginModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95" style="display:none;">
+    <div id="loginModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95" style="display:none;">
         <div class="w-full max-w-sm text-center bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-2xl relative">
-            <h2 class="text-2xl font-black uppercase text-white mb-2">Restricted Area</h2>
-            <p class="text-gray-500 text-xs mb-6">Enter Passkey</p>
-            <div class="relative w-full mb-6">
-                <input type="password" id="investorPass" placeholder="ENTER KEY" class="w-full bg-gray-800 border border-gray-700 text-center text-white text-xl tracking-widest rounded-xl px-4 py-4 focus:outline-none focus:border-green-500 pr-12">
-                <button type="button" onclick="togglePassVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 z-50 p-2 text-gray-400 hover:text-white cursor-pointer">
-                    <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                </button>
+            <h2 class="text-2xl font-black uppercase text-white mb-2">Employee Portal</h2>
+            
+            <div id="authStage">
+                <p id="authPrompt" class="text-gray-500 text-xs mb-6">Enter Master Key or Personal PIN</p>
+                <div class="relative w-full mb-6">
+                    <input type="password" id="accessKey" placeholder="ACCESS KEY" class="w-full bg-gray-800 border border-gray-700 text-center text-white text-xl tracking-widest rounded-xl px-4 py-4 focus:outline-none focus:border-green-500 pr-12">
+                    <button type="button" onclick="togglePassVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 z-50 p-2 text-gray-400 hover:text-white cursor-pointer">
+                        <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    </button>
+                </div>
+                <button onclick="checkAccess()" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition">AUTHENTICATE</button>
             </div>
-            <button onclick="checkInvestorPass()" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition">ACCESS</button>
-            <button onclick="closeInvestorLogin()" class="mt-6 text-xs text-gray-600 block w-full hover:text-white">CANCEL</button>
+
+            <div id="createPinStage" class="hidden">
+                <p class="text-green-500 text-xs mb-6 font-bold">Master Key Accepted. Create your Personal PIN.</p>
+                <input type="password" id="newPin" placeholder="CREATE NEW PIN" class="w-full bg-gray-800 border border-green-500 text-center text-white text-xl tracking-widest rounded-xl px-4 py-4 focus:outline-none mb-6">
+                <button onclick="saveNewPin()" class="w-full bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-500 transition">SAVE & LOGIN</button>
+            </div>
+
+            <button onclick="closeLoginModal()" class="mt-6 text-xs text-gray-600 block w-full hover:text-white">CANCEL</button>
         </div>
     </div>
 
     <div id="configExportModal" class="hidden fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95">
-        <div class="bg-gray-900 w-full max-w-lg p-6 rounded-2xl border border-red-500 flex flex-col max-h-[80vh]">
-            <h2 class="text-xl font-bold text-red-500 mb-2">⚠️ SAVE CHANGES</h2>
-            <p class="text-gray-400 text-xs mb-4">Click "COPY ALL CODE" then paste into GitHub's index.html file.</p>
-            
-            <button onclick="copyToClipboard()" class="w-full bg-green-500 text-black font-black py-4 rounded-xl hover:bg-green-400 mb-4 uppercase flex items-center justify-center gap-2 shadow-lg hover:scale-[1.02] transition">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
-                COPY ALL CODE
-            </button>
-
-            <textarea id="configOutput" class="w-full flex-grow bg-black text-green-400 font-mono text-[10px] p-4 rounded-xl border border-gray-700 mb-4 focus:outline-none select-all" readonly></textarea>
-            
-            <button onclick="document.getElementById('configExportModal').style.display='none'" class="w-full bg-gray-800 text-white py-3 rounded-xl hover:bg-gray-700 font-bold">CLOSE</button>
+        <div class="bg-gray-900 w-full max-w-lg p-6 rounded-2xl border border-red-500">
+            <h2 class="text-xl font-bold text-red-500 mb-2">⚠️ COPY THIS CODE</h2>
+            <p class="text-gray-400 text-xs mb-4">Click "COPY ALL". Go to GitHub. Replace your entire <b>index.html</b> file.</p>
+            <button onclick="copyToClipboard()" class="w-full bg-green-500 text-black font-bold py-4 rounded-xl hover:bg-green-400 mb-4 uppercase">📋 Copy All Code</button>
+            <textarea id="configOutput" class="w-full h-32 bg-black text-green-400 font-mono text-xs p-4 rounded-xl border border-gray-700 mb-4 focus:outline-none select-all"></textarea>
+            <button onclick="document.getElementById('configExportModal').style.display='none'" class="w-full bg-gray-800 text-white py-2 rounded-xl hover:bg-gray-700">CLOSE</button>
         </div>
     </div>
 
@@ -155,7 +131,6 @@
             <section class="mb-12">
                 <h3 class="text-3xl font-black text-white mb-4">01. THE VISION</h3>
                 <p id="plan-vision" class="text-gray-400 leading-relaxed mb-4"><span class="text-white font-bold">smoothiePlus+</span> is a bio-hacked hydration station replacing ubiquitous soda with targeted fruit nutrition. We utilize a unique "Zero-Water" blending process, replacing inert water with nutrient-dense Milk, Honey, or Tiger Nut bases.</p>
-                
                 <div class="grid grid-cols-2 gap-4 mt-6">
                     <div class="bg-gray-900 p-4 rounded-xl border border-gray-800">
                         <p class="text-green-500 font-bold text-lg">Precision Prep</p>
@@ -207,6 +182,34 @@
         </div>
     </div>
 
+    <div id="teamPanelVault" class="fixed inset-0 z-[140] bg-[#0f172a] overflow-y-auto flex flex-col" style="display:none;">
+        <div class="flex justify-between items-center bg-gray-900/95 backdrop-blur-md py-4 px-4 border-b border-gray-800 flex-shrink-0">
+            <div>
+                <h2 class="text-lg font-black text-blue-500 tracking-tighter flex items-center gap-2">
+                    <span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span></span>
+                    NEURAL LINK
+                </h2>
+                <p class="text-[10px] text-gray-500 uppercase">Live Operations Stream</p>
+            </div>
+            <button onclick="closeVault()" class="text-xs bg-gray-800 px-3 py-1 rounded text-white">EXIT</button>
+        </div>
+        <div id="chatStream" class="flex-1 p-4 overflow-y-auto flex flex-col space-y-2"></div>
+        <div class="bg-gray-900 p-4 border-t border-gray-800 flex-shrink-0">
+            <div class="flex gap-2 mb-2 overflow-x-auto pb-2">
+                <button onclick="setRole('ALCHEMIST')" id="role-alch" class="role-btn text-[10px] bg-gray-800 text-gray-400 px-3 py-1 rounded-full border border-gray-700 hover:border-purple-500">⚗️ ALCHEMIST</button>
+                <button onclick="setRole('ARCHITECT')" id="role-arch" class="role-btn text-[10px] bg-gray-800 text-gray-400 px-3 py-1 rounded-full border border-gray-700 hover:border-blue-500">🏗️ ARCHITECT</button>
+                <button onclick="setRole('AMPLIFIER')" id="role-amp" class="role-btn text-[10px] bg-gray-800 text-gray-400 px-3 py-1 rounded-full border border-gray-700 hover:border-orange-500">📢 AMPLIFIER</button>
+            </div>
+            <div class="flex gap-2">
+                <input type="text" id="chatInput" placeholder="Transmit data..." class="flex-1 bg-black border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 text-sm">
+                <button onclick="sendChatMessage()" class="bg-blue-600 text-white font-bold px-4 rounded-xl hover:bg-blue-500">➤</button>
+            </div>
+            <button onclick="broadcastToTelegram()" class="w-full mt-3 text-[10px] text-gray-500 border border-gray-800 py-2 rounded-lg hover:bg-gray-800 hover:text-blue-400 transition flex items-center justify-center gap-1">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.361 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.693-1.653-1.124-2.678-1.8-1.185-.781-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.141.119.098.152.228.166.33.016.115.022.242.018.365z"/></svg> BROADCAST TO TELEGRAM
+            </button>
+        </div>
+    </div>
+
     <div id="orderSheet" class="fixed bottom-0 left-0 right-0 glass-panel rounded-t-3xl p-6 z-[100] max-h-[85vh] overflow-y-auto slide-up">
         <div class="w-12 h-1 bg-gray-500 rounded-full mx-auto mb-6 cursor-pointer" onclick="toggleSheet()"></div>
         <div class="flex justify-between items-center mb-2">
@@ -227,6 +230,10 @@
     </div>
 
     <script id="main-script">
+        // 🔒 ADMIN CONFIGURATION
+        // 'ACTIVE' = Normal | 'MAINTENANCE' = Upgrading | 'KILLED' = Offline
+        const SITE_STATE = 'ACTIVE'; 
+
         // ⚡ DO NOT EDIT THIS BLOCK MANUALLY. USE GODMODE.
         const STORE_CONFIG = {
     "admin": {
@@ -277,69 +284,176 @@
 
         let cart = {}; 
         let adminMode = false;
-        // Business Plan IDs that are editable
+        let messages = JSON.parse(localStorage.getItem('teamMessages')) || [];
+        let currentRole = 'ALCHEMIST'; 
+        let localUserPin = localStorage.getItem('mySmoothiePin'); // Get stored PIN
+
         const editablePlanIds = ['plan-vision', 'plan-usp1', 'plan-usp2', 'plan-scale', 'plan-aov', 'plan-cogs', 'plan-margin'];
 
         window.addEventListener('load', () => { 
+            checkSiteHealth();
             renderMenu(); 
             renderBankDetails();
-            document.getElementById('investorPass').addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') { checkInvestorPass(); }
+            document.getElementById('accessKey').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') { checkAccess(); }
             });
+            document.getElementById('newPin').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') { saveNewPin(); }
+            });
+            document.getElementById('chatInput').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') { sendChatMessage(); }
+            });
+            
+            if(window.location.hash === "#employee") openLoginModal();
+            updateRoleUI();
         });
 
-        // --- AUTH LOGIC ---
-        function openInvestorLogin() { 
-            document.getElementById('investorLoginModal').style.display = 'flex'; 
-            document.getElementById('investorPass').value = ''; 
-            document.getElementById('investorPass').type = 'password'; 
-            document.getElementById('investorPass').focus();
+        // --- LOCKDOWN LOGIC ---
+        function checkSiteHealth() {
+            const overlay = document.getElementById('systemLockdown');
+            const title = document.getElementById('lockdownTitle');
+            const msg = document.getElementById('lockdownMsg');
+
+            if(SITE_STATE === 'ACTIVE') {
+                overlay.style.display = 'none';
+            } else if (SITE_STATE === 'MAINTENANCE') {
+                overlay.style.display = 'flex';
+                title.innerText = "SYSTEM UPGRADING";
+                title.className = "text-4xl font-black text-yellow-500 mb-4";
+                msg.innerText = "DEPLOYING NEW ASSETS. STANDBY.";
+            } else if (SITE_STATE === 'KILLED') {
+                overlay.style.display = 'flex';
+                title.innerText = "404 NOT FOUND";
+                title.className = "text-4xl font-black text-gray-600 mb-4";
+                msg.innerText = "SERVER CONNECTION REFUSED.";
+            }
         }
 
-        function closeInvestorLogin() { document.getElementById('investorLoginModal').style.display = 'none'; }
+        // --- AUTH LOGIC ---
+        function openLoginModal() { 
+            document.getElementById('loginModal').style.display = 'flex'; 
+            document.getElementById('authStage').classList.remove('hidden');
+            document.getElementById('createPinStage').classList.add('hidden');
+            document.getElementById('accessKey').value = ''; 
+            document.getElementById('accessKey').focus();
+        }
+
+        function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
         
         function togglePassVisibility() {
-            const input = document.getElementById('investorPass');
+            const input = document.getElementById('accessKey');
             input.type = input.type === "password" ? "text" : "password";
         }
 
-        function checkInvestorPass() {
-            const pass = document.getElementById('investorPass').value.trim();
-            if (pass === "iwillinvesT") {
-                closeInvestorLogin();
+        function checkAccess() {
+            const inputVal = document.getElementById('accessKey').value.trim();
+            
+            // 1. ADMIN MASTER KEY (Setup Mode)
+            if (inputVal === "Admin GODMODE") {
+                document.getElementById('authStage').classList.add('hidden');
+                document.getElementById('createPinStage').classList.remove('hidden');
+                document.getElementById('newPin').focus();
+            }
+            // 2. CHECK LOCAL PIN (Team Access)
+            else if (localUserPin && inputVal === localUserPin) {
+                grantTeamAccess();
+            }
+            // 3. INVESTOR READ-ONLY
+            else if (inputVal === "iwillinvesT") {
+                closeLoginModal();
                 renderInvestorProducts();
                 document.getElementById('investorVault').style.display = 'block'; 
                 showStatusBadge("🔒 INVESTOR VIEW", "green");
-            } 
-            else if (pass === "Admin GODMODE") {
-                closeInvestorLogin();
-                activateGodMode();
             }
             else { alert("ACCESS DENIED: INCORRECT KEY"); }
+        }
+
+        function saveNewPin() {
+            const pin = document.getElementById('newPin').value.trim();
+            if(pin.length < 4) return alert("PIN too short.");
+            
+            localStorage.setItem('mySmoothiePin', pin);
+            localUserPin = pin;
+            
+            // Auto login after creating PIN
+            grantTeamAccess();
+        }
+
+        function grantTeamAccess() {
+            closeLoginModal();
+            // Enable God Mode + Team Chat
+            activateGodMode(); 
+            document.getElementById('teamPanelVault').style.display = 'flex';
+            renderChat();
+            showStatusBadge("⚔️ COMMANDER ACTIVE", "blue");
+        }
+
+        // --- NEURAL CHAT LOGIC ---
+        function setRole(role) { currentRole = role; updateRoleUI(); }
+
+        function updateRoleUI() {
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                btn.classList.remove('bg-purple-900', 'bg-blue-900', 'bg-orange-900', 'text-white', 'border-white');
+                btn.classList.add('bg-gray-800', 'text-gray-400');
+            });
+            let btnId = 'role-alch';
+            let activeClass = 'bg-purple-900';
+            if(currentRole === 'ARCHITECT') { btnId = 'role-arch'; activeClass = 'bg-blue-900'; }
+            if(currentRole === 'AMPLIFIER') { btnId = 'role-amp'; activeClass = 'bg-orange-900'; }
+            const btn = document.getElementById(btnId);
+            btn.classList.remove('bg-gray-800', 'text-gray-400');
+            btn.classList.add(activeClass, 'text-white', 'border-white');
+        }
+
+        function sendChatMessage() {
+            const txt = document.getElementById('chatInput').value.trim();
+            if(!txt) return;
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            messages.push({ role: currentRole, text: txt, time: time });
+            localStorage.setItem('teamMessages', JSON.stringify(messages));
+            document.getElementById('chatInput').value = '';
+            renderChat();
+        }
+
+        function renderChat() {
+            const container = document.getElementById('chatStream');
+            container.innerHTML = '';
+            messages.forEach(msg => {
+                let colorClass = 'chat-other';
+                let roleColor = 'text-gray-400';
+                if (msg.role === currentRole) colorClass = 'chat-self';
+                if(msg.role === 'ALCHEMIST') roleColor = 'text-purple-400';
+                if(msg.role === 'ARCHITECT') roleColor = 'text-blue-400';
+                if(msg.role === 'AMPLIFIER') roleColor = 'text-orange-400';
+
+                container.innerHTML += `
+                <div class="chat-bubble ${colorClass}">
+                    <div class="flex justify-between items-baseline gap-4 mb-1">
+                        <span class="font-bold text-[10px] uppercase ${roleColor}">${msg.role}</span>
+                        <span class="text-[8px] text-gray-500">${msg.time}</span>
+                    </div>
+                    <p>${msg.text}</p>
+                </div>`;
+            });
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function broadcastToTelegram() {
+            if(messages.length === 0) return alert("Neural Link Empty.");
+            let text = "🚀 *TEAM SYNC UPDATE*\n\n";
+            messages.slice(-10).forEach(m => { text += `[${m.role}] ${m.text}\n`; });
+            window.open(`tg://msg?text=${encodeURIComponent(text)}`, '_blank');
         }
 
         // --- GOD MODE LOGIC ---
         function activateGodMode() {
             adminMode = true;
-            showStatusBadge("⚡ GODMODE ACTIVE", "red");
             document.getElementById('adminSaveBtn').classList.remove('hidden');
-            
-            // 1. Open Vault Automatically
-            renderInvestorProducts();
-            document.getElementById('investorVault').style.display = 'block'; 
-            
-            // 2. Make Plan Editable
             editablePlanIds.forEach(id => {
                 const el = document.getElementById(id);
-                if(el) {
-                    el.contentEditable = "true";
-                    el.classList.add('admin-editable');
-                }
+                if(el) { el.contentEditable = "true"; el.classList.add('admin-editable'); }
             });
-
-            // 3. Make Products Editable (Re-render with edit enabled)
             renderMenu();
-            alert("GODMODE ON:\n1. Edit Business Plan text directly.\n2. Close Plan to edit Product Prices/Names.\n3. Click SAVE FULL SITE when done.");
         }
 
         function showStatusBadge(text, color) {
@@ -351,12 +465,12 @@
 
         function closeVault() { 
             document.getElementById('investorVault').style.display = 'none'; 
+            document.getElementById('teamPanelVault').style.display = 'none';
             if(!adminMode) document.getElementById('statusBadge').classList.add('hidden');
         }
 
-        // --- COMPILER ENGINE (THE MAGIC) ---
+        // --- COMPILER ENGINE ---
         function compileAndSave() {
-            // 1. Scrape Products from DOM
             const updatedProducts = STORE_CONFIG.products.map(p => {
                 return {
                     id: p.id,
@@ -369,34 +483,23 @@
                 };
             });
 
-            // 2. Clone the Document to clean it
             const clone = document.documentElement.cloneNode(true);
-            
-            // 3. CLEANUP: Remove Admin Artifacts from Clone
-            const adminBadges = clone.querySelectorAll('#statusBadge, #adminSaveBtn, #configExportModal, #investorLoginModal, #productModal, #investorVault');
-            adminBadges.forEach(el => el.classList.add('hidden')); // Hide all modals/badges
-            clone.querySelector('#investorVault').style.display = 'none'; // Force hide inline style
+            const adminBadges = clone.querySelectorAll('#statusBadge, #adminSaveBtn, #configExportModal, #investorLoginModal, #productModal, #investorVault, #teamPanelVault, #systemLockdown');
+            adminBadges.forEach(el => el.classList.add('hidden')); 
+            clone.querySelector('#investorVault').style.display = 'none';
+            clone.querySelector('#teamPanelVault').style.display = 'none';
             clone.querySelector('#statusBadge').style.display = 'none';
+            clone.querySelector('#systemLockdown').style.display = 'none';
             clone.querySelector('#adminSaveBtn').classList.add('hidden');
 
-            // 4. CLEANUP: Remove contentEditable attributes
             const editables = clone.querySelectorAll('[contenteditable]');
-            editables.forEach(el => {
-                el.removeAttribute('contenteditable');
-                el.classList.remove('admin-editable');
-            });
+            editables.forEach(el => { el.removeAttribute('contenteditable'); el.classList.remove('admin-editable'); });
 
-            // 5. INJECT: New Config Variable
             const newConfig = { admin: STORE_CONFIG.admin, products: updatedProducts };
             const scriptContent = clone.querySelector('#main-script').innerHTML;
-            // Regex to replace the STORE_CONFIG object
-            const newScript = scriptContent.replace(
-                /const STORE_CONFIG = \{[\s\S]*?\};/, 
-                "const STORE_CONFIG = " + JSON.stringify(newConfig, null, 4) + ";"
-            );
+            const newScript = scriptContent.replace(/const STORE_CONFIG = \{[\s\S]*?\};/, "const STORE_CONFIG = " + JSON.stringify(newConfig, null, 4) + ";");
             clone.querySelector('#main-script').innerHTML = newScript;
 
-            // 6. OUTPUT
             const finalHTML = "<!DOCTYPE html>\n" + clone.outerHTML;
             document.getElementById('configOutput').value = finalHTML;
             document.getElementById('configExportModal').style.display = 'flex';
@@ -420,7 +523,6 @@
         function renderMenu() {
             const container = document.getElementById('menuGrid');
             let html = '';
-            
             STORE_CONFIG.products.forEach((product, index) => {
                 let borderColor = `border-${product.color}-500`;
                 let textColor = `text-${product.color}-400`;
@@ -428,7 +530,6 @@
                 if(product.color === 'cyan' || product.color === 'orange') btnColor = `bg-${product.color}-500`;
                 let iconColorClass = `text-${product.color}-400 border-${product.color}-500/60 hover:bg-${product.color}-500/20`;
                 const delay = index * 0.5;
-
                 const contentEditable = adminMode ? 'contenteditable="true" class="admin-editable rounded p-1"' : '';
 
                 html += `
@@ -450,7 +551,6 @@
                     </div>
                 </div>`;
             });
-            
             document.getElementById('loadingMsg').style.display = 'none';
             container.innerHTML = html;
         }
