@@ -3,43 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
     <title>smoothiePlus+ | Liquid Energy</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     
+    <link id="manifest-placeholder" rel="manifest">
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: { sans: ['Montserrat', 'sans-serif'] },
-                    colors: { darkBg: '#0a0a12', msgSelf: '#0084ff', msgOther: '#3e4042' }
+                    colors: { darkBg: '#0a0a12', msgSelf: '#0084ff', msgOther: '#3e4042', neon: '#39ff14' }
                 }
             }
         }
     </script>
     <style>
-        body { 
-            background-color: #050508; 
-            color: white; 
-            overscroll-behavior: none; 
-        }
+        body { background-color: #050508; color: white; overscroll-behavior: none; }
         input, textarea { -webkit-user-select: text; user-select: text; }
         
         /* 100dvh FIX */
-        .drawer-full {
-            position: fixed; bottom: 0; left: 0; right: 0; top: 0;
-            background: #0f172a; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
-            z-index: 100; display: flex; flex-direction: column; height: 100dvh;
-        }
+        .drawer-full { position: fixed; bottom: 0; left: 0; right: 0; top: 0; background: #0f172a; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); z-index: 100; display: flex; flex-direction: column; height: 100dvh; }
         .drawer-full.active { transform: translateY(0); }
-
-        .drawer-partial {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: rgba(20, 20, 30, 0.98); border-top: 1px solid rgba(255,255,255,0.1);
-            border-top-left-radius: 24px; border-top-right-radius: 24px;
-            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
-            z-index: 90; max-height: 85vh; display: flex; flex-direction: column;
-        }
+        .drawer-partial { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(20, 20, 30, 0.98); border-top: 1px solid rgba(255,255,255,0.1); border-top-left-radius: 24px; border-top-right-radius: 24px; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1); z-index: 90; max-height: 85vh; display: flex; flex-direction: column; }
         .drawer-partial.active { transform: translateY(0); }
 
         /* SCROLL & UTILS */
@@ -48,45 +40,44 @@
         .admin-editable { border: 1px dashed #ff0000; background: rgba(255, 0, 0, 0.1); cursor: text; }
         .glass-panel { background: rgba(20, 20, 30, 0.95); border-top: 1px solid rgba(255, 255, 255, 0.15); }
         
-        /* TOAST */
-        #apiToast {
-            position: fixed; top: -50px; left: 50%; transform: translateX(-50%);
-            background: #22c55e; color: black; padding: 8px 16px; border-radius: 20px;
-            font-size: 10px; font-weight: bold; z-index: 9999;
-            transition: top 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-        }
-        #apiToast.active { top: 20px; }
-        #apiToast.error { background: #ef4444; color: white; }
-
+        /* ANIMATIONS */
         @keyframes liquid-float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
         .float-card { animation: liquid-float 6s ease-in-out infinite; transition: transform 0.2s; }
         .float-card:active { transform: scale(0.98); }
         .pulse-glow { animation: pulse-green 2s infinite; }
         @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(57, 255, 20, 0); } 100% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0); } }
 
-        /* SHIMMER */
-        .shimmer-card { position: relative; overflow: hidden; background: rgba(20, 20, 30, 0.6); backdrop-filter: blur(10px); }
-        .shimmer-card::before {
-            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.05), transparent);
-            transform: skewX(-25deg); animation: shimmer 6s infinite; pointer-events: none;
-        }
-        @keyframes shimmer { 0% { left: -100%; } 20% { left: 200%; } 100% { left: 200%; } }
+        /* AR SCANNER HUD */
+        .scanner-overlay { position: absolute; inset: 0; pointer-events: none; border: 2px solid rgba(57, 255, 20, 0.1); z-index: 10; }
+        .scanner-line { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: #39ff14; box-shadow: 0 0 10px #39ff14; animation: scan-down 3s linear infinite; }
+        .hud-corner { position: absolute; width: 40px; height: 40px; border: 4px solid #39ff14; opacity: 0.8; }
+        .tl { top: 20px; left: 20px; border-right: none; border-bottom: none; }
+        .tr { top: 20px; right: 20px; border-left: none; border-bottom: none; }
+        .bl { bottom: 20px; left: 20px; border-right: none; border-top: none; }
+        .br { bottom: 20px; right: 20px; border-left: none; border-top: none; }
+        @keyframes scan-down { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
 
-        /* MESSENGER CHAT STYLES */
-        .msg-row { display: flex; gap: 8px; margin-bottom: 4px; align-items: flex-end; }
-        .msg-row.self { flex-direction: row-reverse; }
-        .msg-bubble { padding: 8px 12px; border-radius: 18px; font-size: 14px; max-width: 75%; line-height: 1.4; position: relative; word-wrap: break-word; }
-        .msg-row.self .msg-bubble { background-color: #0084ff; color: white; border-bottom-right-radius: 4px; }
-        .msg-row.other .msg-bubble { background-color: #3e4042; color: #e4e6eb; border-bottom-left-radius: 4px; }
+        /* TOAST & CHAT */
+        #apiToast { position: fixed; top: -50px; left: 50%; transform: translateX(-50%); background: #22c55e; color: black; padding: 8px 16px; border-radius: 20px; font-size: 10px; font-weight: bold; z-index: 9999; transition: top 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+        #apiToast.active { top: 20px; }
+        #apiToast.error { background: #ef4444; color: white; }
+        .chat-bubble { max-width: 85%; padding: 12px; border-radius: 16px; margin-bottom: 8px; font-size: 13px; line-height: 1.4; animation: popIn 0.2s ease-out; }
+        .chat-self { background-color: #2563eb; color: white; align-self: flex-end; border-bottom-right-radius: 4px; margin-left: auto; }
+        .chat-other { background-color: #1f2937; color: #e5e7eb; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #374151; }
         .avatar-circle { width: 28px; height: 28px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: #aaa; border: 1px solid #555; cursor: pointer; }
         .seen-indicator { font-size: 10px; color: #65676b; text-align: right; margin-top: 2px; margin-right: 4px; display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
         .eye-icon { width: 12px; height: 12px; opacity: 0.7; }
-
-        .tab-active { border-bottom: 2px solid #0084ff; color: #0084ff; }
-        .tab-inactive { border-bottom: 2px solid transparent; color: #6b7280; }
+        @keyframes popIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* SHIMMER */
+        .shimmer-card { position: relative; overflow: hidden; background: rgba(20, 20, 30, 0.6); backdrop-filter: blur(10px); }
+        .shimmer-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.05), transparent); transform: skewX(-25deg); animation: shimmer 6s infinite; pointer-events: none; }
+        @keyframes shimmer { 0% { left: -100%; } 20% { left: 200%; } 100% { left: 200%; } }
+        
         .task-check:checked + label span { background-color: #22c55e; border-color: #22c55e; }
         .task-check:checked + label p { text-decoration: line-through; color: #6b7280; }
+        .tab-active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
+        .tab-inactive { border-bottom: 2px solid transparent; color: #6b7280; }
     </style>
 </head>
 <body class="pb-32 overflow-x-hidden font-sans">
@@ -112,13 +103,36 @@
         </div>
     </div>
 
-    <div class="text-center pt-8 pb-6 relative overflow-hidden">
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-green-500 rounded-full blur-[100px] opacity-20 -z-10"></div>
-        <h1 class="text-4xl font-black tracking-tighter uppercase leading-none">
-            smoothie<span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">Plus+</span>
-        </h1>
-        <p class="text-gray-400 text-xs tracking-widest uppercase mt-2">Premium Bio-Hacked Blends</p>
+    <div id="scannerModal" class="fixed inset-0 z-[150] bg-black hidden flex-col">
+        <div class="relative flex-1 overflow-hidden bg-black">
+            <video id="scannerVideo" class="absolute inset-0 w-full h-full object-cover opacity-80" autoplay playsinline muted></video>
+            <div class="scanner-overlay">
+                <div class="scanner-line"></div>
+                <div class="hud-corner tl"></div><div class="hud-corner tr"></div>
+                <div class="hud-corner bl"></div><div class="hud-corner br"></div>
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-neon font-mono text-xs tracking-widest animate-pulse">ANALYZING BIOMETRICS...</div>
+            </div>
+            <button onclick="closeScanner()" class="absolute top-4 right-4 z-50 text-white font-bold bg-black/50 rounded-full w-10 h-10 flex items-center justify-center border border-white/20">✕</button>
+        </div>
+        <div class="bg-gray-900 p-6 text-center border-t border-gray-800">
+            <p class="text-xs text-gray-400 mb-2">POINT CAMERA AT FRUIT OR HAND</p>
+            <div class="h-1 w-full bg-gray-800 rounded-full overflow-hidden">
+                <div class="h-full bg-green-500 w-1/3 animate-pulse"></div>
+            </div>
+        </div>
     </div>
+
+    <div class="flex justify-between items-center px-4 pt-6 pb-2 relative z-50">
+        <div>
+            <h1 class="text-2xl font-black tracking-tighter uppercase leading-none">
+                smoothie<span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">Plus+</span>
+            </h1>
+        </div>
+        <button onclick="startScanner()" class="bg-gray-900 border border-green-500/50 text-green-400 rounded-full w-10 h-10 flex items-center justify-center hover:bg-green-500 hover:text-black transition shadow-[0_0_15px_rgba(57,255,20,0.3)]">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+        </button>
+    </div>
+    <p class="text-center text-gray-400 text-xs tracking-widest uppercase mb-6">Premium Bio-Hacked Blends</p>
 
     <main id="menuGrid" class="px-4 grid grid-cols-2 gap-4 max-w-md mx-auto relative z-10 min-h-[50vh]">
         <div id="loadingMsg" class="col-span-2 text-center text-gray-500 mt-10">Loading Menu...</div>
@@ -160,6 +174,7 @@
                 </div>
                 <button onclick="checkAccess()" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200">AUTHENTICATE</button>
             </div>
+            
             <div id="createPinStage" class="hidden">
                 <p class="text-green-500 text-xs mb-2 font-bold">Identity Protocol</p>
                 <p class="text-gray-500 text-[10px] mb-6">Register your callsign and local PIN.</p>
@@ -194,8 +209,8 @@
                     <h3 class="text-3xl font-black text-white mb-4">01. THE VISION</h3>
                     <p id="plan-vision" class="text-gray-400 leading-relaxed mb-4">Bio-hacked hydration utilizing unique "Zero-Water" blending processes.</p>
                     <div class="grid grid-cols-2 gap-4 mt-6">
-                        <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shimmer-card"><p class="text-green-500 font-bold text-lg">Precision Prep</p><p id="plan-usp1" class="text-xs text-gray-500 uppercase">Potato Slicer Consistency</p></div>
-                        <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shimmer-card"><p class="text-green-500 font-bold text-lg">3 Flavor Bases</p><p id="plan-usp2" class="text-xs text-gray-500 uppercase">Milk / Honey / Tiger Nut</p></div>
+                        <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shimmer-card"><p class="text-green-500 font-bold text-lg">Precision Prep</p><p class="text-xs text-gray-500 uppercase">Potato Slicer Consistency</p></div>
+                        <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shimmer-card"><p class="text-green-500 font-bold text-lg">3 Flavor Bases</p><p class="text-xs text-gray-500 uppercase">Milk / Honey / Tiger Nut</p></div>
                     </div>
                 </section>
                 <section class="mb-12">
@@ -223,24 +238,13 @@
 
     <div id="teamPanelVault" class="drawer-full bg-[#0f172a]">
         <div class="flex justify-between items-center bg-gray-900/95 backdrop-blur-md py-4 px-4 border-b border-gray-800 flex-shrink-0">
-            <div>
-                <h2 class="text-lg font-black text-blue-500 tracking-tighter flex items-center gap-2">
-                    <span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span></span>
-                    NEURAL LINK
-                </h2>
-                <p class="text-[10px] text-gray-500 uppercase">Synced Operations</p>
-            </div>
-            <div class="flex gap-4">
-                <button onclick="minimizeDrawer('teamPanelVault')" class="text-gray-500 hover:text-white text-xl">_</button>
-                <button onclick="closeDrawer('teamPanelVault')" class="text-gray-500 hover:text-red-500 text-xl">✕</button>
-            </div>
+            <div><h2 class="text-lg font-black text-blue-500 tracking-tighter flex items-center gap-2"><span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span></span>NEURAL LINK</h2><p class="text-[10px] text-gray-500 uppercase">Synced Operations</p></div>
+            <div class="flex gap-4"><button onclick="minimizeDrawer('teamPanelVault')" class="text-gray-500 hover:text-white text-xl">_</button><button onclick="closeDrawer('teamPanelVault')" class="text-gray-500 hover:text-red-500 text-xl">✕</button></div>
         </div>
-
         <div class="flex border-b border-gray-800 bg-gray-900">
             <button onclick="switchTab('CHAT')" id="tab-chat" class="flex-1 py-3 text-xs font-bold uppercase tab-active transition">Chat</button>
             <button onclick="switchTab('TASKS')" id="tab-tasks" class="flex-1 py-3 text-xs font-bold uppercase tab-inactive transition">Directives</button>
         </div>
-
         <div id="view-chat" class="flex-1 flex flex-col h-full overflow-hidden viewport-height">
             <div id="chatStream" class="scroll-area p-4 space-y-2"></div>
             <div class="bg-gray-900 p-4 border-t border-gray-800 fixed-bottom">
@@ -251,16 +255,11 @@
                 <p class="text-[9px] text-gray-500 mt-2 text-center">Identity: <span id="userIdentityDisplay" class="text-blue-400 font-bold">UNKNOWN</span></p>
             </div>
         </div>
-
         <div id="view-tasks" class="hidden flex-1 flex flex-col h-full overflow-hidden p-4 viewport-height">
             <div class="bg-black border border-gray-800 p-4 rounded-2xl mb-4 shimmer-card">
                 <input type="text" id="newTaskInput" placeholder="New Directive..." class="w-full bg-gray-900 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm mb-2">
                 <div class="flex gap-2">
-                    <select id="taskAssignee" class="bg-gray-900 border border-gray-700 text-gray-300 text-xs rounded-lg px-2 py-2 flex-1 focus:outline-none">
-                        <option value="GENERAL">GENERAL</option>
-                        <option value="URGENT">URGENT</option>
-                        <option value="OPS">OPS</option>
-                    </select>
+                    <select id="taskAssignee" class="bg-gray-900 border border-gray-700 text-gray-300 text-xs rounded-lg px-2 py-2 flex-1 focus:outline-none"><option value="GENERAL">GENERAL</option><option value="URGENT">URGENT</option><option value="OPS">OPS</option></select>
                     <button onclick="addNewTask()" class="bg-blue-600 text-white text-xs font-bold px-4 rounded-lg">ADD</button>
                 </div>
             </div>
@@ -303,7 +302,7 @@
 
     <script id="main-script">
         // ⚡ PASTE YOUR GOOGLE DEPLOYMENT URL HERE ⚡
-        const GOOGLE_API_URL = ""; 
+        const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbylW3_w8NdVfE-Ow-2qdaMDJn-b90Nvj-M2bKfz-d_w4IYCLtSFE5kL0i16tKQp906R/exec"; 
         const SITE_STATE = 'ACTIVE';
 
         const KEYS = { INVESTOR: "iwillinvesT", BUILDER: "AdminEDITGODMODE", COMMANDER: "Admin GODMODE" };
@@ -323,23 +322,46 @@
         let localUserPin = localStorage.getItem('mySmoothiePin'); 
         let tasks = []; 
 
+        // INJECT DYNAMIC PWA MANIFEST
+        const manifest = {
+            "name": "smoothiePlus+", "short_name": "sPlus+", "start_url": ".", "display": "standalone", "background_color": "#050508", "theme_color": "#000000",
+            "icons": [{ "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Ccircle cx='256' cy='256' r='256' fill='%23050508'/%3E%3Ctext x='50%25' y='50%25' font-family='sans-serif' font-weight='900' font-size='300' fill='%2339ff14' text-anchor='middle' dy='.35em'%3ES+%3C/text%3E%3C/svg%3E", "sizes": "512x512", "type": "image/svg+xml" }]
+        };
+        document.getElementById('manifest-placeholder').setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest)));
+
         window.addEventListener('load', () => { 
             checkSiteHealth(); renderMenu(); renderBankDetails(); restoreSession();
             document.getElementById('accessKey').addEventListener('keypress', function (e) { if (e.key === 'Enter') checkAccess(); });
             document.getElementById('newPin').addEventListener('keypress', function (e) { if (e.key === 'Enter') saveNewIdentity(); });
             document.getElementById('chatInput').addEventListener('keypress', function (e) { if (e.key === 'Enter') sendChatMessage(); });
-            
             if(window.location.hash === "#employee") openLoginModal();
             if(localStorage.getItem('smoothieActiveView') === 'teamPanelVault') startNeuralLink();
             document.getElementById('userIdentityDisplay').innerText = currentName;
         });
 
-        // --- SAFE POST WRAPPER ---
+        // --- AR SCANNER ---
+        function startScanner() {
+            document.getElementById('scannerModal').style.display = 'flex';
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(stream => {
+                document.getElementById('scannerVideo').srcObject = stream;
+                setTimeout(() => {
+                    const randomProduct = STORE_CONFIG.products[Math.floor(Math.random() * STORE_CONFIG.products.length)];
+                    closeScanner();
+                    showProductDetails(randomProduct.id);
+                    showToast("MATCH FOUND: " + randomProduct.name, "success");
+                }, 3500); 
+            }).catch(e => { alert("Camera access required for Bio-Scan."); closeScanner(); });
+        }
+        function closeScanner() {
+            document.getElementById('scannerModal').style.display = 'none';
+            const vid = document.getElementById('scannerVideo');
+            if(vid.srcObject) vid.srcObject.getTracks().forEach(t => t.stop());
+        }
+
+        // --- SAFE POST ---
         async function safePost(payload) {
-            try {
-                await fetch(GOOGLE_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-                showToast("SYNCED ✓", "success");
-            } catch (e) { showToast("OFFLINE", "error"); }
+            try { await fetch(GOOGLE_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); showToast("SYNCED ✓", "success"); } 
+            catch (e) { showToast("OFFLINE", "error"); }
         }
         function showToast(msg, type) { const t = document.getElementById('apiToast'); t.innerText = msg; t.className = type === 'error' ? 'error active' : 'active'; setTimeout(() => t.classList.remove('active'), 2000); }
 
@@ -351,23 +373,17 @@
         function checkAccess() {
             const val = document.getElementById('accessKey').value.trim();
             if (val === KEYS.INVESTOR) { launchApp('investorVault', "green", "🔒 INVESTOR VIEW"); closeLoginModal(); } 
-            else if (val === KEYS.BUILDER) { 
-                closeLoginModal(); // Close modal immediately
-                activateBuilderMode(); // Just unlock editing
-            }
+            else if (val === KEYS.BUILDER) { closeLoginModal(); activateBuilderMode(); }
             else if (val === KEYS.COMMANDER) { document.getElementById('authStage').classList.add('hidden'); document.getElementById('createPinStage').classList.remove('hidden'); document.getElementById('newName').focus(); }
             else if (localUserPin && val === localUserPin) { launchApp('teamPanelVault', "blue", "⚔️ COMMANDER ACTIVE"); startNeuralLink(); closeLoginModal(); } 
             else { alert("ACCESS DENIED"); }
         }
 
         function saveNewIdentity() {
-            const name = document.getElementById('newName').value.trim().toUpperCase();
-            const pin = document.getElementById('newPin').value.trim();
-            if(name.length < 2) return alert("Name required.");
-            if(pin.length < 4) return alert("PIN too short.");
+            const name = document.getElementById('newName').value.trim().toUpperCase(); const pin = document.getElementById('newPin').value.trim();
+            if(name.length < 2) return alert("Name required."); if(pin.length < 4) return alert("PIN too short.");
             localStorage.setItem('mySmoothieName', name); localStorage.setItem('mySmoothiePin', pin);
-            localUserPin = pin; currentName = name;
-            document.getElementById('userIdentityDisplay').innerText = currentName;
+            localUserPin = pin; currentName = name; document.getElementById('userIdentityDisplay').innerText = currentName;
             closeLoginModal(); launchApp('teamPanelVault', "blue", "⚔️ COMMANDER ACTIVE"); startNeuralLink();
         }
 
@@ -378,9 +394,7 @@
         async function loadCloudData() {
             if(!GOOGLE_API_URL) return;
             try {
-                const res = await fetch(GOOGLE_API_URL);
-                const data = await res.json();
-                
+                const res = await fetch(GOOGLE_API_URL); const data = await res.json();
                 const chatContainer = document.getElementById('chatStream');
                 data.chat.forEach(msg => {
                     if(!document.getElementById('msg-' + msg.id)) {
@@ -390,11 +404,7 @@
                         let content = isSelf ? `<div id="msg-${msg.id}" class="msg-row self"><div class="msg-bubble">${msg.text}</div></div>` : `<div id="msg-${msg.id}" class="msg-row other"><div onclick="showMemberInfo('${msg.role}')" class="avatar-circle">${msg.role.substring(0,2)}</div><div class="msg-bubble">${msg.text}</div></div>`;
                         chatContainer.insertAdjacentHTML('beforeend', content);
                         chatContainer.scrollTop = chatContainer.scrollHeight;
-                        // Add Seen Indicator to last message if self
-                        if(isSelf) {
-                             document.querySelectorAll('.seen-indicator').forEach(e => e.remove());
-                             chatContainer.lastElementChild.insertAdjacentHTML('afterend', `<div class="seen-indicator">Seen <svg class="eye-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div>`);
-                        }
+                        if(isSelf) { document.querySelectorAll('.seen-indicator').forEach(e => e.remove()); chatContainer.lastElementChild.insertAdjacentHTML('afterend', `<div class="seen-indicator">Seen <svg class="eye-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div>`); }
                     }
                 });
                 tasks = data.tasks; renderTasks();
@@ -406,8 +416,7 @@
         // --- OPERATIONS ---
         function sendChatMessage() {
             const txt = document.getElementById('chatInput').value.trim(); if(!txt) return;
-            const newId = Date.now();
-            document.getElementById('chatInput').value = '';
+            const newId = Date.now(); document.getElementById('chatInput').value = '';
             if(GOOGLE_API_URL) safePost({ type: 'CHAT', id: newId, role: currentName, text: txt, pin: KEYS.COMMANDER });
             loadCloudData();
         }
@@ -433,7 +442,7 @@
         // --- COMPILER ---
         function compileAndSave() {
             const clone = document.documentElement.cloneNode(true);
-            clone.querySelectorAll('#statusBadge, #adminSaveBtn, #configExportModal, #loginModal, #productModal, #systemLockdown, #memberModal').forEach(e => e.classList.add('hidden'));
+            clone.querySelectorAll('#statusBadge, #adminSaveBtn, #configExportModal, #loginModal, #productModal, #systemLockdown, #memberModal, #scannerModal').forEach(e => e.classList.add('hidden'));
             clone.querySelectorAll('.drawer-full, .drawer-partial').forEach(e => e.classList.remove('active'));
             clone.querySelectorAll('[contenteditable]').forEach(e => { e.removeAttribute('contenteditable'); e.classList.remove('admin-editable'); });
             const newConfig = { admin: STORE_CONFIG.admin, products: STORE_CONFIG.products };
@@ -444,8 +453,9 @@
         }
         function copyToClipboard() { navigator.clipboard.writeText(document.getElementById("configOutput").value); alert("COPIED"); }
 
-        // --- MENU ---
+        // --- MENU & CART ---
         function renderBankDetails() { document.getElementById('dispBankName').innerText = STORE_CONFIG.admin.bankName; document.getElementById('dispAcctNum').innerText = STORE_CONFIG.admin.acctNum; document.getElementById('dispAcctName').innerText = STORE_CONFIG.admin.acctName; }
+        
         function renderMenu() {
             const c = document.getElementById('menuGrid'); let h = '';
             STORE_CONFIG.products.forEach(p => {
@@ -453,7 +463,19 @@
                 h += `<div onclick="showProductDetails(${p.id})" class="float-card bg-gray-900 border border-${p.color}-500/50 rounded-2xl p-3 shadow-lg flex flex-col justify-between cursor-pointer active:scale-95 transition shimmer-card"><div><h3 ${edit} class="font-bold text-sm uppercase mb-2 text-white">${p.name}</h3><div class="h-28 w-full rounded-xl mb-2 overflow-hidden bg-gray-800"><img src="${p.img}" class="object-cover w-full h-full"></div></div><div class="flex justify-between items-center mt-2"><span class="text-${p.color}-400 font-bold">₦<span ${edit}>${p.price.toLocaleString()}</span></span><button onclick="event.stopPropagation(); addToCart('${p.name}', ${p.price})" class="bg-${p.color}-600 text-black text-xs font-bold px-3 py-1.5 rounded-lg z-10">+ ADD</button></div></div>`;
             });
             document.getElementById('loadingMsg').style.display = 'none'; c.innerHTML = h;
+            
+            // Render Investor Grid as well
+            const invGrid = document.getElementById('investorProductGrid');
+            if(invGrid) {
+                let invHtml = '';
+                STORE_CONFIG.products.forEach(p => {
+                    const margin = Math.round(p.price * 0.6);
+                    invHtml += `<div class="bg-gray-800 p-3 rounded-xl border border-gray-700 flex items-center gap-3 shimmer-card"><img src="${p.img}" class="w-12 h-12 rounded-full object-cover"><div><p class="text-white font-bold text-sm">${p.name}</p><p class="text-neon text-xs">Margin ₦${margin.toLocaleString()}</p></div></div>`;
+                });
+                invGrid.innerHTML = invHtml;
+            }
         }
+
         function addToCart(n, p) { if(cart[n]) cart[n].q++; else cart[n]={p:p, q:1}; updateCart(); document.getElementById('orderSheet').classList.add('active'); }
         function toggleSheet() { document.getElementById('orderSheet').classList.toggle('active'); }
         function updateCart() {
@@ -475,6 +497,8 @@
         function showStatusBadge(text, color) { const b = document.getElementById('statusBadge'); b.innerText = text; b.className = `fixed top-4 left-4 z-[300] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl backdrop-blur-md border border-${color}-500 text-${color}-500 animate-pulse bg-black`; b.classList.remove('hidden'); }
         function activateBuilderMode() { adminMode = true; document.getElementById('adminSaveBtn').classList.remove('hidden'); showStatusBadge("⚡ BUILDER MODE", "red"); document.querySelectorAll('[id^="plan-"]').forEach(el => { el.contentEditable = "true"; el.classList.add('admin-editable'); }); renderMenu(); }
         function switchTab(t) { document.getElementById('view-chat').className = t==='CHAT' ? 'flex-1 flex flex-col h-full overflow-hidden viewport-height' : 'hidden'; document.getElementById('view-tasks').className = t==='TASKS' ? 'flex-1 flex flex-col h-full overflow-hidden p-4 viewport-height' : 'hidden'; document.getElementById('tab-chat').className = t==='CHAT' ? "flex-1 py-3 text-xs font-bold uppercase tab-active transition" : "flex-1 py-3 text-xs font-bold uppercase tab-inactive transition"; document.getElementById('tab-tasks').className = t==='TASKS' ? "flex-1 py-3 text-xs font-bold uppercase tab-active transition" : "flex-1 py-3 text-xs font-bold uppercase tab-inactive transition"; }
+        function showProductDetails(id) { const p = STORE_CONFIG.products.find(x => x.id === id); if(!p) return; document.getElementById('modalContent').innerHTML = `<div class="text-center mb-6"><img src="${p.img}" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-${p.color}-500 mb-4 shadow-[0_0_30px_rgba(255,255,255,0.2)]"><h2 class="text-3xl font-black uppercase text-white leading-none mb-1">${p.name}</h2><p class="text-${p.color}-400 font-bold text-xl">₦${p.price.toLocaleString()}</p></div><div class="space-y-4 text-sm text-gray-300"><div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700"><p class="uppercase text-[10px] text-gray-500 font-bold tracking-widest mb-1">Function</p><p>${p.description}</p></div><div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700"><p class="uppercase text-[10px] text-gray-500 font-bold tracking-widest mb-1">Contains</p><p class="italic text-gray-400">${p.ingredients}</p></div></div><button onclick="addToCart('${p.name}', ${p.price}); closeModal()" class="w-full mt-8 bg-white text-black font-black py-4 rounded-xl uppercase hover:scale-105 transition shadow-lg">Add to Order</button>`; document.getElementById('productModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('productModal').style.display = 'none'; }
     </script>
 </body>
 </html>
