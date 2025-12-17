@@ -2,450 +2,337 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#000000">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <title>smoothiePlus+ | Liquid Energy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smoothie Verse | Zero Cost</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
-    <link id="manifest-placeholder" rel="manifest">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Montserrat', 'sans-serif'] },
-                    colors: { darkBg: '#050508', neon: '#39ff14', panel: '#0f172a' }
-                }
-            }
-        }
-    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #050508; color: white; overscroll-behavior: none; font-family: 'Montserrat', sans-serif; }
-        input, textarea { -webkit-user-select: text; user-select: text; }
-
-        /* --- 1. NOISE TEXTURE (PREMIUM FEEL) --- */
-        .noise-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-            pointer-events: none; z-index: 50; opacity: 0.4;
-        }
-
-        /* --- 2. INFINITE MARQUEE --- */
-        .marquee-container { overflow: hidden; white-space: nowrap; position: relative; }
-        .marquee-content { display: inline-block; animation: scroll 20s linear infinite; }
-        @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-
-        /* --- 3. BENTO GRID UTILS --- */
-        .bento-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .bento-card { 
-            background: rgba(255, 255, 255, 0.03); 
-            border: 1px solid rgba(255, 255, 255, 0.05); 
-            border-radius: 20px; padding: 16px; 
-            backdrop-filter: blur(10px);
-            transition: transform 0.3s ease, border-color 0.3s;
-        }
-        .bento-card:hover { border-color: rgba(57, 255, 20, 0.3); transform: translateY(-2px); }
-        .col-span-2 { grid-column: span 2; }
-
-        /* DRAWERS */
-        .drawer-full { position: fixed; inset: 0; background: #050508; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 100; display: flex; flex-direction: column; }
-        .drawer-full.active { transform: translateY(0); }
-        .drawer-partial { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15, 23, 42, 0.95); border-top: 1px solid rgba(255,255,255,0.1); border-radius: 24px 24px 0 0; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); z-index: 90; max-height: 85vh; display: flex; flex-direction: column; }
-        .drawer-partial.active { transform: translateY(0); }
-
-        /* UTILS */
-        .scroll-area { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 40px; }
-        .fixed-bottom { flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); }
-        .admin-editable { border: 1px dashed #ef4444; background: rgba(239, 68, 68, 0.1); cursor: text; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #000; color: white; }
         
-        /* CHAT */
-        .chat-bubble { max-width: 85%; padding: 12px 16px; border-radius: 20px; margin-bottom: 8px; font-size: 13px; line-height: 1.4; animation: popIn 0.2s ease-out; }
-        .chat-self { background: #3b82f6; color: white; align-self: flex-end; border-bottom-right-radius: 4px; margin-left: auto; }
-        .chat-other { background: #1e293b; color: #cbd5e1; align-self: flex-start; border-bottom-left-radius: 4px; }
-        .avatar-circle { width: 32px; height: 32px; border-radius: 50%; background: #334155; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #94a3b8; border: 1px solid #475569; }
-        @keyframes popIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
 
-        /* AR SCANNER */
-        .scanner-line { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: #39ff14; box-shadow: 0 0 15px #39ff14; animation: scan 2.5s ease-in-out infinite; }
-        @keyframes scan { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+        /* Animations */
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        .shimmer-card {
+            background: linear-gradient(to right, #0f172a 4%, #1e293b 25%, #0f172a 36%);
+            background-size: 1000px 100%;
+            animation: shimmer 20s infinite linear;
+        }
+        
+        /* Glassmorphism */
+        .glass {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-        /* TOAST */
-        #apiToast { position: fixed; top: -50px; left: 50%; transform: translateX(-50%); background: #22c55e; color: black; padding: 10px 24px; border-radius: 30px; font-size: 12px; font-weight: 800; letter-spacing: 1px; z-index: 9999; transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 30px rgba(34, 197, 94, 0.3); }
-        #apiToast.active { top: 30px; }
-        #apiToast.error { background: #ef4444; color: white; box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3); }
-
-        .shimmer-card { position: relative; overflow: hidden; background: rgba(30, 41, 59, 0.4); }
-        .shimmer-card::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.03), transparent); transform: skewX(-25deg); animation: shimmer 8s infinite; pointer-events: none; }
-        @keyframes shimmer { 0% { left: -100%; } 20% { left: 200%; } 100% { left: 200%; } }
+        .float-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px -10px rgba(74, 222, 128, 0.2); }
     </style>
 </head>
-<body class="pb-32 overflow-x-hidden font-sans">
+<body class="bg-black min-h-screen pb-20 selection:bg-green-500 selection:text-black">
 
-    <div class="noise-overlay"></div>
-    <div id="apiToast">SYNCED ✓</div>
-
-    <div id="systemLockdown" class="fixed inset-0 z-[99999] bg-black hidden flex-col items-center justify-center text-center p-6">
-        <h1 class="text-5xl font-black text-red-600 mb-4 tracking-tighter">OFFLINE</h1>
-        <p class="text-gray-500 font-mono text-xs">CONNECTION TERMINATED</p>
+    <div id="loadingMsg" class="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-black transition-opacity duration-500">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-400 mb-4"></div>
+        <h2 class="text-green-400 font-bold tracking-widest animate-pulse">LOADING MENU...</h2>
     </div>
 
-    <div id="statusBadge" class="hidden fixed top-4 left-4 z-[300] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl bg-black border border-gray-800 animate-bounce"></div>
+    <nav class="fixed top-0 w-full z-40 glass px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-gradient-to-tr from-green-400 to-emerald-600 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(74,222,128,0.5)]">
+                <i class="fas fa-leaf text-black text-sm"></i>
+            </div>
+            <h1 class="font-bold text-lg tracking-tight">Zero<span class="text-green-400">Cost</span></h1>
+        </div>
+        <div class="relative cursor-pointer" onclick="toggleCart()">
+            <i class="fas fa-shopping-bag text-xl text-gray-300 hover:text-white transition"></i>
+            <span id="cartBadge" class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+        </div>
+    </nav>
 
-    <div id="scannerModal" class="fixed inset-0 z-[150] bg-black hidden flex-col">
-        <div class="relative flex-1 bg-black">
-            <video id="scannerVideo" class="absolute inset-0 w-full h-full object-cover opacity-60" autoplay playsinline muted></video>
-            <div class="absolute inset-0 border-[30px] border-black/50 rounded-[40px] pointer-events-none"></div>
-            <div class="absolute inset-0 flex items-center justify-center">
-                <div class="w-64 h-64 border border-green-500/30 rounded-3xl relative">
-                    <div class="scanner-line"></div>
-                    <div class="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-green-400"></div>
-                    <div class="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-green-400"></div>
-                    <div class="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-green-400"></div>
-                    <div class="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-green-400"></div>
+    <header class="pt-24 pb-6 px-4">
+        <div class="bg-gradient-to-r from-green-900/20 to-blue-900/20 rounded-2xl p-6 border border-white/5 text-center relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-green-500/10 blur-3xl rounded-full"></div>
+            <h2 class="text-2xl font-bold mb-2">Fresh. Organic. <span class="text-green-400">Yours.</span></h2>
+            <p class="text-gray-400 text-xs max-w-md mx-auto">100% Natural ingredients delivered instantly.</p>
+        </div>
+    </header>
+
+    <div id="investorPanel" class="hidden px-4 mb-6">
+        <div class="bg-slate-900 border border-yellow-500/30 rounded-xl p-4">
+            <h3 class="text-yellow-500 text-xs font-bold uppercase tracking-widest mb-3 border-b border-white/10 pb-2">
+                <i class="fas fa-lock mr-2"></i>Investor Insight
+            </h3>
+            <div class="grid grid-cols-3 gap-2 text-center mb-4">
+                <div class="bg-black/40 p-2 rounded-lg">
+                    <p class="text-[10px] text-gray-400">Total Rev</p>
+                    <p class="text-white font-bold text-sm">₦1.2M</p>
+                </div>
+                <div class="bg-black/40 p-2 rounded-lg">
+                    <p class="text-[10px] text-gray-400">Margin</p>
+                    <p class="text-green-400 font-bold text-sm">42%</p>
+                </div>
+                <div class="bg-black/40 p-2 rounded-lg">
+                    <p class="text-[10px] text-gray-400">Orders</p>
+                    <p class="text-blue-400 font-bold text-sm">840</p>
                 </div>
             </div>
-            <button onclick="closeScanner()" class="absolute top-6 right-6 z-50 text-white bg-black/50 rounded-full w-10 h-10 flex items-center justify-center border border-white/10">✕</button>
-        </div>
-        <div class="bg-gray-900 p-8 text-center rounded-t-3xl border-t border-gray-800">
-            <p class="text-neon font-mono text-xs mb-2 tracking-widest animate-pulse">ANALYZING BIOMETRICS...</p>
-            <p class="text-gray-500 text-[10px]">Align fruit or palm within the reticle.</p>
+            <div id="investorProductGrid" class="space-y-2 max-h-32 overflow-y-auto pr-1 custom-scroll">
+                </div>
         </div>
     </div>
 
-    <div class="pt-6 pb-4 relative z-20">
-        <div class="flex justify-between items-center px-4 mb-4">
-            <h1 class="text-2xl font-black tracking-tighter uppercase leading-none">
-                smoothie<span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">Plus+</span>
-            </h1>
-            <button onclick="startScanner()" class="bg-gray-900/80 border border-white/10 text-green-400 rounded-full w-10 h-10 flex items-center justify-center backdrop-blur-md">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-            </button>
-        </div>
-        
-        <div class="marquee-container bg-green-500/10 border-y border-green-500/20 py-2">
-            <div class="marquee-content">
-                <span class="text-[10px] font-bold text-green-400 uppercase tracking-[0.2em] px-4">⚡ BIO-HACKED HYDRATION ⚡ ZERO WATER ⚡ PURE FRUIT ⚡ POTATO SLICER PRECISION ⚡ LIQUID ENERGY ⚡ DIABETES DEFENSE ⚡</span>
-                <span class="text-[10px] font-bold text-green-400 uppercase tracking-[0.2em] px-4">⚡ BIO-HACKED HYDRATION ⚡ ZERO WATER ⚡ PURE FRUIT ⚡ POTATO SLICER PRECISION ⚡ LIQUID ENERGY ⚡ DIABETES DEFENSE ⚡</span>
+    <main class="px-4 pb-24">
+        <div class="flex justify-between items-end mb-4">
+            <h2 class="text-xl font-bold">Menu</h2>
+            <div class="flex gap-2">
+                <span class="text-[10px] bg-white/10 px-2 py-1 rounded-md text-gray-300">All</span>
+                <span class="text-[10px] bg-white/5 px-2 py-1 rounded-md text-gray-500">Green</span>
+                <span class="text-[10px] bg-white/5 px-2 py-1 rounded-md text-gray-500">Berry</span>
             </div>
         </div>
-    </div>
-
-    <main id="menuGrid" class="px-4 grid grid-cols-2 gap-3 max-w-md mx-auto relative z-10 pb-20">
-        <div id="loadingMsg" class="col-span-2 text-center text-gray-500 mt-10">Loading Menu...</div>
+        
+        <div id="menuGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            </div>
     </main>
 
-    <footer class="fixed bottom-8 left-0 right-0 text-center z-10 pointer-events-none">
-        <div class="pointer-events-auto inline-flex gap-2 bg-gray-900/90 backdrop-blur-xl p-1.5 rounded-full border border-white/10 shadow-2xl">
-            <button onclick="openLoginModal()" class="text-[10px] text-gray-300 hover:text-white font-bold px-4 py-2 rounded-full hover:bg-white/10 transition">
-                EMPLOYEE
-            </button>
-            <div class="w-px bg-white/10 my-1"></div>
-            <button onclick="openLoginModal()" class="text-[10px] text-gray-300 hover:text-green-400 font-bold px-4 py-2 rounded-full hover:bg-white/10 transition">
-                INVESTOR
-            </button>
-        </div>
+    <footer class="text-center text-gray-600 text-[10px] pb-8">
+        <p>Zero Cost Smoothies © 2024</p>
+        <button onclick="toggleAdmin()" class="mt-4 text-gray-800 hover:text-gray-500 transition">
+            <i class="fas fa-fingerprint"></i> Admin Access
+        </button>
     </footer>
 
-    <button id="adminSaveBtn" onclick="compileAndSave()" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 bg-red-600 text-white font-bold py-3 px-6 rounded-full shadow-2xl z-[200] text-xs tracking-wider hover:bg-red-700 transition">
-        💾 SAVE CONFIG
-    </button>
-
-    <button onclick="toggleSheet()" class="fixed bottom-24 right-6 bg-white text-black w-14 h-14 rounded-full shadow-[0_0_20px_rgba(255,255,255,0.3)] flex items-center justify-center transform active:scale-90 transition z-40">
-        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
-        <span id="cartCount" class="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full hidden border border-black">0</span>
-    </button>
-
-    <div id="productModal" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md" style="display:none;">
-        <div class="bg-gray-900 border border-gray-700 w-full max-w-sm rounded-3xl p-6 relative shadow-2xl shimmer-card">
-            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white font-bold bg-gray-800 rounded-full w-8 h-8 flex items-center justify-center z-20">✕</button>
-            <div id="modalContent"></div>
-        </div>
-    </div>
-
-    <div id="loginModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95" style="display:none;">
-        <div class="w-full max-w-sm text-center bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-2xl relative shimmer-card">
-            <h2 class="text-2xl font-black uppercase text-white mb-2">Access Portal</h2>
-            <div id="authStage">
-                <input type="password" id="accessKey" placeholder="ENTER PASSKEY" class="w-full bg-black border border-gray-700 text-center text-white text-lg rounded-xl px-4 py-4 focus:outline-none focus:border-green-500 mb-4">
-                <button onclick="checkAccess()" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200">AUTHENTICATE</button>
+    <div id="cartModal" class="fixed inset-0 z-50 bg-black/90 hidden backdrop-blur-sm flex flex-col justify-end sm:justify-center sm:items-center transition-all">
+        <div class="bg-[#0f172a] w-full sm:w-96 rounded-t-3xl sm:rounded-2xl border-t sm:border border-white/10 p-6 shadow-2xl animate-slide-up relative">
+            
+            <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+                <h2 class="text-xl font-bold">Your Cart</h2>
+                <button onclick="toggleCart()" class="text-gray-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
             </div>
-            <div id="createPinStage" class="hidden">
-                <p class="text-green-500 text-xs mb-4 font-bold">IDENTITY PROTOCOL</p>
-                <input type="text" id="newName" placeholder="CODENAME" class="w-full bg-black border border-gray-700 text-center text-white text-sm rounded-xl px-4 py-3 focus:outline-none mb-2 uppercase">
-                <input type="password" id="newPin" placeholder="CREATE PIN" class="w-full bg-black border border-gray-700 text-center text-white text-xl tracking-widest rounded-xl px-4 py-3 focus:outline-none mb-4">
-                <button onclick="saveNewIdentity()" class="w-full bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-500 transition">REGISTER</button>
+
+            <div id="cartItems" class="max-h-60 overflow-y-auto mb-4 space-y-3">
+                <p class="text-gray-500 text-center text-sm py-4">Your cart is empty.</p>
             </div>
-            <button onclick="closeLoginModal()" class="mt-6 text-xs text-gray-600 block w-full hover:text-white">CANCEL</button>
-        </div>
-    </div>
 
-    <div id="configExportModal" class="hidden fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95">
-        <div class="bg-gray-900 w-full max-w-lg p-6 rounded-2xl border border-red-500">
-            <h2 class="text-xl font-bold text-red-500 mb-2">⚠️ SAVE CHANGES</h2>
-            <button onclick="copyToClipboard()" class="w-full bg-green-500 text-black font-bold py-4 rounded-xl mb-4 uppercase">📋 Copy Code</button>
-            <textarea id="configOutput" class="w-full h-32 bg-black text-green-400 font-mono text-xs p-4 rounded-xl border border-gray-700 select-all"></textarea>
-            <button onclick="document.getElementById('configExportModal').style.display='none'" class="w-full mt-4 bg-gray-800 text-white py-2 rounded-xl">CLOSE</button>
-        </div>
-    </div>
-
-    <div id="investorVault" class="drawer-full">
-        <div class="max-w-2xl mx-auto w-full h-full flex flex-col bg-[#050508]">
-            <div class="flex justify-between items-center px-6 py-6">
-                <h2 class="text-xl font-black text-white tracking-tight">INVESTOR<span class="text-green-500">DECK</span></h2>
-                <div class="flex gap-4">
-                    <button onclick="minimizeDrawer('investorVault')" class="text-gray-500 hover:text-white">_</button>
-                    <button onclick="closeDrawer('investorVault')" class="text-gray-500 hover:text-red-500">✕</button>
+            <div class="border-t border-white/10 pt-4">
+                <div class="flex justify-between mb-4 text-lg font-bold">
+                    <span>Total</span>
+                    <span class="text-green-400">₦<span id="cartTotal">0</span></span>
                 </div>
-            </div>
-            <div class="scroll-area px-4 pb-32">
-                
-                <div class="bento-grid">
-                    <div class="bento-card col-span-2">
-                        <p class="text-[10px] text-green-500 font-bold tracking-widest mb-2">01 // THE VISION</p>
-                        <p id="pitch-vision_text" class="text-sm text-gray-300 leading-relaxed">Loading Neural Cloud...</p>
-                    </div>
-
-                    <div class="bento-card">
-                        <p class="text-[9px] text-gray-500 uppercase">Avg Order</p>
-                        <p class="text-2xl font-black text-white mt-1">₦4,000</p>
-                    </div>
-                    <div class="bento-card">
-                        <p class="text-[9px] text-gray-500 uppercase">Gross Margin</p>
-                        <p id="pitch-margin_val" class="text-2xl font-black text-green-400 mt-1">...</p>
-                    </div>
-
-                    <div class="bento-card col-span-2">
-                        <p class="text-[10px] text-blue-400 font-bold tracking-widest mb-2">03 // SCALABILITY</p>
-                        <div id="pitch-scalability_text" class="text-xs text-gray-400 space-y-1">Loading...</div>
-                    </div>
-
-                    <div class="col-span-2 mt-4 mb-2">
-                        <p class="text-xs font-bold text-gray-500 uppercase tracking-widest">Product Matrix</p>
-                    </div>
-
-                    <div id="investorProductGrid" class="col-span-2 grid grid-cols-2 gap-3"></div>
-                </div>
-
+                <button onclick="checkoutWhatsApp()" class="w-full bg-green-500 hover:bg-green-600 text-black font-bold py-3 rounded-xl transition flex justify-center items-center gap-2">
+                    <i class="fab fa-whatsapp text-lg"></i> Checkout via WhatsApp
+                </button>
             </div>
         </div>
     </div>
 
-    <div id="teamPanelVault" class="drawer-full bg-[#050508]">
-        <div class="flex justify-between items-center px-6 py-6 border-b border-white/5">
-            <div>
-                <h2 class="text-lg font-black text-blue-500 tracking-tighter">NEURAL LINK</h2>
-                <p class="text-[10px] text-gray-500 uppercase tracking-widest">Ops Network</p>
-            </div>
-            <div class="flex gap-4">
-                <button onclick="minimizeDrawer('teamPanelVault')" class="text-gray-500 hover:text-white">_</button>
-                <button onclick="closeDrawer('teamPanelVault')" class="text-gray-500 hover:text-red-500">✕</button>
-            </div>
-        </div>
-        <div class="flex border-b border-white/5 bg-white/5">
-            <button onclick="switchTab('CHAT')" id="tab-chat" class="flex-1 py-4 text-[10px] font-bold uppercase tab-active transition">Chat Stream</button>
-            <button onclick="switchTab('TASKS')" id="tab-tasks" class="flex-1 py-4 text-[10px] font-bold uppercase tab-inactive transition">Directives</button>
-        </div>
-        
-        <div id="view-chat" class="flex-1 flex flex-col h-full overflow-hidden viewport-height">
-            <div id="chatStream" class="scroll-area p-4 space-y-3"></div>
-            <div class="bg-[#050508] p-4 border-t border-white/10 fixed-bottom">
-                <div class="flex gap-2">
-                    <input type="text" id="chatInput" placeholder="Transmit data..." class="flex-1 bg-white/5 border border-white/10 text-white rounded-full px-5 py-3 focus:outline-none focus:border-blue-500 text-xs">
-                    <button onclick="sendChatMessage()" class="bg-blue-600 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-blue-500">➤</button>
-                </div>
-                <p class="text-[9px] text-gray-600 mt-3 text-center uppercase tracking-widest">ID: <span id="userIdentityDisplay" class="text-blue-500 font-bold">...</span></p>
-            </div>
-        </div>
-
-        <div id="view-tasks" class="hidden flex-1 flex flex-col h-full overflow-hidden p-4 viewport-height">
-            <div class="bento-card mb-4">
-                <input type="text" id="newTaskInput" placeholder="New Directive..." class="w-full bg-transparent border-b border-gray-700 text-white py-2 text-sm mb-3 focus:outline-none focus:border-blue-500">
-                <div class="flex gap-2">
-                    <select id="taskAssignee" class="bg-gray-800 border-none text-gray-400 text-xs rounded px-2 py-2 flex-1"><option value="OPS">OPS</option><option value="URGENT">URGENT</option></select>
-                    <button onclick="addNewTask()" class="bg-white text-black text-xs font-bold px-4 rounded hover:bg-gray-200">ADD</button>
-                </div>
-            </div>
-            <div id="taskListContainer" class="scroll-area space-y-2 pb-24"></div>
-        </div>
+    <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-white text-black px-6 py-3 rounded-full shadow-2xl z-[70] translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-2 font-bold text-sm">
+        <i class="fas fa-check-circle text-green-600"></i>
+        <span>Added to cart</span>
     </div>
 
-    <div id="orderSheet" class="drawer-partial">
-        <div class="w-12 h-1 bg-gray-600 rounded-full mx-auto mb-6 mt-4 cursor-pointer" onclick="toggleSheet()"></div>
-        <div class="px-6 pb-6 scroll-area">
-            <div id="cartItems" class="space-y-3 mb-6 text-sm font-medium text-gray-300"></div>
-            <div class="border-t border-white/10 pt-4 mb-6">
-                <div class="flex justify-between items-end mb-4"><span class="text-gray-500 text-xs uppercase tracking-widest">Total</span><span id="totalPrice" class="text-3xl font-black text-white">₦0</span></div>
-                <div class="bg-white/5 rounded-xl p-4 border border-white/10 flex justify-between items-center">
-                    <div>
-                        <p class="text-[9px] text-gray-500 uppercase tracking-widest mb-1">Pay via OPay</p>
-                        <p id="dispAcctNum" class="font-mono text-white font-bold text-lg tracking-wider">8083000771</p>
-                        <p id="dispAcctName" class="text-[9px] text-gray-400">LAWAL OPEYEMI MICHAEL</p>
-                    </div>
-                    <button id="copyBankBtn" onclick="copyBank()" class="text-[10px] bg-white text-black font-bold px-3 py-1.5 rounded hover:scale-105 transition">COPY</button>
-                </div>
-            </div>
-            <input type="text" id="custName" placeholder="YOUR NAME" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 mb-3 text-sm focus:border-green-500 focus:outline-none">
-            <textarea id="custAddress" rows="2" placeholder="DELIVERY ADDRESS" class="w-full bg-white/5 border border-white/10 text-white rounded-xl px-4 py-3 mb-4 text-sm focus:border-green-500 focus:outline-none"></textarea>
-            <button onclick="sendOrder()" class="w-full bg-green-500 text-black font-black py-4 rounded-xl shadow-[0_0_20px_rgba(34,197,94,0.4)] active:scale-95 transition">CONFIRM VIA WHATSAPP</button>
-        </div>
-    </div>
-
-    <script id="main-script">
-        // ⚡ CONNECTED API ⚡
-        const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbylW3_w8NdVfE-Ow-2qdaMDJn-b90Nvj-M2bKfz-d_w4IYCLtSFE5kL0i16tKQp906R/exec"; 
-        
-        // 🔒 AUTH CONFIG
-        const KEYS = { INVESTOR: "iwillinvesT", BUILDER: "AdminEDITGODMODE", COMMANDER: "Admin GODMODE" };
+    <script>
+        // CONFIGURATION
         const STORE_CONFIG = {
-            "admin": { "whatsapp": "2347068516779", "bankName": "OPay", "acctNum": "8083000771", "acctName": "LAWAL OPEYEMI MICHAEL" },
-            "products": [
-                { "id": 1, "name": "Diabetes Defense", "price": 3500, "img": "https://images.unsplash.com/photo-1610970881699-44a5587cabec?auto=format&fit=crop&w=500&q=80", "color": "green", "description": "Low-glycemic blend.", "ingredients": "Green Apple, Cucumber" },
-                { "id": 2, "name": "Mood Lifter", "price": 4200, "img": "https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?auto=format&fit=crop&w=500&q=80", "color": "purple", "description": "Antidepressant focus.", "ingredients": "Banana, Berries" },
-                { "id": 3, "name": "Workaholic Energy", "price": 3800, "img": "https://images.unsplash.com/photo-1595981267035-7b04ca84a82d?auto=format&fit=crop&w=500&q=80", "color": "orange", "description": "Instant natural energy.", "ingredients": "Watermelon, Pineapple" },
-                { "id": 4, "name": "Pure Hydration", "price": 3000, "img": "https://images.unsplash.com/photo-1589984662646-e7b2e4962f18?auto=format&fit=crop&w=500&q=80", "color": "cyan", "description": "Single-fruit variety.", "ingredients": "100% Watermelon" }
+            whatsappNumber: "2348000000000", // Replace with your number
+            products: [
+                { id: 1, name: "Green Glow", price: 3500, img: "https://images.unsplash.com/photo-1610970881699-44a5587cabec?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" },
+                { id: 2, name: "Berry Blast", price: 4000, img: "https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" },
+                { id: 3, name: "Mango Madness", price: 3000, img: "https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" }, // Placeholder img
+                { id: 4, name: "Choco Protein", price: 5000, img: "https://images.unsplash.com/photo-1577805947697-89e18249d767?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" },
+                { id: 5, name: "Tropical Haze", price: 3800, img: "https://images.unsplash.com/photo-1546173159-315724a31696?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" },
+                { id: 6, name: "Avocado Power", price: 4500, img: "https://images.unsplash.com/photo-1603569283847-aa295f0d016a?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" }
             ]
         };
 
-        let cart = {}; let adminMode = false;
-        let currentName = localStorage.getItem('mySmoothieName') || 'UNKNOWN';
-        let localUserPin = localStorage.getItem('mySmoothiePin'); 
-        let tasks = [];
-
-        // PWA MANIFEST
-        const manifest = { "name": "smoothiePlus+", "short_name": "sPlus+", "start_url": ".", "display": "standalone", "background_color": "#050508", "theme_color": "#000000", "icons": [{ "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Ccircle cx='256' cy='256' r='256' fill='%23050508'/%3E%3Ctext x='50%25' y='50%25' font-family='sans-serif' font-weight='900' font-size='300' fill='%2339ff14' text-anchor='middle' dy='.35em'%3ES+%3C/text%3E%3C/svg%3E", "sizes": "512x512", "type": "image/svg+xml" }] };
-        document.getElementById('manifest-placeholder').setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest)));
-
-        window.addEventListener('load', () => { 
-            checkSiteHealth(); renderMenu(); renderBankDetails(); restoreSession();
-            document.getElementById('accessKey').addEventListener('keypress', e => e.key === 'Enter' && checkAccess());
-            document.getElementById('newPin').addEventListener('keypress', e => e.key === 'Enter' && saveNewIdentity());
-            document.getElementById('chatInput').addEventListener('keypress', e => e.key === 'Enter' && sendChatMessage());
-            if(location.hash === "#employee") openLoginModal();
-            if(localStorage.getItem('smoothieActiveView') === 'teamPanelVault' || localStorage.getItem('smoothieActiveView') === 'investorVault') startNeuralLink();
-            document.getElementById('userIdentityDisplay').innerText = currentName;
-        });
-
-        // --- AUTH ---
-        function checkAccess() {
-            const val = document.getElementById('accessKey').value.trim();
-            if (val === KEYS.INVESTOR) { launchApp('investorVault', "green", "🔒 INVESTOR VIEW"); closeLoginModal(); startNeuralLink(); } 
-            else if (val === KEYS.BUILDER) { closeLoginModal(); activateBuilderMode(); }
-            else if (val === KEYS.COMMANDER) { document.getElementById('authStage').classList.add('hidden'); document.getElementById('createPinStage').classList.remove('hidden'); document.getElementById('newName').focus(); }
-            else if (localUserPin && val === localUserPin) { launchApp('teamPanelVault', "blue", "⚔️ COMMANDER ACTIVE"); startNeuralLink(); closeLoginModal(); } 
-            else { alert("ACCESS DENIED"); }
-        }
-        function saveNewIdentity() {
-            const name = document.getElementById('newName').value.trim().toUpperCase(); const pin = document.getElementById('newPin').value.trim();
-            if(name.length < 2 || pin.length < 4) return alert("Invalid Name/PIN");
-            localStorage.setItem('mySmoothieName', name); localStorage.setItem('mySmoothiePin', pin);
-            localUserPin = pin; currentName = name; document.getElementById('userIdentityDisplay').innerText = currentName;
-            closeLoginModal(); launchApp('teamPanelVault', "blue", "⚔️ COMMANDER ACTIVE"); startNeuralLink();
-        }
-
-        // --- SYNC ---
-        function startNeuralLink() { loadCloudData(); setInterval(loadCloudData, 5000); }
-        async function loadCloudData() {
-            if(!GOOGLE_API_URL) return;
-            try {
-                const res = await fetch(GOOGLE_API_URL); const data = await res.json();
-                
-                // Chat
-                const chatContainer = document.getElementById('chatStream');
-                data.chat.forEach(msg => {
-                    if(!document.getElementById('msg-' + msg.id)) {
-                        const isSelf = msg.role === currentName;
-                        const cls = isSelf ? 'chat-self' : 'chat-other';
-                        const initials = msg.role.substring(0,2);
-                        const content = isSelf ? `<div id="msg-${msg.id}" class="msg-row self"><div class="chat-bubble ${cls}">${msg.text}</div></div>` : `<div id="msg-${msg.id}" class="msg-row other"><div class="avatar-circle">${initials}</div><div class="chat-bubble ${cls}"><span class="text-[9px] text-blue-400 block mb-1 font-bold">${msg.role}</span>${msg.text}</div></div>`;
-                        chatContainer.insertAdjacentHTML('beforeend', content);
-                        chatContainer.scrollTop = chatContainer.scrollHeight;
-                    }
-                });
-
-                // Tasks
-                tasks = data.tasks; renderTasks();
-
-                // Investor Data
-                if(data.pitch) {
-                    if(data.pitch.vision_text) document.getElementById('pitch-vision_text').innerText = data.pitch.vision_text;
-                    if(data.pitch.scalability_text) document.getElementById('pitch-scalability_text').innerText = data.pitch.scalability_text;
-                    if(data.pitch.margin_val) document.getElementById('pitch-margin_val').innerText = data.pitch.margin_val;
-                }
-            } catch(e) {}
-        }
+        // STATE
+        let cart = [];
+        let adminMode = false;
 
         // --- CORE FUNCTIONS ---
-        async function safePost(payload) { try { await fetch(GOOGLE_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); showToast("SYNCED ✓", "success"); } catch(e){ showToast("OFFLINE", "error"); } }
-        function sendChatMessage() { const t = document.getElementById('chatInput').value.trim(); if(!t) return; document.getElementById('chatInput').value=''; safePost({ type: 'CHAT', id: Date.now(), role: currentName, text: t, pin: KEYS.COMMANDER }); loadCloudData(); }
-        function addNewTask() { const t = document.getElementById('newTaskInput').value.trim(); if(!t) return; document.getElementById('newTaskInput').value=''; safePost({ type: 'TASK', action: 'ADD', id: Date.now(), role: document.getElementById('taskAssignee').value, text: t, pin: KEYS.COMMANDER }); }
-        function toggleTask(id) { const t=tasks.find(x=>x.id===id); if(t){ t.done=!t.done; renderTasks(); safePost({ type: 'TASK', action: 'TOGGLE', id: id, pin: KEYS.COMMANDER }); }}
-        function deleteTask(id) { tasks=tasks.filter(x=>x.id!==id); renderTasks(); safePost({ type: 'TASK', action: 'DELETE', id: id, pin: KEYS.COMMANDER }); }
-        
-        function renderTasks() {
-            const l = document.getElementById('taskListContainer'); l.innerHTML='';
-            if(tasks.length===0) { l.innerHTML='<p class="text-gray-600 text-[10px] text-center mt-4">NO ACTIVE DIRECTIVES</p>'; return; }
-            tasks.forEach(t => {
-                let badge = 'bg-gray-700'; if(t.role==='URGENT') badge='bg-red-900 text-red-200'; else if(t.role==='OPS') badge='bg-blue-900 text-blue-200';
-                l.innerHTML += `<div class="flex items-start gap-3 bg-white/5 border border-white/10 p-3 rounded-xl"><input type="checkbox" onchange="toggleTask(${t.id})" class="task-check hidden" id="task-${t.id}" ${t.done?'checked':''}><label for="task-${t.id}" class="flex-shrink-0 w-4 h-4 border border-gray-600 rounded cursor-pointer flex items-center justify-center mt-1"><span class="w-2.5 h-2.5 rounded-sm"></span></label><div class="flex-1"><span class="${badge} text-[8px] px-1.5 py-0.5 rounded font-bold mb-1 inline-block">${t.role}</span><p class="text-xs text-gray-300 leading-snug ${t.done?'line-through opacity-50':''}">${t.text}</p></div><button onclick="deleteTask(${t.id})" class="text-gray-600 hover:text-red-500">✕</button></div>`;
+
+        // 1. Render Menu (INCLUDES THE FIX)
+        function renderMenu() {
+            const c = document.getElementById('menuGrid');
+            let h = '';
+
+            // Customer Cards
+            STORE_CONFIG.products.forEach(p => {
+                const edit = adminMode ? 'contenteditable="true" class="bg-white/10 rounded px-1 border border-dashed border-yellow-500/50"' : '';
+                const clickAction = adminMode ? '' : `onclick="showProductDetails(${p.id})"`; // Modal placeholder
+                
+                h += `
+                <div class="float-card bg-[#0f172a] border border-white/5 rounded-2xl p-3 shadow-lg flex flex-col justify-between cursor-pointer active:scale-95 transition-all shimmer-card relative overflow-hidden group">
+                    <div class="h-32 w-full rounded-xl mb-3 overflow-hidden bg-black relative">
+                        <img src="${p.img}" class="object-cover w-full h-full opacity-90 group-hover:opacity-100 group-hover:scale-110 transition duration-500" loading="lazy">
+                        ${adminMode ? '<div class="absolute top-1 right-1 bg-yellow-500 text-black text-[9px] font-bold px-1 rounded">EDIT</div>' : ''}
+                    </div>
+                    
+                    <div>
+                        <h3 ${edit} class="font-bold text-sm uppercase mb-1 text-white leading-tight">${p.name}</h3>
+                        <div class="flex justify-between items-center mt-3">
+                            <span class="text-green-400 font-bold text-sm">₦<span ${edit}>${p.price.toLocaleString()}</span></span>
+                            ${!adminMode ? `
+                            <button onclick="event.stopPropagation(); addToCart('${p.name}', ${p.price})" class="bg-white text-black text-[10px] font-bold px-3 py-1.5 rounded-lg hover:bg-gray-200 transition">
+                                + ADD
+                            </button>` : ''}
+                        </div>
+                    </div>
+                </div>`;
             });
+
+            c.innerHTML = h;
+
+            // --- THE CRITICAL FIX: HIDE LOADER ---
+            const loadingMsg = document.getElementById('loadingMsg');
+            if (loadingMsg) {
+                // Small timeout to ensure the DOM paint is visible first
+                setTimeout(() => {
+                    loadingMsg.style.opacity = '0';
+                    setTimeout(() => loadingMsg.style.display = 'none', 500);
+                }, 500); // 0.5s artificial delay for effect
+            }
+
+            // Investor Grid Logic
+            renderInvestorGrid();
         }
 
-        function renderMenu() {
-            const c = document.getElementById('menuGrid'); let h = '';
-            STORE_CONFIG.products.forEach(p => {
-                const edit = adminMode ? 'contenteditable="true" class="admin-editable rounded p-1"' : '';
-                const clickAction = adminMode ? '' : `onclick="showProductDetails(${p.id})"`;
-                h += `<div ${clickAction} class="float-card bg-[#0f172a] border border-white/5 rounded-2xl p-3 shadow-lg flex flex-col justify-between cursor-pointer active:scale-95 transition shimmer-card"><div><h3 ${edit} class="font-bold text-sm uppercase mb-2 text-white">${p.name}</h3><div class="h-28 w-full rounded-xl mb-2 overflow-hidden bg-black"><img src="${p.img}" class="object-cover w-full h-full opacity-90"></div></div><div class="flex justify-between items-center mt-2"><span class="text-gray-400 font-bold text-xs">₦<span ${edit}>${p.price.toLocaleString()}</span></span><button onclick="event.stopPropagation(); addToCart('${p.name}', ${p.price})" class="bg-white text-black text-[10px] font-bold px-3 py-1.5 rounded-lg">+ ADD</button></div></div>`;
-            });
-            document.getElementById('loadingMsg').style.display = 'none'; c.innerHTML = h;
-            
-            // Investor Grid
+        // 2. Render Investor Grid (Admin Only)
+        function renderInvestorGrid() {
             const invGrid = document.getElementById('investorProductGrid');
             if(invGrid) {
                 let invHtml = '';
                 STORE_CONFIG.products.forEach(p => {
-                    invHtml += `<div class="bento-card flex items-center gap-3"><img src="${p.img}" class="w-8 h-8 rounded-full object-cover"><div><p class="text-white text-[9px] font-bold">${p.name}</p><p class="text-green-400 text-[8px]">M: ₦${Math.round(p.price*0.6).toLocaleString()}</p></div></div>`;
+                    // Calculate 60% Cost / 40% Margin Logic
+                    const cost = Math.round(p.price * 0.6);
+                    const margin = p.price - cost;
+                    invHtml += `
+                    <div class="flex items-center justify-between bg-black/20 p-2 rounded border border-white/5">
+                        <div class="flex items-center gap-2">
+                            <img src="${p.img}" class="w-6 h-6 rounded-full object-cover">
+                            <p class="text-white text-[10px] font-bold">${p.name}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-gray-500 text-[8px]">Cost: ₦${cost}</p>
+                            <p class="text-green-400 text-[9px] font-bold">+₦${margin}</p>
+                        </div>
+                    </div>`;
                 });
                 invGrid.innerHTML = invHtml;
             }
         }
 
-        // --- UTILS ---
-        function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; document.getElementById('accessKey').focus(); }
-        function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
-        function togglePassVisibility() { const i = document.getElementById('accessKey'); i.type = i.type === "password" ? "text" : "password"; }
-        function showToast(msg, type) { const t = document.getElementById('apiToast'); t.innerText = msg; t.className = type === 'error' ? 'error active' : 'active'; setTimeout(() => t.classList.remove('active'), 2000); }
-        function launchApp(viewId, color, badgeText) { document.getElementById(viewId).classList.add('active'); localStorage.setItem('smoothieActiveView', viewId); showStatusBadge(badgeText, color); }
-        function closeDrawer(id) { document.getElementById(id).classList.remove('active'); localStorage.setItem('smoothieActiveView', 'none'); document.getElementById('statusBadge').classList.add('hidden'); }
-        function minimizeDrawer(id) { document.getElementById(id).classList.remove('active'); }
-        function restoreSession() { const v = localStorage.getItem('smoothieActiveView'); if(v && v !== 'none') document.getElementById(v).classList.add('active'); }
-        function showStatusBadge(text, color) { const b = document.getElementById('statusBadge'); b.innerText = text; b.className = `fixed top-4 left-4 z-[300] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl backdrop-blur-md border border-${color}-500 text-${color}-500 animate-pulse bg-black`; b.classList.remove('hidden'); }
-        function switchTab(t) { document.getElementById('view-chat').className = t==='CHAT' ? 'flex-1 flex flex-col h-full overflow-hidden viewport-height' : 'hidden'; document.getElementById('view-tasks').className = t==='TASKS' ? 'flex-1 flex flex-col h-full overflow-hidden p-4 viewport-height' : 'hidden'; document.getElementById('tab-chat').className = t==='CHAT' ? "flex-1 py-3 text-xs font-bold uppercase tab-active transition" : "flex-1 py-3 text-xs font-bold uppercase tab-inactive transition"; document.getElementById('tab-tasks').className = t==='TASKS' ? "flex-1 py-3 text-xs font-bold uppercase tab-active transition" : "flex-1 py-3 text-xs font-bold uppercase tab-inactive transition"; }
-        function checkSiteHealth() { if(SITE_STATE === 'MAINTENANCE') { document.getElementById('systemLockdown').style.display = 'flex'; document.getElementById('lockdownTitle').innerText = "SYSTEM UPGRADING"; } else if (SITE_STATE === 'KILLED') { document.getElementById('systemLockdown').style.display = 'flex'; } }
-        function activateBuilderMode() { adminMode = true; document.getElementById('adminSaveBtn').classList.remove('hidden'); showStatusBadge("⚡ BUILDER MODE", "red"); renderMenu(); }
-        function compileAndSave() { const clone = document.documentElement.cloneNode(true); clone.querySelectorAll('#statusBadge, #adminSaveBtn, #configExportModal, #loginModal, #productModal, #systemLockdown, #memberModal, #scannerModal').forEach(e => e.classList.add('hidden')); clone.querySelectorAll('.drawer-full, .drawer-partial').forEach(e => e.classList.remove('active')); clone.querySelectorAll('[contenteditable]').forEach(e => { e.removeAttribute('contenteditable'); e.classList.remove('admin-editable'); }); const newConfig = { admin: STORE_CONFIG.admin, products: STORE_CONFIG.products }; const script = clone.querySelector('#main-script').innerHTML; clone.querySelector('#main-script').innerHTML = script.replace(/const STORE_CONFIG = \{[\s\S]*?\};/, "const STORE_CONFIG = " + JSON.stringify(newConfig, null, 4) + ";"); document.getElementById('configOutput').value = "<!DOCTYPE html>\n" + clone.outerHTML; document.getElementById('configExportModal').style.display = 'flex'; }
-        function copyToClipboard() { navigator.clipboard.writeText(document.getElementById("configOutput").value); alert("COPIED"); }
-        function addToCart(n, p) { if(cart[n]) cart[n].q++; else cart[n]={p:p, q:1}; updateCart(); document.getElementById('orderSheet').classList.add('active'); }
-        function toggleSheet() { document.getElementById('orderSheet').classList.toggle('active'); }
-        function updateCart() { const l = document.getElementById('cartItems'); l.innerHTML=''; let t=0, c=0; for(const [k,v] of Object.entries(cart)) { t+=v.p*v.q; c+=v.q; l.innerHTML+=`<div class="flex justify-between text-white"><span>${k} x${v.q}</span><span>₦${(v.p*v.q).toLocaleString()}</span></div>`; } document.getElementById('totalPrice').innerText = '₦'+t.toLocaleString(); document.getElementById('cartCount').innerText = c; document.getElementById('cartCount').classList.toggle('hidden', c===0); }
-        function copyBank() { const num = document.getElementById('dispAcctNum').innerText; navigator.clipboard.writeText(num).then(() => { const btn = document.getElementById('copyBankBtn'); const originalText = btn.innerText; btn.innerText = "COPIED!"; btn.classList.add('bg-green-600', 'text-white'); setTimeout(() => { btn.innerText = originalText; btn.classList.remove('bg-green-600', 'text-white'); }, 2000); }); }
-        function sendOrder() { let m = `*NEW ORDER* 🚨%0A👤 ${document.getElementById('custName').value}%0A📍 ${document.getElementById('custAddress').value}%0A%0A`; for(const [k,v] of Object.entries(cart)) m+=`${k} (x${v.q}) - ₦${v.p*v.q}%0A`; if(GOOGLE_API_URL) safePost({ type: 'ORDER', customer: document.getElementById('custName').value, orderString: m, total: document.getElementById('totalPrice').innerText, pin: KEYS.COMMANDER }); window.open(`https://wa.me/${STORE_CONFIG.admin.whatsapp}?text=${m}`, '_blank'); }
-        function showProductDetails(id) { const p = STORE_CONFIG.products.find(x => x.id === id); if(!p) return; document.getElementById('modalContent').innerHTML = `<div class="text-center mb-6"><img src="${p.img}" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-${p.color}-500 mb-4 shadow-[0_0_30px_rgba(255,255,255,0.2)]"><h2 class="text-3xl font-black uppercase text-white leading-none mb-1">${p.name}</h2><p class="text-${p.color}-400 font-bold text-xl">₦${p.price.toLocaleString()}</p></div><div class="space-y-4 text-sm text-gray-300"><div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700"><p class="uppercase text-[10px] text-gray-500 font-bold tracking-widest mb-1">Function</p><p>${p.description}</p></div><div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700"><p class="uppercase text-[10px] text-gray-500 font-bold tracking-widest mb-1">Contains</p><p class="italic text-gray-400">${p.ingredients}</p></div></div><button onclick="addToCart('${p.name}', ${p.price}); closeModal()" class="w-full mt-8 bg-white text-black font-black py-4 rounded-xl uppercase hover:scale-105 transition shadow-lg">Add to Order</button>`; document.getElementById('productModal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('productModal').style.display = 'none'; }
-        
-        // --- AR SCANNER ---
-        function startScanner() {
-            document.getElementById('scannerModal').style.display = 'flex';
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(stream => {
-                document.getElementById('scannerVideo').srcObject = stream;
-                setTimeout(() => { const randomProduct = STORE_CONFIG.products[Math.floor(Math.random() * STORE_CONFIG.products.length)]; closeScanner(); showProductDetails(randomProduct.id); showToast("MATCH FOUND: " + randomProduct.name, "success"); }, 3500); 
-            }).catch(e => { alert("Camera access required."); closeScanner(); });
+        // 3. Cart Logic
+        function addToCart(name, price) {
+            cart.push({ name, price });
+            updateCartUI();
+            showToast(`Added ${name}`);
         }
-        function closeScanner() { document.getElementById('scannerModal').style.display = 'none'; const vid = document.getElementById('scannerVideo'); if(vid.srcObject) vid.srcObject.getTracks().forEach(t => t.stop()); }
-        function broadcastToTelegram() { let text = "🚀 *STATUS REPORT*\n\n*DIRECTIVES:*\n"; const pending = tasks.filter(t => !t.done); if(pending.length > 0) { pending.forEach(t => text += `🔴 [${t.role}] ${t.text}\n`); } else { text += "✅ All Clear\n"; } window.open(`tg://msg?text=${encodeURIComponent(text)}`, '_blank'); }
+
+        function updateCartUI() {
+            document.getElementById('cartBadge').innerText = cart.length;
+            document.getElementById('cartBadge').style.display = cart.length > 0 ? 'block' : 'none';
+            
+            const list = document.getElementById('cartItems');
+            const totalEl = document.getElementById('cartTotal');
+            
+            if (cart.length === 0) {
+                list.innerHTML = '<p class="text-gray-500 text-center text-sm py-4">Your cart is empty.</p>';
+                totalEl.innerText = '0';
+                return;
+            }
+
+            let html = '';
+            let total = 0;
+            
+            cart.forEach((item, index) => {
+                total += item.price;
+                html += `
+                <div class="flex justify-between items-center bg-white/5 p-3 rounded-lg border border-white/5">
+                    <span class="text-sm font-medium">${item.name}</span>
+                    <div class="flex items-center gap-3">
+                        <span class="text-green-400 text-sm">₦${item.price.toLocaleString()}</span>
+                        <button onclick="removeFromCart(${index})" class="text-red-400 hover:text-red-300"><i class="fas fa-trash text-xs"></i></button>
+                    </div>
+                </div>`;
+            });
+            
+            list.innerHTML = html;
+            totalEl.innerText = total.toLocaleString();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        function toggleCart() {
+            const modal = document.getElementById('cartModal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        // 4. Admin Toggle
+        function toggleAdmin() {
+            adminMode = !adminMode;
+            const panel = document.getElementById('investorPanel');
+            
+            if (adminMode) {
+                panel.classList.remove('hidden');
+                document.body.style.border = "4px solid #eab308"; // Gold border indicator
+                showToast("Admin Mode Active");
+            } else {
+                panel.classList.add('hidden');
+                document.body.style.border = "none";
+                showToast("Admin Mode Exit");
+            }
+            renderMenu(); // Re-render to show/hide edit inputs
+        }
+
+        // 5. Checkout
+        function checkoutWhatsApp() {
+            if (cart.length === 0) return;
+            
+            let msg = "Hello! I'd like to order:%0A";
+            let total = 0;
+            cart.forEach(item => {
+                msg += `- ${item.name} (₦${item.price})%0A`;
+                total += item.price;
+            });
+            msg += `%0ATotal: ₦${total.toLocaleString()}`;
+            
+            window.open(`https://wa.me/${STORE_CONFIG.whatsappNumber}?text=${msg}`, '_blank');
+        }
+
+        // 6. UI Utilities
+        function showToast(text) {
+            const t = document.getElementById('toast');
+            t.querySelector('span').innerText = text;
+            t.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                t.classList.add('translate-y-20', 'opacity-0');
+            }, 2000);
+        }
+
+        function showProductDetails(id) {
+            // Placeholder for modal expansion if needed later
+            console.log("View product", id);
+        }
+
+        // INITIALIZE
+        window.onload = renderMenu;
+
     </script>
 </body>
 </html>
