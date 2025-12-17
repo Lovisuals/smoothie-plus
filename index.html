@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>smoothiePlus+ | Liquid Energy</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
@@ -33,36 +33,45 @@
             color: white; 
             -webkit-user-select: none; 
             user-select: none; 
-            overscroll-behavior: none; /* Prevent pull-to-refresh on mobile */
+            overscroll-behavior: none; 
         }
         input, textarea { -webkit-user-select: text; user-select: text; }
         
-        /* Drawer Animations */
-        .drawer {
+        /* 100dvh FIX: THE PERFECT FIT FOR MOBILE */
+        .drawer-full {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            top: 0; /* Full screen */
+            bottom: 0; left: 0; right: 0; top: 0;
             background: #0f172a;
             transform: translateY(100%);
             transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
             z-index: 100;
             display: flex;
             flex-direction: column;
+            height: 100dvh;
         }
-        .drawer.active { transform: translateY(0); }
-        
-        /* Partial Drawer (Order Sheet) */
+        .drawer-full.active { transform: translateY(0); }
+
+        /* PARTIAL DRAWER */
         .drawer-partial {
-            top: auto;
-            max-height: 85vh;
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(20, 20, 30, 0.98);
+            border-top: 1px solid rgba(255,255,255,0.1);
             border-top-left-radius: 24px;
             border-top-right-radius: 24px;
-            background: rgba(20, 20, 30, 0.98);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255,255,255,0.1);
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+            z-index: 90;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
         }
+        .drawer-partial.active { transform: translateY(0); }
+
+        /* VIEWPORT UTILITIES */
+        .viewport-height { height: 100dvh; max-height: 100dvh; }
+        .scroll-area { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .fixed-bottom { flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); }
 
         .admin-editable { border: 1px dashed #ff0000; background: rgba(255, 0, 0, 0.1); cursor: text; }
         .admin-editable:focus { outline: none; background: rgba(255, 0, 0, 0.2); }
@@ -71,29 +80,28 @@
         
         @keyframes liquid-float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
         .float-card { animation: liquid-float 6s ease-in-out infinite; }
-
-        .icon-pulse { animation: pulse-ring 2s infinite; }
-        @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1); } 70% { box-shadow: 0 0 0 6px rgba(255, 255, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
-
         .pulse-glow { animation: pulse-green 2s infinite; }
         @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(57, 255, 20, 0); } 100% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0); } }
 
-        /* Chat & Task Styles */
-        .chat-bubble { position: relative; max-width: 80%; padding: 10px; border-radius: 12px; margin-bottom: 10px; font-size: 12px; }
-        .chat-self { background-color: #2563eb; color: white; align-self: flex-end; border-bottom-right-radius: 2px; margin-left: auto; }
-        .chat-other { background-color: #1f2937; color: #e5e7eb; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #374151; }
-        .task-check:checked + label span { background-color: #22c55e; border-color: #22c55e; }
-        .task-check:checked + label p { text-decoration: line-through; color: #6b7280; }
+        /* Chat Styles */
+        .chat-bubble { max-width: 85%; padding: 12px; border-radius: 16px; margin-bottom: 8px; font-size: 13px; line-height: 1.4; animation: popIn 0.2s ease-out; }
+        .chat-self { background-color: #2563eb; color: white; align-self: flex-end; border-bottom-right-radius: 4px; margin-left: auto; }
+        .chat-other { background-color: #1f2937; color: #e5e7eb; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #374151; }
+        @keyframes popIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
         .tab-active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
         .tab-inactive { border-bottom: 2px solid transparent; color: #6b7280; }
+        
+        /* Task Checkbox */
+        .task-check:checked + label span { background-color: #22c55e; border-color: #22c55e; }
+        .task-check:checked + label p { text-decoration: line-through; color: #6b7280; }
     </style>
 </head>
 <body class="pb-32 overflow-x-hidden font-sans">
 
     <div id="systemLockdown" class="fixed inset-0 z-[99999] bg-black hidden flex-col items-center justify-center text-center p-6">
-        <h1 id="lockdownTitle" class="text-4xl font-black text-red-600 mb-4">SYSTEM OFFLINE</h1>
-        <p id="lockdownMsg" class="text-gray-500 font-mono text-xs">CONNECTION TERMINATED BY HOST</p>
+        <h1 id="lockdownTitle" class="text-4xl font-black text-red-600 mb-4">OFFLINE</h1>
+        <p id="lockdownMsg" class="text-gray-500 font-mono text-xs">MAINTENANCE PROTOCOL ACTIVE</p>
     </div>
 
     <div id="statusBadge" class="hidden fixed top-4 left-4 z-[300] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl bg-black border animate-bounce"></div>
@@ -137,16 +145,14 @@
 
     <div id="loginModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95" style="display:none;">
         <div class="w-full max-w-sm text-center bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-2xl relative">
-            <h2 class="text-2xl font-black uppercase text-white mb-2">Corporate Access</h2>
+            <h2 class="text-2xl font-black uppercase text-white mb-2">Access Portal</h2>
             <div id="authStage">
-                <p id="authPrompt" class="text-gray-500 text-xs mb-6">Enter Passkey / Employee PIN</p>
+                <p id="authPrompt" class="text-gray-500 text-xs mb-6">Enter Passkey</p>
                 <div class="relative w-full mb-6">
                     <input type="password" id="accessKey" placeholder="ENTER KEY" class="w-full bg-gray-800 border border-gray-700 text-center text-white text-xl tracking-widest rounded-xl px-4 py-4 focus:outline-none focus:border-green-500 pr-12">
-                    <button type="button" onclick="togglePassVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 z-50 p-2 text-gray-400 hover:text-white cursor-pointer">
-                        <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                    </button>
+                    <button type="button" onclick="togglePassVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 z-50 p-2 text-gray-400 hover:text-white"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
                 </div>
-                <button onclick="checkAccess()" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition">AUTHENTICATE</button>
+                <button onclick="checkAccess()" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200">AUTHENTICATE</button>
             </div>
             <div id="createPinStage" class="hidden">
                 <p class="text-green-500 text-xs mb-6 font-bold">Master Key Accepted. Create your Personal PIN.</p>
@@ -159,28 +165,26 @@
 
     <div id="configExportModal" class="hidden fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95">
         <div class="bg-gray-900 w-full max-w-lg p-6 rounded-2xl border border-red-500">
-            <h2 class="text-xl font-bold text-red-500 mb-2">⚠️ COPY THIS CODE</h2>
-            <p class="text-gray-400 text-xs mb-4">Click "COPY ALL". Go to GitHub. Replace your entire <b>index.html</b> file.</p>
-            <button onclick="copyToClipboard()" class="w-full bg-green-500 text-black font-bold py-4 rounded-xl hover:bg-green-400 mb-4 uppercase">📋 Copy All Code</button>
-            <textarea id="configOutput" class="w-full h-32 bg-black text-green-400 font-mono text-xs p-4 rounded-xl border border-gray-700 mb-4 focus:outline-none select-all"></textarea>
-            <button onclick="document.getElementById('configExportModal').style.display='none'" class="w-full bg-gray-800 text-white py-2 rounded-xl hover:bg-gray-700">CLOSE</button>
+            <h2 class="text-xl font-bold text-red-500 mb-2">⚠️ SAVE CHANGES</h2>
+            <button onclick="copyToClipboard()" class="w-full bg-green-500 text-black font-bold py-4 rounded-xl mb-4 uppercase">📋 Copy All Code</button>
+            <textarea id="configOutput" class="w-full h-32 bg-black text-green-400 font-mono text-xs p-4 rounded-xl border border-gray-700 select-all"></textarea>
+            <button onclick="document.getElementById('configExportModal').style.display='none'" class="w-full mt-4 bg-gray-800 text-white py-2 rounded-xl hover:bg-gray-700">CLOSE</button>
         </div>
     </div>
 
-    <div id="investorVault" class="drawer">
+    <div id="investorVault" class="drawer-full">
         <div class="max-w-2xl mx-auto w-full h-full flex flex-col bg-gray-900">
             <div class="flex justify-between items-center px-6 py-4 border-b border-gray-800 bg-gray-900/95">
                 <h2 class="text-xl font-black text-green-500">INVESTOR PROTOCOL</h2>
                 <div class="flex gap-4">
-                    <button onclick="minimizeDrawer('investorVault')" class="text-gray-500 hover:text-white font-bold text-xl">_</button>
-                    <button onclick="closeDrawer('investorVault')" class="text-gray-500 hover:text-red-500 font-bold text-xl">✕</button>
+                    <button onclick="minimizeDrawer('investorVault')" class="text-gray-500 hover:text-white text-xl">_</button>
+                    <button onclick="closeDrawer('investorVault')" class="text-gray-500 hover:text-red-500 text-xl">✕</button>
                 </div>
             </div>
-            
-            <div class="flex-1 overflow-y-auto p-6 pb-32">
+            <div class="scroll-area p-6 pb-32">
                 <section class="mb-12">
                     <h3 class="text-3xl font-black text-white mb-4">01. THE VISION</h3>
-                    <p id="plan-vision" class="text-gray-400 leading-relaxed mb-4"><span class="text-white font-bold">smoothiePlus+</span> is a bio-hacked hydration station replacing ubiquitous soda with targeted fruit nutrition. We utilize a unique "Zero-Water" blending process, replacing inert water with nutrient-dense Milk, Honey, or Tiger Nut bases.</p>
+                    <p id="plan-vision" class="text-gray-400 leading-relaxed mb-4">Bio-hacked hydration utilizing unique "Zero-Water" blending processes.</p>
                     <div class="grid grid-cols-2 gap-4 mt-6">
                         <div class="bg-gray-800 p-4 rounded-xl border border-gray-700">
                             <p class="text-green-500 font-bold text-lg">Precision Prep</p>
@@ -192,12 +196,10 @@
                         </div>
                     </div>
                 </section>
-
                 <section class="mb-12">
                     <h3 class="text-3xl font-black text-white mb-4">02. PRODUCT LINE</h3>
                     <div id="investorProductGrid" class="grid grid-cols-2 gap-3"></div>
                 </section>
-
                 <section class="mb-12">
                     <h3 class="text-3xl font-black text-white mb-4">03. SCALABILITY</h3>
                     <div class="bg-gray-800 border border-green-500/20 p-6 rounded-2xl">
@@ -211,7 +213,6 @@
                         </div>
                     </div>
                 </section>
-
                 <section class="mb-12">
                     <h3 class="text-3xl font-black text-white mb-4">04. UNIT ECONOMICS</h3>
                     <div class="glass-panel p-6 rounded-2xl">
@@ -224,55 +225,55 @@
         </div>
     </div>
 
-    <div id="teamPanelVault" class="drawer bg-[#0f172a]">
+    <div id="teamPanelVault" class="drawer-full bg-[#0f172a]">
         <div class="flex justify-between items-center bg-gray-900/95 backdrop-blur-md py-4 px-4 border-b border-gray-800 flex-shrink-0">
             <div>
                 <h2 class="text-lg font-black text-blue-500 tracking-tighter flex items-center gap-2">
                     <span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span></span>
-                    COMMAND CENTER
+                    NEURAL LINK
                 </h2>
-                <p class="text-[10px] text-gray-500 uppercase">Live Operations</p>
+                <p class="text-[10px] text-gray-500 uppercase">Synced Operations</p>
             </div>
             <div class="flex gap-4">
-                <button onclick="minimizeDrawer('teamPanelVault')" class="text-gray-500 hover:text-white font-bold text-xl">_</button>
-                <button onclick="closeDrawer('teamPanelVault')" class="text-gray-500 hover:text-red-500 font-bold text-xl">✕</button>
+                <button onclick="minimizeDrawer('teamPanelVault')" class="text-gray-500 hover:text-white text-xl">_</button>
+                <button onclick="closeDrawer('teamPanelVault')" class="text-gray-500 hover:text-red-500 text-xl">✕</button>
             </div>
         </div>
 
         <div class="flex border-b border-gray-800 bg-gray-900">
-            <button onclick="switchTab('CHAT')" id="tab-chat" class="flex-1 py-3 text-xs font-bold uppercase tab-active transition">Neural Link</button>
+            <button onclick="switchTab('CHAT')" id="tab-chat" class="flex-1 py-3 text-xs font-bold uppercase tab-active transition">Chat</button>
             <button onclick="switchTab('TASKS')" id="tab-tasks" class="flex-1 py-3 text-xs font-bold uppercase tab-inactive transition">Directives</button>
         </div>
 
-        <div id="view-chat" class="flex-1 flex flex-col h-full overflow-hidden">
-            <div id="chatStream" class="flex-1 p-4 overflow-y-auto flex flex-col space-y-2"></div>
-            <div class="bg-gray-900 p-4 border-t border-gray-800 flex-shrink-0 pb-10">
+        <div id="view-chat" class="flex-1 flex flex-col h-full overflow-hidden viewport-height">
+            <div id="chatStream" class="scroll-area p-4 space-y-2"></div>
+            <div class="bg-gray-900 p-4 border-t border-gray-800 fixed-bottom">
                 <div class="flex gap-2 mb-2 overflow-x-auto pb-2">
-                    <button onclick="setRole('ALCHEMIST')" id="role-alch" class="role-btn text-[10px] bg-gray-800 text-gray-400 px-3 py-1 rounded-full border border-gray-700 hover:border-purple-500">⚗️ ALCHEMIST</button>
-                    <button onclick="setRole('ARCHITECT')" id="role-arch" class="role-btn text-[10px] bg-gray-800 text-gray-400 px-3 py-1 rounded-full border border-gray-700 hover:border-blue-500">🏗️ ARCHITECT</button>
-                    <button onclick="setRole('AMPLIFIER')" id="role-amp" class="role-btn text-[10px] bg-gray-800 text-gray-400 px-3 py-1 rounded-full border border-gray-700 hover:border-orange-500">📢 AMPLIFIER</button>
+                    <button onclick="setRole('ALCHEMIST')" id="role-alch" class="role-btn text-[10px] bg-gray-800 text-gray-400 px-3 py-1 rounded-full border border-gray-700">⚗️ ALCHEMIST</button>
+                    <button onclick="setRole('ARCHITECT')" id="role-arch" class="role-btn text-[10px] bg-gray-800 text-gray-400 px-3 py-1 rounded-full border border-gray-700">🏗️ ARCHITECT</button>
+                    <button onclick="setRole('AMPLIFIER')" id="role-amp" class="role-btn text-[10px] bg-gray-800 text-gray-400 px-3 py-1 rounded-full border border-gray-700">📢 AMPLIFIER</button>
                 </div>
                 <div class="flex gap-2">
-                    <input type="text" id="chatInput" placeholder="Transmit data..." class="flex-1 bg-black border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 text-sm">
-                    <button onclick="sendChatMessage()" class="bg-blue-600 text-white font-bold px-4 rounded-xl hover:bg-blue-500">➤</button>
+                    <input type="text" id="chatInput" placeholder="Transmit..." class="flex-1 bg-black border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 text-sm">
+                    <button onclick="sendChatMessage()" class="bg-blue-600 text-white font-bold px-4 rounded-xl">➤</button>
                 </div>
             </div>
         </div>
 
-        <div id="view-tasks" class="hidden flex-1 flex flex-col h-full overflow-hidden p-4">
-            <div class="bg-black border border-gray-800 p-4 rounded-2xl mb-4 shadow-lg">
-                <input type="text" id="newTaskInput" placeholder="New Directive..." class="w-full bg-gray-900 border border-gray-700 text-white rounded-lg px-3 py-3 mb-3 focus:outline-none focus:border-blue-500 text-sm">
+        <div id="view-tasks" class="hidden flex-1 flex flex-col h-full overflow-hidden p-4 viewport-height">
+            <div class="bg-black border border-gray-800 p-4 rounded-2xl mb-4">
+                <input type="text" id="newTaskInput" placeholder="New Directive..." class="w-full bg-gray-900 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm mb-2">
                 <div class="flex gap-2">
-                    <select id="taskAssignee" class="bg-gray-900 border border-gray-700 text-gray-300 text-xs rounded-lg px-2 py-3 flex-1 focus:outline-none">
+                    <select id="taskAssignee" class="bg-gray-900 border border-gray-700 text-gray-300 text-xs rounded-lg px-2 py-2 flex-1 focus:outline-none">
                         <option value="ALCHEMIST">ALCHEMIST</option>
                         <option value="ARCHITECT">ARCHITECT</option>
                         <option value="AMPLIFIER">AMPLIFIER</option>
                     </select>
-                    <button onclick="addNewTask()" class="bg-blue-600 text-white font-bold px-4 rounded-lg text-xs hover:bg-blue-500">ADD</button>
+                    <button onclick="addNewTask()" class="bg-blue-600 text-white text-xs font-bold px-4 rounded-lg">ADD</button>
                 </div>
             </div>
-            <div id="taskListContainer" class="flex-1 overflow-y-auto space-y-3 pb-24"></div>
-            <div class="absolute bottom-0 left-0 right-0 p-4 bg-gray-900 border-t border-gray-800 pb-10">
+            <div id="taskListContainer" class="scroll-area space-y-3 pb-24"></div>
+            <div class="fixed-bottom p-4 bg-gray-900 border-t border-gray-800">
                 <button onclick="broadcastToTelegram()" class="w-full text-[10px] text-gray-500 border border-gray-800 py-3 rounded-lg hover:bg-gray-800 hover:text-blue-400 transition flex items-center justify-center gap-1">
                     <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.361 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.693-1.653-1.124-2.678-1.8-1.185-.781-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.141.119.098.152.228.166.33.016.115.022.242.018.365z"/></svg> SYNC TO TELEGRAM
                 </button>
@@ -280,9 +281,9 @@
         </div>
     </div>
 
-    <div id="orderSheet" class="drawer drawer-partial">
+    <div id="orderSheet" class="drawer-partial">
         <div class="w-12 h-1 bg-gray-500 rounded-full mx-auto mb-6 mt-4 cursor-pointer" onclick="toggleSheet()"></div>
-        <div class="px-6 pb-6 overflow-y-auto">
+        <div class="px-6 pb-6 scroll-area">
             <div class="flex justify-between items-center mb-2">
                 <h3 class="text-xs text-gray-400 uppercase font-bold">Order Summary</h3>
                 <button onclick="toggleSheet()" class="text-xs text-red-400 font-bold border border-red-400/30 px-2 py-1 rounded">CLOSE</button>
@@ -301,186 +302,84 @@
         </div>
     </div>
 
-    <script id="main-script">
-        // 🔒 ADMIN CONFIGURATION
-        const SITE_STATE = 'ACTIVE'; 
+    <div id="configExportModal" class="hidden fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95">
+        <div class="bg-gray-900 w-full max-w-lg p-6 rounded-2xl border border-red-500">
+            <h2 class="text-xl font-bold text-red-500 mb-2">⚠️ SAVE CHANGES</h2>
+            <button onclick="copyToClipboard()" class="w-full bg-green-500 text-black font-bold py-4 rounded-xl mb-4 uppercase">📋 Copy All Code</button>
+            <textarea id="configOutput" class="w-full h-32 bg-black text-green-400 font-mono text-xs p-4 rounded-xl border border-gray-700 select-all"></textarea>
+            <button onclick="document.getElementById('configExportModal').style.display='none'" class="w-full mt-4 bg-gray-800 text-white py-2 rounded-xl hover:bg-gray-700">CLOSE</button>
+        </div>
+    </div>
 
-        // ⚡ DO NOT EDIT THIS BLOCK MANUALLY. USE BUILDER MODE.
+    <script id="main-script">
+        // ⚡ PASTE YOUR GOOGLE DEPLOYMENT URL HERE ⚡
+        const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbzx2nyB2BWA1pN8MPOOoNuqGug9vmaWQv_DtamSduTq2PfrYQP5yxnL1l1iLT5Fivuu/exec"; 
+        const SITE_STATE = 'ACTIVE';
+
+        // 🔒 AUTH KEYS
+        const KEYS = {
+            INVESTOR: "iwillinvesT",
+            BUILDER: "AdminEDITGODMODE",
+            COMMANDER: "Admin GODMODE"
+        };
+
         const STORE_CONFIG = {
-    "admin": {
-        "whatsapp": "2347068516779",
-        "bankName": "OPay",
-        "acctNum": "8083000771",
-        "acctName": "LAWAL OPEYEMI MICHAEL"
-    },
-    "products": [
-        {
-            "id": 1,
-            "name": "Diabetes Defense",
-            "price": 3500,
-            "img": "https://images.unsplash.com/photo-1610970881699-44a5587cabec?auto=format&fit=crop&w=500&q=80",
-            "color": "green",
-            "description": "Low-glycemic blend. Replaces soda with fiber-rich hydration.",
-            "ingredients": "Sliced Green Apples, Cucumber, Tiger Nut Water Base"
-        },
-        {
-            "id": 2,
-            "name": "Mood Lifter",
-            "price": 4200,
-            "img": "https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?auto=format&fit=crop&w=500&q=80",
-            "color": "purple",
-            "description": "Antidepressant focus. Packed with mood-boosting vitamins and natural sweetness.",
-            "ingredients": "Banana, Berries, Honey Water Base, Ice Block"
-        },
-        {
-            "id": 3,
-            "name": "Workaholic Energy",
-            "price": 3800,
-            "img": "https://images.unsplash.com/photo-1595981267035-7b04ca84a82d?auto=format&fit=crop&w=500&q=80",
-            "color": "orange",
-            "description": "The ultimate fuel for the always-working individual. Instant natural energy.",
-            "ingredients": "Squashed Watermelon Liquid, Pineapple, Milk Water Base"
-        },
-        {
-            "id": 4,
-            "name": "Pure Hydration",
-            "price": 3000,
-            "img": "https://images.unsplash.com/photo-1589984662646-e7b2e4962f18?auto=format&fit=crop&w=500&q=80",
-            "color": "cyan",
-            "description": "Single-fruit variety. Pure hydration with your choice of flavor base.",
-            "ingredients": "100% Squashed Watermelon, Choice of: Milk, Honey, or Tiger Nut Base"
-        }
-    ]
-};
+            "admin": { "whatsapp": "2347068516779", "bankName": "OPay", "acctNum": "8083000771", "acctName": "LAWAL OPEYEMI MICHAEL" },
+            "products": [
+                { "id": 1, "name": "Diabetes Defense", "price": 3500, "img": "https://images.unsplash.com/photo-1610970881699-44a5587cabec?auto=format&fit=crop&w=500&q=80", "color": "green", "description": "Low-glycemic blend.", "ingredients": "Green Apple, Cucumber" },
+                { "id": 2, "name": "Mood Lifter", "price": 4200, "img": "https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?auto=format&fit=crop&w=500&q=80", "color": "purple", "description": "Antidepressant focus.", "ingredients": "Banana, Berries" },
+                { "id": 3, "name": "Workaholic Energy", "price": 3800, "img": "https://images.unsplash.com/photo-1595981267035-7b04ca84a82d?auto=format&fit=crop&w=500&q=80", "color": "orange", "description": "Instant natural energy.", "ingredients": "Watermelon, Pineapple" },
+                { "id": 4, "name": "Pure Hydration", "price": 3000, "img": "https://images.unsplash.com/photo-1589984662646-e7b2e4962f18?auto=format&fit=crop&w=500&q=80", "color": "cyan", "description": "Single-fruit variety.", "ingredients": "100% Watermelon" }
+            ]
+        };
 
         let cart = {}; 
         let adminMode = false;
-        let messages = JSON.parse(localStorage.getItem('teamMessages')) || [];
-        let tasks = JSON.parse(localStorage.getItem('smoothieTasks')) || [];
         let currentRole = 'ALCHEMIST'; 
         let localUserPin = localStorage.getItem('mySmoothiePin'); 
-
-        const editablePlanIds = ['plan-vision', 'plan-usp1', 'plan-usp2', 'plan-scale', 'plan-aov', 'plan-cogs', 'plan-margin'];
+        let tasks = JSON.parse(localStorage.getItem('smoothieTasks')) || [];
 
         window.addEventListener('load', () => { 
             checkSiteHealth();
             renderMenu(); 
             renderBankDetails();
             renderTasks();
-            restoreSession(); // RESTORE DRAWER STATE
+            restoreSession();
+            updateRoleUI();
             
-            document.getElementById('accessKey').addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') { checkAccess(); }
-            });
-            document.getElementById('newPin').addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') { saveNewPin(); }
-            });
-            document.getElementById('chatInput').addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') { sendChatMessage(); }
-            });
+            document.getElementById('accessKey').addEventListener('keypress', function (e) { if (e.key === 'Enter') checkAccess(); });
+            document.getElementById('newPin').addEventListener('keypress', function (e) { if (e.key === 'Enter') saveNewPin(); });
+            document.getElementById('chatInput').addEventListener('keypress', function (e) { if (e.key === 'Enter') sendChatMessage(); });
             
             if(window.location.hash === "#employee") openLoginModal();
-            updateRoleUI();
+            if(localStorage.getItem('smoothieActiveView') === 'teamPanelVault') setInterval(loadChatFromCloud, 5000);
         });
 
-        // --- SESSION PERSISTENCE ---
-        function persistView(viewId) {
-            localStorage.setItem('smoothieActiveView', viewId);
-        }
-
-        function restoreSession() {
-            const lastView = localStorage.getItem('smoothieActiveView');
-            if (lastView && lastView !== 'none') {
-                if(lastView === 'teamPanelVault' && localUserPin) {
-                    // Only restore team panel if user has a PIN setup (Security)
-                    document.getElementById(lastView).classList.add('active');
-                    renderChat();
-                    showStatusBadge("⚔️ COMMANDER ACTIVE", "blue");
-                } 
-                else if (lastView === 'investorVault') {
-                    // Always valid to restore investor view if it was open
-                    document.getElementById(lastView).classList.add('active');
-                    renderInvestorProducts();
-                    showStatusBadge("🔒 INVESTOR VIEW", "green");
-                }
-            }
-        }
-
-        function closeDrawer(id) {
-            document.getElementById(id).classList.remove('active');
-            localStorage.setItem('smoothieActiveView', 'none'); // Clear state
-            if(!adminMode) document.getElementById('statusBadge').classList.add('hidden');
-        }
-
-        function minimizeDrawer(id) {
-            document.getElementById(id).classList.remove('active');
-            // We DO NOT clear the localStorage state here, so it persists on reload
-        }
-
-        // --- LOCKDOWN LOGIC ---
-        function checkSiteHealth() {
-            const overlay = document.getElementById('systemLockdown');
-            const title = document.getElementById('lockdownTitle');
-            const msg = document.getElementById('lockdownMsg');
-
-            if(SITE_STATE === 'ACTIVE') {
-                overlay.style.display = 'none';
-            } else if (SITE_STATE === 'MAINTENANCE') {
-                overlay.style.display = 'flex';
-                title.innerText = "SYSTEM UPGRADING";
-                title.className = "text-4xl font-black text-yellow-500 mb-4";
-                msg.innerText = "DEPLOYING NEW ASSETS. STANDBY.";
-            } else if (SITE_STATE === 'KILLED') {
-                overlay.style.display = 'flex';
-                title.innerText = "404 NOT FOUND";
-                title.className = "text-4xl font-black text-gray-600 mb-4";
-                msg.innerText = "SERVER CONNECTION REFUSED.";
-            }
-        }
-
-        // --- AUTH LOGIC ---
-        function openLoginModal() { 
-            document.getElementById('loginModal').style.display = 'flex'; 
-            document.getElementById('authStage').classList.remove('hidden');
-            document.getElementById('createPinStage').classList.add('hidden');
-            document.getElementById('accessKey').value = ''; 
-            document.getElementById('accessKey').focus();
-        }
-
+        // --- AUTH SYSTEM ---
+        function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; document.getElementById('accessKey').focus(); }
         function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
-        
-        function togglePassVisibility() {
-            const input = document.getElementById('accessKey');
-            input.type = input.type === "password" ? "text" : "password";
-        }
+        function togglePassVisibility() { const i = document.getElementById('accessKey'); i.type = i.type === "password" ? "text" : "password"; }
 
         function checkAccess() {
-            const inputVal = document.getElementById('accessKey').value.trim();
-            
-            // 1. BUILDER MODE
-            if (inputVal === "AdminEDITGODMODE") {
-                closeLoginModal();
+            const val = document.getElementById('accessKey').value.trim();
+            if (val === KEYS.INVESTOR) {
+                launchApp('investorVault', "green", "🔒 INVESTOR VIEW");
+            } 
+            else if (val === KEYS.BUILDER) {
+                launchApp('investorVault', "red", "⚡ BUILDER MODE");
                 activateBuilderMode();
             }
-            // 2. OPS SETUP
-            else if (inputVal === "Admin GODMODE") {
+            else if (val === KEYS.COMMANDER) {
                 document.getElementById('authStage').classList.add('hidden');
                 document.getElementById('createPinStage').classList.remove('hidden');
                 document.getElementById('newPin').focus();
             }
-            // 3. OPS LOGIN
-            else if (localUserPin && inputVal === localUserPin) {
-                grantOpsAccess();
-            }
-            // 4. INVESTOR
-            else if (inputVal === "iwillinvesT") {
-                closeLoginModal();
-                renderInvestorProducts();
-                document.getElementById('investorVault').classList.add('active');
-                persistView('investorVault');
-                showStatusBadge("🔒 INVESTOR VIEW", "green");
-            }
-            else { alert("ACCESS DENIED: INCORRECT KEY"); }
+            else if (localUserPin && val === localUserPin) {
+                launchApp('teamPanelVault', "blue", "⚔️ COMMANDER ACTIVE");
+                loadChatFromCloud();
+            } 
+            else { alert("ACCESS DENIED"); }
+            if(val !== KEYS.COMMANDER) closeLoginModal();
         }
 
         function saveNewPin() {
@@ -488,109 +387,50 @@
             if(pin.length < 4) return alert("PIN too short.");
             localStorage.setItem('mySmoothiePin', pin);
             localUserPin = pin;
-            grantOpsAccess();
-        }
-
-        function grantOpsAccess() {
             closeLoginModal();
-            document.getElementById('teamPanelVault').classList.add('active');
-            persistView('teamPanelVault');
-            renderChat();
-            showStatusBadge("⚔️ COMMANDER ACTIVE", "blue");
+            launchApp('teamPanelVault', "blue", "⚔️ COMMANDER ACTIVE");
+            loadChatFromCloud();
         }
 
-        function activateBuilderMode() {
-            adminMode = true;
-            document.getElementById('adminSaveBtn').classList.remove('hidden');
-            showStatusBadge("⚡ BUILDER MODE", "red");
-            renderInvestorProducts();
-            document.getElementById('investorVault').classList.add('active');
-            editablePlanIds.forEach(id => {
-                const el = document.getElementById(id);
-                if(el) { el.contentEditable = "true"; el.classList.add('admin-editable'); }
-            });
-            renderMenu();
-            alert("BUILDER MODE ACTIVE:\nEdit Text & Prices on screen.\nClick SAVE FULL SITE when done.");
+        function launchApp(viewId, color, badgeText) {
+            document.getElementById(viewId).classList.add('active');
+            localStorage.setItem('smoothieActiveView', viewId);
+            showStatusBadge(badgeText, color);
         }
 
-        function showStatusBadge(text, color) {
-            const badge = document.getElementById('statusBadge');
-            badge.innerText = text;
-            badge.className = `fixed top-4 left-4 z-[300] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl backdrop-blur-md border border-${color}-500 text-${color}-500 animate-pulse bg-black`;
-            badge.classList.remove('hidden');
-        }
-
-        // --- DASHBOARD TABS ---
-        function switchTab(tab) {
-            const chatView = document.getElementById('view-chat');
-            const tasksView = document.getElementById('view-tasks');
-            const tabChat = document.getElementById('tab-chat');
-            const tabTasks = document.getElementById('tab-tasks');
-
-            if (tab === 'CHAT') {
-                chatView.classList.remove('hidden');
-                tasksView.classList.add('hidden');
-                tabChat.className = "flex-1 py-3 text-xs font-bold uppercase tab-active transition";
-                tabTasks.className = "flex-1 py-3 text-xs font-bold uppercase tab-inactive transition";
-            } else {
-                chatView.classList.add('hidden');
-                tasksView.classList.remove('hidden');
-                tabChat.className = "flex-1 py-3 text-xs font-bold uppercase tab-inactive transition";
-                tabTasks.className = "flex-1 py-3 text-xs font-bold uppercase tab-active transition";
-            }
-        }
-
-        // --- NEURAL CHAT LOGIC ---
-        function setRole(role) { currentRole = role; updateRoleUI(); }
-
-        function updateRoleUI() {
-            document.querySelectorAll('.role-btn').forEach(btn => {
-                btn.classList.remove('bg-purple-900', 'bg-blue-900', 'bg-orange-900', 'text-white', 'border-white');
-                btn.classList.add('bg-gray-800', 'text-gray-400');
-            });
-            let btnId = 'role-alch';
-            let activeClass = 'bg-purple-900';
-            if(currentRole === 'ARCHITECT') { btnId = 'role-arch'; activeClass = 'bg-blue-900'; }
-            if(currentRole === 'AMPLIFIER') { btnId = 'role-amp'; activeClass = 'bg-orange-900'; }
-            const btn = document.getElementById(btnId);
-            btn.classList.remove('bg-gray-800', 'text-gray-400');
-            btn.classList.add(activeClass, 'text-white', 'border-white');
-        }
-
+        // --- GOOGLE SYNC ---
         function sendChatMessage() {
             const txt = document.getElementById('chatInput').value.trim();
             if(!txt) return;
             const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            messages.push({ role: currentRole, text: txt, time: time });
-            localStorage.setItem('teamMessages', JSON.stringify(messages));
+            renderSingleMessage({role: currentRole, text: txt, time: time}, true);
             document.getElementById('chatInput').value = '';
-            renderChat();
+            if(GOOGLE_API_URL) fetch(GOOGLE_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ type: 'CHAT', role: currentRole, text: txt, pin: KEYS.COMMANDER }) });
         }
 
-        function renderChat() {
+        async function loadChatFromCloud() {
+            if(!GOOGLE_API_URL) return;
+            try {
+                const res = await fetch(GOOGLE_API_URL);
+                const data = await res.json();
+                const container = document.getElementById('chatStream');
+                container.innerHTML = ''; 
+                data.forEach(msg => renderSingleMessage(msg, msg.role === currentRole));
+                container.scrollTop = container.scrollHeight;
+            } catch(e) { console.log("Sync Error"); }
+        }
+
+        function renderSingleMessage(msg, isSelf) {
             const container = document.getElementById('chatStream');
-            container.innerHTML = '';
-            messages.forEach(msg => {
-                let colorClass = 'chat-other';
-                let roleColor = 'text-gray-400';
-                if (msg.role === currentRole) colorClass = 'chat-self';
-                if(msg.role === 'ALCHEMIST') roleColor = 'text-purple-400';
-                if(msg.role === 'ARCHITECT') roleColor = 'text-blue-400';
-                if(msg.role === 'AMPLIFIER') roleColor = 'text-orange-400';
-
-                container.innerHTML += `
-                <div class="chat-bubble ${colorClass}">
-                    <div class="flex justify-between items-baseline gap-4 mb-1">
-                        <span class="font-bold text-[10px] uppercase ${roleColor}">${msg.role}</span>
-                        <span class="text-[8px] text-gray-500">${msg.time}</span>
-                    </div>
-                    <p>${msg.text}</p>
-                </div>`;
-            });
-            container.scrollTop = container.scrollHeight;
+            const colorClass = isSelf ? 'chat-self' : 'chat-other';
+            let roleColor = 'text-gray-400';
+            if(msg.role === 'ALCHEMIST') roleColor = 'text-purple-400';
+            if(msg.role === 'ARCHITECT') roleColor = 'text-blue-400';
+            if(msg.role === 'AMPLIFIER') roleColor = 'text-orange-400';
+            container.innerHTML += `<div class="chat-bubble ${colorClass}"><div class="flex justify-between items-baseline gap-4 mb-1"><span class="font-bold text-[10px] uppercase ${roleColor}">${msg.role}</span></div><p>${msg.text}</p></div>`;
         }
 
-        // --- TASK LOGIC ---
+        // --- TASK MANAGER ---
         function addNewTask() {
             const txt = document.getElementById('newTaskInput').value.trim();
             const role = document.getElementById('taskAssignee').value;
@@ -600,233 +440,102 @@
             document.getElementById('newTaskInput').value = '';
             renderTasks();
         }
-
-        function toggleTask(id) {
-            const task = tasks.find(t => t.id === id);
-            if(task) task.done = !task.done;
-            localStorage.setItem('smoothieTasks', JSON.stringify(tasks));
-            renderTasks();
-        }
-
-        function deleteTask(id) {
-            tasks = tasks.filter(t => t.id !== id);
-            localStorage.setItem('smoothieTasks', JSON.stringify(tasks));
-            renderTasks();
-        }
-
+        function toggleTask(id) { const t = tasks.find(t=>t.id===id); if(t) t.done=!t.done; localStorage.setItem('smoothieTasks', JSON.stringify(tasks)); renderTasks(); }
+        function deleteTask(id) { tasks = tasks.filter(t=>t.id!==id); localStorage.setItem('smoothieTasks', JSON.stringify(tasks)); renderTasks(); }
         function renderTasks() {
-            const list = document.getElementById('taskListContainer');
-            list.innerHTML = '';
-            if(tasks.length === 0) { list.innerHTML = '<p class="text-gray-600 text-xs text-center mt-4">No Active Directives.</p>'; return; }
-            tasks.forEach(task => {
-                let badgeColor = 'bg-gray-600';
-                if(task.role === 'ALCHEMIST') badgeColor = 'bg-purple-600';
-                if(task.role === 'ARCHITECT') badgeColor = 'bg-blue-600';
-                if(task.role === 'AMPLIFIER') badgeColor = 'bg-orange-600';
-                list.innerHTML += `
-                <div class="flex items-start gap-3 bg-gray-900/50 border border-gray-800 p-3 rounded-xl hover:border-gray-700 transition">
-                    <input type="checkbox" onchange="toggleTask(${task.id})" class="task-check hidden" id="task-${task.id}" ${task.done ? 'checked' : ''}>
-                    <label for="task-${task.id}" class="flex-shrink-0 w-5 h-5 border border-gray-600 rounded cursor-pointer flex items-center justify-center mt-1"><span class="w-3 h-3 rounded-sm"></span></label>
-                    <div class="flex-1"><span class="${badgeColor} text-[8px] px-1.5 py-0.5 rounded text-white font-bold mb-1 inline-block">${task.role}</span><p class="text-sm text-gray-300 leading-snug ${task.done ? 'line-through opacity-50' : ''}">${task.text}</p></div>
-                    <button onclick="deleteTask(${task.id})" class="text-gray-600 hover:text-red-500 text-xs">✕</button>
-                </div>`;
+            const l = document.getElementById('taskListContainer'); l.innerHTML='';
+            if(tasks.length===0) { l.innerHTML='<p class="text-gray-600 text-xs text-center">No Active Directives.</p>'; return; }
+            tasks.forEach(t => {
+                let badge = 'bg-gray-600';
+                if(t.role==='ALCHEMIST') badge='bg-purple-600'; else if(t.role==='ARCHITECT') badge='bg-blue-600'; else if(t.role==='AMPLIFIER') badge='bg-orange-600';
+                l.innerHTML += `<div class="flex items-start gap-3 bg-gray-900/50 border border-gray-800 p-3 rounded-xl hover:border-gray-700 transition">
+                    <input type="checkbox" onchange="toggleTask(${t.id})" class="task-check hidden" id="task-${t.id}" ${t.done?'checked':''}>
+                    <label for="task-${t.id}" class="flex-shrink-0 w-5 h-5 border border-gray-600 rounded cursor-pointer flex items-center justify-center mt-1"><span class="w-3 h-3 rounded-sm"></span></label>
+                    <div class="flex-1"><span class="${badge} text-[8px] px-1.5 py-0.5 rounded text-white font-bold mb-1 inline-block">${t.role}</span><p class="text-sm text-gray-300 leading-snug ${t.done?'line-through opacity-50':''}">${t.text}</p></div>
+                    <button onclick="deleteTask(${t.id})" class="text-gray-600 hover:text-red-500 text-xs">✕</button></div>`;
             });
         }
 
+        // --- UI UTILS ---
+        function checkSiteHealth() {
+            if(SITE_STATE === 'MAINTENANCE') { document.getElementById('systemLockdown').style.display = 'flex'; document.getElementById('lockdownTitle').innerText = "SYSTEM UPGRADING"; }
+            else if (SITE_STATE === 'KILLED') { document.getElementById('systemLockdown').style.display = 'flex'; }
+        }
+        function closeDrawer(id) { document.getElementById(id).classList.remove('active'); localStorage.setItem('smoothieActiveView', 'none'); document.getElementById('statusBadge').classList.add('hidden'); }
+        function minimizeDrawer(id) { document.getElementById(id).classList.remove('active'); }
+        function restoreSession() { const v = localStorage.getItem('smoothieActiveView'); if(v && v !== 'none') document.getElementById(v).classList.add('active'); }
+        function showStatusBadge(text, color) { const b = document.getElementById('statusBadge'); b.innerText = text; b.className = `fixed top-4 left-4 z-[300] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl backdrop-blur-md border border-${color}-500 text-${color}-500 animate-pulse bg-black`; b.classList.remove('hidden'); }
+        function activateBuilderMode() {
+            adminMode = true; document.getElementById('adminSaveBtn').classList.remove('hidden');
+            document.querySelectorAll('[id^="plan-"]').forEach(el => { el.contentEditable = "true"; el.classList.add('admin-editable'); });
+            renderMenu();
+        }
+        function setRole(r) { currentRole = r; updateRoleUI(); }
+        function updateRoleUI() {
+            document.querySelectorAll('.role-btn').forEach(b => { b.classList.remove('bg-purple-900', 'bg-blue-900', 'bg-orange-900', 'text-white', 'border-white'); b.classList.add('bg-gray-800', 'text-gray-400'); });
+            let id = 'role-alch', active = 'bg-purple-900';
+            if(currentRole === 'ARCHITECT') { id = 'role-arch'; active = 'bg-blue-900'; } else if(currentRole === 'AMPLIFIER') { id = 'role-amp'; active = 'bg-orange-900'; }
+            const btn = document.getElementById(id); btn.classList.remove('bg-gray-800', 'text-gray-400'); btn.classList.add(active, 'text-white', 'border-white');
+        }
+        function switchTab(t) {
+            document.getElementById('view-chat').className = t==='CHAT' ? 'flex-1 flex flex-col h-full overflow-hidden viewport-height' : 'hidden';
+            document.getElementById('view-tasks').className = t==='TASKS' ? 'flex-1 flex flex-col h-full overflow-hidden p-4 viewport-height' : 'hidden';
+            document.getElementById('tab-chat').className = t==='CHAT' ? "flex-1 py-3 text-xs font-bold uppercase tab-active transition" : "flex-1 py-3 text-xs font-bold uppercase tab-inactive transition";
+            document.getElementById('tab-tasks').className = t==='TASKS' ? "flex-1 py-3 text-xs font-bold uppercase tab-active transition" : "flex-1 py-3 text-xs font-bold uppercase tab-inactive transition";
+        }
         function broadcastToTelegram() {
-            let text = "🚀 *STATUS REPORT*\n\n*CHAT LOG:*\n";
-            messages.slice(-5).forEach(m => { text += `[${m.role}] ${m.text}\n`; });
-            text += "\n*DIRECTIVES:*\n";
+            let text = "🚀 *STATUS REPORT*\n\n*DIRECTIVES:*\n";
             const pending = tasks.filter(t => !t.done);
             if(pending.length > 0) { pending.forEach(t => text += `🔴 [${t.role}] ${t.text}\n`); } else { text += "✅ All Clear\n"; }
             window.open(`tg://msg?text=${encodeURIComponent(text)}`, '_blank');
         }
 
-        // --- COMPILER ENGINE ---
+        // --- COMPILER ---
         function compileAndSave() {
-            const updatedProducts = STORE_CONFIG.products.map(p => {
-                return {
-                    id: p.id,
-                    name: document.getElementById(`name-${p.id}`).innerText.trim(),
-                    price: parseInt(document.getElementById(`price-${p.id}`).innerText.replace(/,/g, '')),
-                    img: p.img,
-                    color: p.color,
-                    description: document.getElementById(`desc-${p.id}`).innerText.trim(), 
-                    ingredients: document.getElementById(`ingr-${p.id}`).innerText.trim()
-                };
-            });
-
             const clone = document.documentElement.cloneNode(true);
-            const adminBadges = clone.querySelectorAll('#statusBadge, #adminSaveBtn, #configExportModal, #loginModal, #productModal, #systemLockdown');
-            adminBadges.forEach(el => el.classList.add('hidden')); 
+            clone.querySelectorAll('#statusBadge, #adminSaveBtn, #configExportModal, #loginModal, #productModal, #systemLockdown').forEach(e => e.classList.add('hidden'));
+            clone.querySelectorAll('.drawer-full, .drawer-partial').forEach(e => e.classList.remove('active'));
+            clone.querySelectorAll('[contenteditable]').forEach(e => { e.removeAttribute('contenteditable'); e.classList.remove('admin-editable'); });
             
-            // Clean Drawers state in clone
-            clone.querySelector('#investorVault').classList.remove('active');
-            clone.querySelector('#teamPanelVault').classList.remove('active');
-            clone.querySelector('#orderSheet').classList.remove('active');
-
-            const editables = clone.querySelectorAll('[contenteditable]');
-            editables.forEach(el => { el.removeAttribute('contenteditable'); el.classList.remove('admin-editable'); });
-
-            const newConfig = { admin: STORE_CONFIG.admin, products: updatedProducts };
-            const scriptContent = clone.querySelector('#main-script').innerHTML;
-            const newScript = scriptContent.replace(/const STORE_CONFIG = \{[\s\S]*?\};/, "const STORE_CONFIG = " + JSON.stringify(newConfig, null, 4) + ";");
-            clone.querySelector('#main-script').innerHTML = newScript;
-
-            const finalHTML = "<!DOCTYPE html>\n" + clone.outerHTML;
-            document.getElementById('configOutput').value = finalHTML;
+            const newConfig = { admin: STORE_CONFIG.admin, products: STORE_CONFIG.products };
+            const script = clone.querySelector('#main-script').innerHTML;
+            clone.querySelector('#main-script').innerHTML = script.replace(/const STORE_CONFIG = \{[\s\S]*?\};/, "const STORE_CONFIG = " + JSON.stringify(newConfig, null, 4) + ";");
+            
+            document.getElementById('configOutput').value = "<!DOCTYPE html>\n" + clone.outerHTML;
             document.getElementById('configExportModal').style.display = 'flex';
         }
+        function copyToClipboard() { navigator.clipboard.writeText(document.getElementById("configOutput").value); alert("COPIED"); }
 
-        function copyToClipboard() {
-            const copyText = document.getElementById("configOutput");
-            copyText.select();
-            copyText.setSelectionRange(0, 99999); 
-            navigator.clipboard.writeText(copyText.value);
-            alert("CODE COPIED! Now paste this into GitHub.");
-        }
-
-        // --- APP LOGIC ---
+        // --- MENU & CART ---
         function renderBankDetails() {
             document.getElementById('dispBankName').innerText = STORE_CONFIG.admin.bankName;
             document.getElementById('dispAcctNum').innerText = STORE_CONFIG.admin.acctNum;
             document.getElementById('dispAcctName').innerText = STORE_CONFIG.admin.acctName;
         }
-
         function renderMenu() {
-            const container = document.getElementById('menuGrid');
-            let html = '';
-            STORE_CONFIG.products.forEach((product, index) => {
-                let borderColor = `border-${product.color}-500`;
-                let textColor = `text-${product.color}-400`;
-                let btnColor = `bg-${product.color}-600`;
-                if(product.color === 'cyan' || product.color === 'orange') btnColor = `bg-${product.color}-500`;
-                let iconColorClass = `text-${product.color}-400 border-${product.color}-500/60 hover:bg-${product.color}-500/20`;
-                const delay = index * 0.5;
-                const contentEditable = adminMode ? 'contenteditable="true" class="admin-editable rounded p-1"' : '';
-
-                html += `
-                <div class="float-card bg-gray-900 border ${borderColor}/50 rounded-2xl p-3 shadow-lg flex flex-col justify-between hover:border-${product.color}-400 transition relative group" style="animation-delay: -${delay}s">
-                    <button onclick="showProductDetails(${product.id})" class="absolute top-2 right-2 z-20 ${iconColorClass} bg-gray-900/90 rounded-full w-7 h-7 flex items-center justify-center text-xs backdrop-blur-md icon-pulse shadow-xl border transition-colors">ℹ️</button>
-                    <div>
-                        <h3 ${contentEditable} id="name-${product.id}" class="font-bold text-sm uppercase mb-2">${product.name}</h3>
-                        <div class="h-28 w-full rounded-xl mb-2 overflow-hidden relative">
-                            <img src="${product.img}" class="object-cover w-full h-full transform group-hover:scale-110 transition duration-700">
-                        </div>
-                    </div>
-                    <div class="flex justify-between items-center mt-2">
-                        <span class="${textColor} font-bold">₦<span ${contentEditable} id="price-${product.id}">${product.price.toLocaleString()}</span></span>
-                        <button onclick="addToCart('${product.name}', ${product.price})" class="${btnColor} hover:opacity-80 text-black text-xs font-bold px-3 py-1.5 rounded-lg active:scale-95 transition">+ ADD</button>
-                    </div>
-                    <div class="hidden">
-                        <span ${contentEditable} id="desc-${product.id}">${product.description}</span>
-                        <span ${contentEditable} id="ingr-${product.id}">${product.ingredients}</span>
-                    </div>
-                </div>`;
-            });
-            document.getElementById('loadingMsg').style.display = 'none';
-            container.innerHTML = html;
-        }
-
-        function renderInvestorProducts() {
-            const container = document.getElementById('investorProductGrid');
-            let html = '';
+            const c = document.getElementById('menuGrid'); let h = '';
             STORE_CONFIG.products.forEach(p => {
-                html += `
-                <div class="bg-gray-800 p-2 rounded-lg flex items-center gap-2">
-                    <img src="${p.img}" class="w-10 h-10 rounded-full object-cover">
-                    <div><p class="text-white text-xs font-bold">${p.name}</p><p class="text-green-400 text-[10px]">₦${p.price.toLocaleString()}</p></div>
-                </div>`;
+                const edit = adminMode ? 'contenteditable="true" class="admin-editable rounded p-1"' : '';
+                h += `<div class="float-card bg-gray-900 border border-${p.color}-500/50 rounded-2xl p-3 shadow-lg flex flex-col justify-between">
+                    <div><h3 ${edit} class="font-bold text-sm uppercase mb-2 text-white">${p.name}</h3><div class="h-28 w-full rounded-xl mb-2 overflow-hidden bg-gray-800"><img src="${p.img}" class="object-cover w-full h-full"></div></div>
+                    <div class="flex justify-between items-center mt-2"><span class="text-${p.color}-400 font-bold">₦<span ${edit}>${p.price.toLocaleString()}</span></span><button onclick="addToCart('${p.name}', ${p.price})" class="bg-${p.color}-600 text-black text-xs font-bold px-3 py-1.5 rounded-lg">+ ADD</button></div></div>`;
             });
-            container.innerHTML = html;
+            document.getElementById('loadingMsg').style.display = 'none'; c.innerHTML = h;
         }
-
-        function showProductDetails(id) {
-            let product;
-            if(adminMode) {
-                 product = {
-                    name: document.getElementById(`name-${id}`).innerText.trim(),
-                    price: parseInt(document.getElementById(`price-${id}`).innerText.replace(/,/g, '')),
-                    img: STORE_CONFIG.products.find(p=>p.id===id).img,
-                    color: STORE_CONFIG.products.find(p=>p.id===id).color,
-                    description: document.getElementById(`desc-${id}`).innerText.trim(),
-                    ingredients: document.getElementById(`ingr-${id}`).innerText.trim()
-                 };
-            } else {
-                 product = STORE_CONFIG.products.find(p => p.id === id);
-            }
-
-            if (!product) return;
-            const content = document.getElementById('modalContent');
-            const contentEditable = adminMode ? 'contenteditable="true" class="admin-editable rounded p-1"' : '';
-
-            content.innerHTML = `
-                <div class="text-center mb-4">
-                    <img src="${product.img}" class="w-24 h-24 rounded-full mx-auto object-cover border-2 border-${product.color}-500 mb-4 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                    <h2 class="text-2xl font-black uppercase text-white">${product.name}</h2>
-                    <p class="text-${product.color}-400 font-bold text-lg">₦${product.price.toLocaleString()}</p>
-                </div>
-                <div class="space-y-4 text-sm text-gray-300">
-                    <div class="bg-gray-800/50 p-3 rounded-xl">
-                        <p class="uppercase text-[10px] text-gray-500 font-bold tracking-widest mb-1">Description</p>
-                        <p ${contentEditable} onblur="syncEdits(${id}, 'desc', this.innerText)">${product.description}</p>
-                    </div>
-                    <div class="bg-gray-800/50 p-3 rounded-xl">
-                        <p class="uppercase text-[10px] text-gray-500 font-bold tracking-widest mb-1">Ingredients</p>
-                        <p class="italic text-gray-400" ${contentEditable} onblur="syncEdits(${id}, 'ingr', this.innerText)">${product.ingredients}</p>
-                    </div>
-                </div>
-                <button onclick="addToCart('${product.name}', ${product.price}); closeModal()" class="w-full mt-6 bg-${product.color}-600 text-black font-bold py-3 rounded-xl uppercase hover:opacity-90 transition">Add to Cart</button>
-            `;
-            document.getElementById('productModal').style.display = 'flex';
-        }
-        
-        function syncEdits(id, type, val) { document.getElementById(`${type}-${id}`).innerText = val.trim(); }
-        function closeModal() { document.getElementById('productModal').style.display = 'none'; }
-        
-        function addToCart(name, price) {
-            if (cart[name]) { cart[name].qty += 1; } else { cart[name] = { price: price, qty: 1 }; }
-            updateUI();
-            document.getElementById('orderSheet').classList.add('active');
-        }
+        function addToCart(n, p) { if(cart[n]) cart[n].q++; else cart[n]={p:p, q:1}; updateCart(); document.getElementById('orderSheet').classList.add('active'); }
         function toggleSheet() { document.getElementById('orderSheet').classList.toggle('active'); }
-        function updateUI() {
-            const list = document.getElementById('cartItems');
-            const totalSpan = document.getElementById('totalPrice');
-            const countSpan = document.getElementById('cartCount');
-            list.innerHTML = '';
-            let total = 0; let count = 0;
-            if (Object.keys(cart).length === 0) { list.innerHTML = '<p class="text-gray-500 italic text-xs">Your cart is empty.</p>'; }
-            for (const [key, value] of Object.entries(cart)) {
-                const itemTotal = value.price * value.qty; total += itemTotal; count += value.qty;
-                list.innerHTML += `
-                    <div class="flex justify-between items-center bg-gray-800/30 p-2 rounded-lg mb-2">
-                        <span class="text-gray-300 font-bold">${key} <span class="text-green-400 text-xs ml-2">x${value.qty}</span></span>
-                        <div class="flex items-center gap-3"><span class="text-white">₦${itemTotal.toLocaleString()}</span><button onclick="removeFromCart('${key}')" class="text-red-500 text-xs font-bold px-1">x</button></div>
-                    </div>`;
-            }
-            totalSpan.innerText = '₦' + total.toLocaleString();
-            if (count > 0) { countSpan.innerText = count; countSpan.classList.remove('hidden'); } else { countSpan.classList.add('hidden'); }
+        function updateCart() {
+            const l = document.getElementById('cartItems'); l.innerHTML=''; let t=0, c=0;
+            for(const [k,v] of Object.entries(cart)) { t+=v.p*v.q; c+=v.q; l.innerHTML+=`<div class="flex justify-between text-white"><span>${k} x${v.q}</span><span>₦${(v.p*v.q).toLocaleString()}</span></div>`; }
+            document.getElementById('totalPrice').innerText = '₦'+t.toLocaleString();
+            document.getElementById('cartCount').innerText = c;
+            document.getElementById('cartCount').classList.toggle('hidden', c===0);
         }
-        function removeFromCart(key) { delete cart[key]; updateUI(); }
-        function copyBank() { navigator.clipboard.writeText(STORE_CONFIG.admin.acctNum); alert('Account Number Copied!'); }
         function sendOrder() {
-            if (Object.keys(cart).length === 0) return alert("Your cart is empty!");
-            const name = document.getElementById('custName').value;
-            const address = document.getElementById('custAddress').value;
-            if (!name || !address) { alert("Please enter your Name and Address."); return; }
-            let message = `*NEW ORDER ALERT* 🚨%0A%0A`;
-            message += `👤 *Customer:* ${name}%0A`;
-            message += `📍 *Address:* ${address}%0A%0A`;
-            message += `🛒 *Items:*%0A`;
-            let total = 0;
-            for (const [key, value] of Object.entries(cart)) {
-                message += `▫️ ${key} (x${value.qty}) - ₦${(value.price * value.qty).toLocaleString()}%0A`;
-                total += value.price * value.qty;
-            }
-            message += `%0A💰 *TOTAL: ₦${total.toLocaleString()}*`;
-            message += `%0A%0A✅ Payment sent to ${STORE_CONFIG.admin.bankName} (${STORE_CONFIG.admin.acctNum}).`;
-            window.open(`https://wa.me/${STORE_CONFIG.admin.whatsapp}?text=${message}`, '_blank');
+            let m = `*NEW ORDER* 🚨%0A👤 ${document.getElementById('custName').value}%0A📍 ${document.getElementById('custAddress').value}%0A%0A`;
+            for(const [k,v] of Object.entries(cart)) m+=`${k} (x${v.q}) - ₦${v.p*v.q}%0A`;
+            if(GOOGLE_API_URL) fetch(GOOGLE_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ type: 'ORDER', customer: document.getElementById('custName').value, orderString: m, total: document.getElementById('totalPrice').innerText, pin: KEYS.COMMANDER }) });
+            window.open(`https://wa.me/${STORE_CONFIG.admin.whatsapp}?text=${m}`, '_blank');
         }
     </script>
 </body>
