@@ -12,7 +12,7 @@
             theme: {
                 extend: {
                     fontFamily: { sans: ['Montserrat', 'sans-serif'] },
-                    colors: { darkBg: '#0a0a12' }
+                    colors: { darkBg: '#0a0a12', msgSelf: '#0084ff', msgOther: '#3e4042' }
                 }
             }
         }
@@ -21,7 +21,6 @@
         body { 
             background-color: #050508; 
             color: white; 
-            /* Removed user-select: none; to improve accessibility per critique */
             overscroll-behavior: none; 
         }
         input, textarea { -webkit-user-select: text; user-select: text; }
@@ -29,7 +28,7 @@
         /* 100dvh FIX */
         .drawer-full {
             position: fixed; bottom: 0; left: 0; right: 0; top: 0;
-            background: #0f172a; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+            background: #000; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
             z-index: 100; display: flex; flex-direction: column; height: 100dvh;
         }
         .drawer-full.active { transform: translateY(0); }
@@ -43,11 +42,31 @@
         }
         .drawer-partial.active { transform: translateY(0); }
 
-        .shimmer-card {
-            position: relative; overflow: hidden;
-            background: rgba(20, 20, 30, 0.6);
-            backdrop-filter: blur(10px);
+        /* SCROLL & UTILS */
+        .scroll-area { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 20px; }
+        .fixed-bottom { flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); }
+        .admin-editable { border: 1px dashed #ff0000; background: rgba(255, 0, 0, 0.1); cursor: text; }
+        .glass-panel { background: rgba(20, 20, 30, 0.95); border-top: 1px solid rgba(255, 255, 255, 0.15); }
+        
+        @keyframes liquid-float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
+        .float-card { animation: liquid-float 6s ease-in-out infinite; transition: transform 0.2s; }
+        .float-card:active { transform: scale(0.98); }
+        .pulse-glow { animation: pulse-green 2s infinite; }
+        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(57, 255, 20, 0); } 100% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0); } }
+
+        /* TOAST NOTIFICATION */
+        #apiToast {
+            position: fixed; top: -50px; left: 50%; transform: translateX(-50%);
+            background: #22c55e; color: black; padding: 8px 16px; border-radius: 20px;
+            font-size: 10px; font-weight: bold; z-index: 9999;
+            transition: top 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
+        #apiToast.active { top: 20px; }
+        #apiToast.error { background: #ef4444; color: white; }
+
+        /* SHIMMER */
+        .shimmer-card { position: relative; overflow: hidden; background: rgba(20, 20, 30, 0.6); backdrop-filter: blur(10px); }
         .shimmer-card::before {
             content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
             background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.05), transparent);
@@ -55,20 +74,7 @@
         }
         @keyframes shimmer { 0% { left: -100%; } 20% { left: 200%; } 100% { left: 200%; } }
 
-        .viewport-height { height: 100dvh; max-height: 100dvh; }
-        .scroll-area { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-        .fixed-bottom { flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); }
-
-        .admin-editable { border: 1px dashed #ff0000; background: rgba(255, 0, 0, 0.1); cursor: text; }
-        .glass-panel { background: rgba(20, 20, 30, 0.95); border-top: 1px solid rgba(255, 255, 255, 0.15); }
-        
-        @keyframes liquid-float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
-        .float-card { animation: liquid-float 6s ease-in-out infinite; transition: transform 0.2s; }
-        .float-card:active { transform: scale(0.98); }
-
-        .pulse-glow { animation: pulse-green 2s infinite; }
-        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(57, 255, 20, 0); } 100% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0); } }
-
+        /* CHAT STYLES */
         .chat-bubble { max-width: 85%; padding: 12px; border-radius: 16px; margin-bottom: 8px; font-size: 13px; line-height: 1.4; animation: popIn 0.2s ease-out; }
         .chat-self { background-color: #2563eb; color: white; align-self: flex-end; border-bottom-right-radius: 4px; margin-left: auto; }
         .chat-other { background-color: #1f2937; color: #e5e7eb; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #374151; }
@@ -82,12 +88,26 @@
 </head>
 <body class="pb-32 overflow-x-hidden font-sans">
 
+    <div id="apiToast">SYNCED ✓</div>
+
     <div id="systemLockdown" class="fixed inset-0 z-[99999] bg-black hidden flex-col items-center justify-center text-center p-6">
         <h1 id="lockdownTitle" class="text-4xl font-black text-red-600 mb-4">OFFLINE</h1>
         <p id="lockdownMsg" class="text-gray-500 font-mono text-xs">MAINTENANCE PROTOCOL ACTIVE</p>
     </div>
 
     <div id="statusBadge" class="hidden fixed top-4 left-4 z-[300] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl bg-black border animate-bounce"></div>
+
+    <div id="memberModal" class="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm hidden">
+        <div class="bg-gray-900 border border-gray-700 w-full max-w-xs rounded-2xl p-6 text-center shadow-2xl relative">
+            <button onclick="document.getElementById('memberModal').classList.add('hidden')" class="absolute top-3 right-3 text-gray-500 hover:text-white">✕</button>
+            <div id="memberAvatar" class="w-16 h-16 rounded-full bg-blue-600 mx-auto mb-3 flex items-center justify-center text-2xl font-bold"></div>
+            <h3 id="memberName" class="text-xl font-bold text-white mb-1"></h3>
+            <p id="memberRole" class="text-xs text-gray-400 uppercase tracking-widest mb-4"></p>
+            <div class="border-t border-gray-700 pt-4">
+                <p class="text-[10px] text-gray-500">NEURAL LINK STATUS: <span class="text-green-500">ONLINE</span></p>
+            </div>
+        </div>
+    </div>
 
     <div class="text-center pt-8 pb-6 relative overflow-hidden">
         <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-green-500 rounded-full blur-[100px] opacity-20 -z-10"></div>
@@ -187,19 +207,6 @@
                     <div id="investorProductGrid" class="grid grid-cols-2 gap-3"></div>
                 </section>
                 <section class="mb-12">
-                    <h3 class="text-3xl font-black text-white mb-4">03. SCALABILITY</h3>
-                    <div class="bg-gray-800 border border-green-500/20 p-6 rounded-2xl shimmer-card">
-                        <h4 class="font-bold text-white mb-2">The "Pod" Model</h4>
-                        <div id="plan-scale">
-                            <ul class="text-sm text-gray-300 space-y-2">
-                                <li>✅ Standardized Slicing (Potato Slicer Tech)</li>
-                                <li>✅ Pre-Squashed Inventory (Casing Technique)</li>
-                                <li>✅ Centralized Base Production</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-                <section class="mb-12">
                     <h3 class="text-3xl font-black text-white mb-4">04. UNIT ECONOMICS</h3>
                     <div class="glass-panel p-6 rounded-2xl shimmer-card">
                         <div class="flex justify-between mb-2"><span class="text-gray-400">Avg. Order Value</span><span id="plan-aov" class="text-white font-bold">₦4,000</span></div>
@@ -234,6 +241,11 @@
         <div id="view-chat" class="flex-1 flex flex-col h-full overflow-hidden viewport-height">
             <div id="chatStream" class="scroll-area p-4 space-y-2"></div>
             <div class="bg-gray-900 p-4 border-t border-gray-800 fixed-bottom">
+                <div class="flex gap-2 mb-2 overflow-x-auto pb-2">
+                    <button onclick="setRole('ALCHEMIST')" id="role-alch" class="role-btn text-[10px] bg-gray-800 text-gray-400 px-3 py-1 rounded-full border border-gray-700">⚗️ ALCHEMIST</button>
+                    <button onclick="setRole('ARCHITECT')" id="role-arch" class="role-btn text-[10px] bg-gray-800 text-gray-400 px-3 py-1 rounded-full border border-gray-700">🏗️ ARCHITECT</button>
+                    <button onclick="setRole('AMPLIFIER')" id="role-amp" class="role-btn text-[10px] bg-gray-800 text-gray-400 px-3 py-1 rounded-full border border-gray-700">📢 AMPLIFIER</button>
+                </div>
                 <div class="flex gap-2">
                     <input type="text" id="chatInput" placeholder="Transmit..." class="flex-1 bg-black border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 text-sm">
                     <button onclick="sendChatMessage()" class="bg-blue-600 text-white font-bold px-4 rounded-xl">➤</button>
@@ -317,7 +329,8 @@
         let adminMode = false;
         let currentName = localStorage.getItem('mySmoothieName') || 'UNKNOWN';
         let localUserPin = localStorage.getItem('mySmoothiePin'); 
-        let tasks = []; // Will be populated from Cloud
+        let tasks = []; 
+        let currentChatRole = 'ALCHEMIST'; 
 
         window.addEventListener('load', () => { 
             checkSiteHealth();
@@ -334,6 +347,29 @@
             
             document.getElementById('userIdentityDisplay').innerText = currentName;
         });
+
+        // --- SAFE POST WRAPPER (THE FIX) ---
+        async function safePost(payload) {
+            try {
+                // Using no-cors because Google Script redirects cause issues with strict CORS in some environments
+                // We trust the network layer. If it throws, we catch.
+                await fetch(GOOGLE_API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify(payload)
+                });
+                showToast("SYNCED ✓", "success");
+            } catch (e) {
+                showToast("OFFLINE - SYNC FAILED", "error");
+            }
+        }
+
+        function showToast(msg, type) {
+            const t = document.getElementById('apiToast');
+            t.innerText = msg;
+            t.className = type === 'error' ? 'error active' : 'active';
+            setTimeout(() => t.classList.remove('active'), 2000);
+        }
 
         // --- AUTH SYSTEM ---
         function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; document.getElementById('accessKey').focus(); }
@@ -365,18 +401,13 @@
         function saveNewIdentity() {
             const name = document.getElementById('newName').value.trim().toUpperCase();
             const pin = document.getElementById('newPin').value.trim();
-            
             if(name.length < 2) return alert("Name required.");
             if(pin.length < 4) return alert("PIN too short.");
-            
             localStorage.setItem('mySmoothieName', name);
             localStorage.setItem('mySmoothiePin', pin);
-            
             localUserPin = pin;
             currentName = name;
-            
             document.getElementById('userIdentityDisplay').innerText = currentName;
-            
             closeLoginModal();
             launchApp('teamPanelVault', "blue", "⚔️ COMMANDER ACTIVE");
             startNeuralLink();
@@ -391,7 +422,7 @@
         // --- GOOGLE SYNC ENGINE ---
         function startNeuralLink() {
             loadCloudData();
-            setInterval(loadCloudData, 5000); // Sync every 5s
+            setInterval(loadCloudData, 5000); 
         }
 
         async function loadCloudData() {
@@ -402,43 +433,57 @@
                 
                 // RENDER CHAT
                 const chatContainer = document.getElementById('chatStream');
-                chatContainer.innerHTML = '';
                 data.chat.forEach(msg => {
-                    const isSelf = msg.role === currentName;
-                    const colorClass = isSelf ? 'chat-self' : 'chat-other';
-                    const roleColor = isSelf ? 'text-white' : 'text-blue-400';
-                    chatContainer.innerHTML += `<div class="chat-bubble ${colorClass}"><div class="flex justify-between items-baseline gap-4 mb-1"><span class="font-bold text-[10px] uppercase ${roleColor}">${msg.role}</span></div><p>${msg.text}</p></div>`;
+                    if(!document.getElementById('msg-' + msg.id)) {
+                        const isSelf = msg.role === currentName;
+                        const colorClass = isSelf ? 'chat-self' : 'chat-other';
+                        const roleColor = isSelf ? 'text-white' : 'text-blue-400';
+                        
+                        // Messenger UI Logic
+                        let content = '';
+                        if(isSelf) {
+                            content = `<div id="msg-${msg.id}" class="msg-row self"><div class="msg-bubble">${msg.text}</div></div>`;
+                        } else {
+                            const initials = msg.role.substring(0,2).toUpperCase();
+                            content = `<div id="msg-${msg.id}" class="msg-row other">
+                                <div onclick="showMemberInfo('${msg.role}')" class="avatar-circle">${initials}</div>
+                                <div class="msg-bubble">${msg.text}</div>
+                            </div>`;
+                        }
+                        
+                        chatContainer.insertAdjacentHTML('beforeend', content);
+                        chatContainer.scrollTop = chatContainer.scrollHeight;
+                    }
                 });
 
                 // RENDER TASKS
-                tasks = data.tasks; // Sync global var
-                const taskContainer = document.getElementById('taskListContainer');
-                taskContainer.innerHTML = '';
-                if(tasks.length === 0) { 
-                    taskContainer.innerHTML = '<p class="text-gray-600 text-xs text-center">No Active Directives.</p>';
-                } else {
-                    tasks.forEach(t => {
-                        let badge = 'bg-gray-600';
-                        if(t.role==='URGENT') badge='bg-red-600'; else if(t.role==='OPS') badge='bg-blue-600';
-                        taskContainer.innerHTML += `<div class="flex items-start gap-3 bg-gray-900/50 border border-gray-800 p-3 rounded-xl hover:border-gray-700 transition">
-                            <input type="checkbox" onchange="toggleTask(${t.id})" class="task-check hidden" id="task-${t.id}" ${t.done?'checked':''}>
-                            <label for="task-${t.id}" class="flex-shrink-0 w-5 h-5 border border-gray-600 rounded cursor-pointer flex items-center justify-center mt-1"><span class="w-3 h-3 rounded-sm"></span></label>
-                            <div class="flex-1"><span class="${badge} text-[8px] px-1.5 py-0.5 rounded text-white font-bold mb-1 inline-block">${t.role}</span><p class="text-sm text-gray-300 leading-snug ${t.done?'line-through opacity-50':''}">${t.text}</p></div>
-                            <button onclick="deleteTask(${t.id})" class="text-gray-600 hover:text-red-500 text-xs">✕</button></div>`;
-                    });
-                }
+                tasks = data.tasks; 
+                renderTasks();
+
             } catch(e) { console.log("Sync Error"); }
+        }
+
+        function showMemberInfo(name) {
+            document.getElementById('memberAvatar').innerText = name.substring(0,2).toUpperCase();
+            document.getElementById('memberName').innerText = name;
+            document.getElementById('memberRole').innerText = "CORE TEAM"; 
+            document.getElementById('memberModal').classList.remove('hidden');
         }
 
         // --- OPERATIONS ---
         function sendChatMessage() {
             const txt = document.getElementById('chatInput').value.trim();
             if(!txt) return;
-            const time = new Date().toLocaleTimeString();
+            const newId = Date.now();
+            
+            // Optimistic UI
+            const chatContainer = document.getElementById('chatStream');
+            chatContainer.insertAdjacentHTML('beforeend', `<div id="msg-${newId}" class="msg-row self"><div class="msg-bubble">${txt}</div></div>`);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
             document.getElementById('chatInput').value = '';
-            // Optimistic UI handled by reload, sending to cloud
-            if(GOOGLE_API_URL) fetch(GOOGLE_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ type: 'CHAT', role: currentName, text: txt, pin: KEYS.COMMANDER }) });
-            loadCloudData(); // Trigger immediate reload
+            
+            if(GOOGLE_API_URL) safePost({ type: 'CHAT', id: newId, role: currentName, text: txt, pin: KEYS.COMMANDER });
         }
 
         function addNewTask() {
@@ -447,19 +492,38 @@
             if(!txt) return;
             const newId = Date.now();
             document.getElementById('newTaskInput').value = '';
-            if(GOOGLE_API_URL) fetch(GOOGLE_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ type: 'TASK', action: 'ADD', id: newId, role: role, text: txt, pin: KEYS.COMMANDER }) });
-            setTimeout(loadCloudData, 1000); // Delay slightly for cloud processing
+            // Optimistic
+            tasks.unshift({ id: newId, text: txt, role: role, done: false });
+            renderTasks();
+            
+            if(GOOGLE_API_URL) safePost({ type: 'TASK', action: 'ADD', id: newId, role: role, text: txt, pin: KEYS.COMMANDER });
         }
 
         function toggleTask(id) {
-            if(GOOGLE_API_URL) fetch(GOOGLE_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ type: 'TASK', action: 'TOGGLE', id: id, pin: KEYS.COMMANDER }) });
+            const t = tasks.find(x => x.id === id);
+            if(t) t.done = !t.done; 
+            renderTasks();
+            if(GOOGLE_API_URL) safePost({ type: 'TASK', action: 'TOGGLE', id: id, pin: KEYS.COMMANDER });
         }
 
         function deleteTask(id) {
-            if(GOOGLE_API_URL) fetch(GOOGLE_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ type: 'TASK', action: 'DELETE', id: id, pin: KEYS.COMMANDER }) });
-            // Optimistic removal from UI
-            tasks = tasks.filter(t => t.id !== id);
-            // Re-render handled by next poll
+            tasks = tasks.filter(t => t.id !== id); 
+            renderTasks();
+            if(GOOGLE_API_URL) safePost({ type: 'TASK', action: 'DELETE', id: id, pin: KEYS.COMMANDER });
+        }
+
+        function renderTasks() {
+            const l = document.getElementById('taskListContainer'); l.innerHTML='';
+            if(tasks.length===0) { l.innerHTML='<p class="text-gray-600 text-xs text-center">No Active Directives.</p>'; return; }
+            tasks.forEach(t => {
+                let badge = 'bg-gray-600';
+                if(t.role==='URGENT') badge='bg-red-600'; else if(t.role==='OPS') badge='bg-blue-600';
+                l.innerHTML += `<div class="flex items-start gap-3 bg-gray-900/50 border border-gray-800 p-3 rounded-xl hover:border-gray-700 transition">
+                    <input type="checkbox" onchange="toggleTask(${t.id})" class="task-check hidden" id="task-${t.id}" ${t.done?'checked':''}>
+                    <label for="task-${t.id}" class="flex-shrink-0 w-5 h-5 border border-gray-600 rounded cursor-pointer flex items-center justify-center mt-1"><span class="w-3 h-3 rounded-sm"></span></label>
+                    <div class="flex-1"><span class="${badge} text-[8px] px-1.5 py-0.5 rounded text-white font-bold mb-1 inline-block">${t.role}</span><p class="text-sm text-gray-300 leading-snug ${t.done?'line-through opacity-50':''}">${t.text}</p></div>
+                    <button onclick="deleteTask(${t.id})" class="text-gray-600 hover:text-red-500 text-xs">✕</button></div>`;
+            });
         }
 
         function broadcastToTelegram() {
@@ -472,7 +536,7 @@
         // --- COMPILER ---
         function compileAndSave() {
             const clone = document.documentElement.cloneNode(true);
-            clone.querySelectorAll('#statusBadge, #adminSaveBtn, #configExportModal, #loginModal, #productModal, #systemLockdown').forEach(e => e.classList.add('hidden'));
+            clone.querySelectorAll('#statusBadge, #adminSaveBtn, #configExportModal, #loginModal, #productModal, #systemLockdown, #memberModal').forEach(e => e.classList.add('hidden'));
             clone.querySelectorAll('.drawer-full, .drawer-partial').forEach(e => e.classList.remove('active'));
             clone.querySelectorAll('[contenteditable]').forEach(e => { e.removeAttribute('contenteditable'); e.classList.remove('admin-editable'); });
             
@@ -523,7 +587,7 @@
         function sendOrder() {
             let m = `*NEW ORDER* 🚨%0A👤 ${document.getElementById('custName').value}%0A📍 ${document.getElementById('custAddress').value}%0A%0A`;
             for(const [k,v] of Object.entries(cart)) m+=`${k} (x${v.q}) - ₦${v.p*v.q}%0A`;
-            if(GOOGLE_API_URL) fetch(GOOGLE_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ type: 'ORDER', customer: document.getElementById('custName').value, orderString: m, total: document.getElementById('totalPrice').innerText, pin: KEYS.COMMANDER }) });
+            if(GOOGLE_API_URL) safePost({ type: 'ORDER', customer: document.getElementById('custName').value, orderString: m, total: document.getElementById('totalPrice').innerText, pin: KEYS.COMMANDER });
             window.open(`https://wa.me/${STORE_CONFIG.admin.whatsapp}?text=${m}`, '_blank');
         }
 
@@ -546,6 +610,13 @@
             document.getElementById('view-tasks').className = t==='TASKS' ? 'flex-1 flex flex-col h-full overflow-hidden p-4 viewport-height' : 'hidden';
             document.getElementById('tab-chat').className = t==='CHAT' ? "flex-1 py-3 text-xs font-bold uppercase tab-active transition" : "flex-1 py-3 text-xs font-bold uppercase tab-inactive transition";
             document.getElementById('tab-tasks').className = t==='TASKS' ? "flex-1 py-3 text-xs font-bold uppercase tab-active transition" : "flex-1 py-3 text-xs font-bold uppercase tab-inactive transition";
+        }
+        function setRole(r) { currentChatRole = r; updateRoleUI(); }
+        function updateRoleUI() {
+            document.querySelectorAll('.role-btn').forEach(b => { b.classList.remove('bg-purple-900', 'bg-blue-900', 'bg-orange-900', 'text-white', 'border-white'); b.classList.add('bg-gray-800', 'text-gray-400'); });
+            let id = 'role-alch', active = 'bg-purple-900';
+            if(currentChatRole === 'ARCHITECT') { id = 'role-arch'; active = 'bg-blue-900'; } else if(currentChatRole === 'AMPLIFIER') { id = 'role-amp'; active = 'bg-orange-900'; }
+            const btn = document.getElementById(id); btn.classList.remove('bg-gray-800', 'text-gray-400'); btn.classList.add(active, 'text-white', 'border-white');
         }
 
         // --- PRODUCT DETAILS MODAL ---
