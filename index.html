@@ -28,7 +28,7 @@
         /* 100dvh FIX */
         .drawer-full {
             position: fixed; bottom: 0; left: 0; right: 0; top: 0;
-            background: #000; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+            background: #0f172a; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
             z-index: 100; display: flex; flex-direction: column; height: 100dvh;
         }
         .drawer-full.active { transform: translateY(0); }
@@ -48,22 +48,21 @@
         .admin-editable { border: 1px dashed #ff0000; background: rgba(255, 0, 0, 0.1); cursor: text; }
         .glass-panel { background: rgba(20, 20, 30, 0.95); border-top: 1px solid rgba(255, 255, 255, 0.15); }
         
+        /* TOAST */
+        #apiToast {
+            position: fixed; top: -50px; left: 50%; transform: translateX(-50%);
+            background: #22c55e; color: black; padding: 8px 16px; border-radius: 20px;
+            font-size: 10px; font-weight: bold; z-index: 9999;
+            transition: top 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        #apiToast.active { top: 20px; }
+        #apiToast.error { background: #ef4444; color: white; }
+
         @keyframes liquid-float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
         .float-card { animation: liquid-float 6s ease-in-out infinite; transition: transform 0.2s; }
         .float-card:active { transform: scale(0.98); }
         .pulse-glow { animation: pulse-green 2s infinite; }
         @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(57, 255, 20, 0); } 100% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0); } }
-
-        /* TOAST NOTIFICATION */
-        #apiToast {
-            position: fixed; top: -50px; left: 50%; transform: translateX(-50%);
-            background: #22c55e; color: black; padding: 8px 16px; border-radius: 20px;
-            font-size: 10px; font-weight: bold; z-index: 9999;
-            transition: top 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-        }
-        #apiToast.active { top: 20px; }
-        #apiToast.error { background: #ef4444; color: white; }
 
         /* SHIMMER */
         .shimmer-card { position: relative; overflow: hidden; background: rgba(20, 20, 30, 0.6); backdrop-filter: blur(10px); }
@@ -74,13 +73,17 @@
         }
         @keyframes shimmer { 0% { left: -100%; } 20% { left: 200%; } 100% { left: 200%; } }
 
-        /* CHAT STYLES */
-        .chat-bubble { max-width: 85%; padding: 12px; border-radius: 16px; margin-bottom: 8px; font-size: 13px; line-height: 1.4; animation: popIn 0.2s ease-out; }
-        .chat-self { background-color: #2563eb; color: white; align-self: flex-end; border-bottom-right-radius: 4px; margin-left: auto; }
-        .chat-other { background-color: #1f2937; color: #e5e7eb; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #374151; }
-        @keyframes popIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .tab-active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
+        /* MESSENGER CHAT STYLES */
+        .msg-row { display: flex; gap: 8px; margin-bottom: 4px; align-items: flex-end; }
+        .msg-row.self { flex-direction: row-reverse; }
+        .msg-bubble { padding: 8px 12px; border-radius: 18px; font-size: 14px; max-width: 75%; line-height: 1.4; position: relative; word-wrap: break-word; }
+        .msg-row.self .msg-bubble { background-color: #0084ff; color: white; border-bottom-right-radius: 4px; }
+        .msg-row.other .msg-bubble { background-color: #3e4042; color: #e4e6eb; border-bottom-left-radius: 4px; }
+        .avatar-circle { width: 28px; height: 28px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: #aaa; border: 1px solid #555; cursor: pointer; }
+        .seen-indicator { font-size: 10px; color: #65676b; text-align: right; margin-top: 2px; margin-right: 4px; display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+        .eye-icon { width: 12px; height: 12px; opacity: 0.7; }
+
+        .tab-active { border-bottom: 2px solid #0084ff; color: #0084ff; }
         .tab-inactive { border-bottom: 2px solid transparent; color: #6b7280; }
         .task-check:checked + label span { background-color: #22c55e; border-color: #22c55e; }
         .task-check:checked + label p { text-decoration: line-through; color: #6b7280; }
@@ -102,7 +105,7 @@
             <button onclick="document.getElementById('memberModal').classList.add('hidden')" class="absolute top-3 right-3 text-gray-500 hover:text-white">✕</button>
             <div id="memberAvatar" class="w-16 h-16 rounded-full bg-blue-600 mx-auto mb-3 flex items-center justify-center text-2xl font-bold"></div>
             <h3 id="memberName" class="text-xl font-bold text-white mb-1"></h3>
-            <p id="memberRole" class="text-xs text-gray-400 uppercase tracking-widest mb-4"></p>
+            <p class="text-xs text-gray-400 uppercase tracking-widest mb-4">CORE TEAM MEMBER</p>
             <div class="border-t border-gray-700 pt-4">
                 <p class="text-[10px] text-gray-500">NEURAL LINK STATUS: <span class="text-green-500">ONLINE</span></p>
             </div>
@@ -157,7 +160,6 @@
                 </div>
                 <button onclick="checkAccess()" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200">AUTHENTICATE</button>
             </div>
-            
             <div id="createPinStage" class="hidden">
                 <p class="text-green-500 text-xs mb-2 font-bold">Identity Protocol</p>
                 <p class="text-gray-500 text-[10px] mb-6">Register your callsign and local PIN.</p>
@@ -192,19 +194,20 @@
                     <h3 class="text-3xl font-black text-white mb-4">01. THE VISION</h3>
                     <p id="plan-vision" class="text-gray-400 leading-relaxed mb-4">Bio-hacked hydration utilizing unique "Zero-Water" blending processes.</p>
                     <div class="grid grid-cols-2 gap-4 mt-6">
-                        <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shimmer-card">
-                            <p class="text-green-500 font-bold text-lg">Precision Prep</p>
-                            <p id="plan-usp1" class="text-xs text-gray-500 uppercase">Potato Slicer Consistency</p>
-                        </div>
-                        <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shimmer-card">
-                            <p class="text-green-500 font-bold text-lg">3 Flavor Bases</p>
-                            <p id="plan-usp2" class="text-xs text-gray-500 uppercase">Milk / Honey / Tiger Nut</p>
-                        </div>
+                        <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shimmer-card"><p class="text-green-500 font-bold text-lg">Precision Prep</p><p id="plan-usp1" class="text-xs text-gray-500 uppercase">Potato Slicer Consistency</p></div>
+                        <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shimmer-card"><p class="text-green-500 font-bold text-lg">3 Flavor Bases</p><p id="plan-usp2" class="text-xs text-gray-500 uppercase">Milk / Honey / Tiger Nut</p></div>
                     </div>
                 </section>
                 <section class="mb-12">
                     <h3 class="text-3xl font-black text-white mb-4">02. PRODUCT LINE</h3>
                     <div id="investorProductGrid" class="grid grid-cols-2 gap-3"></div>
+                </section>
+                <section class="mb-12">
+                    <h3 class="text-3xl font-black text-white mb-4">03. SCALABILITY</h3>
+                    <div class="bg-gray-800 border border-green-500/20 p-6 rounded-2xl shimmer-card">
+                        <h4 class="font-bold text-white mb-2">The "Pod" Model</h4>
+                        <div id="plan-scale"><ul class="text-sm text-gray-300 space-y-2"><li>✅ Standardized Slicing (Potato Slicer Tech)</li><li>✅ Pre-Squashed Inventory (Casing Technique)</li><li>✅ Centralized Base Production</li></ul></div>
+                    </div>
                 </section>
                 <section class="mb-12">
                     <h3 class="text-3xl font-black text-white mb-4">04. UNIT ECONOMICS</h3>
@@ -241,16 +244,11 @@
         <div id="view-chat" class="flex-1 flex flex-col h-full overflow-hidden viewport-height">
             <div id="chatStream" class="scroll-area p-4 space-y-2"></div>
             <div class="bg-gray-900 p-4 border-t border-gray-800 fixed-bottom">
-                <div class="flex gap-2 mb-2 overflow-x-auto pb-2">
-                    <button onclick="setRole('ALCHEMIST')" id="role-alch" class="role-btn text-[10px] bg-gray-800 text-gray-400 px-3 py-1 rounded-full border border-gray-700">⚗️ ALCHEMIST</button>
-                    <button onclick="setRole('ARCHITECT')" id="role-arch" class="role-btn text-[10px] bg-gray-800 text-gray-400 px-3 py-1 rounded-full border border-gray-700">🏗️ ARCHITECT</button>
-                    <button onclick="setRole('AMPLIFIER')" id="role-amp" class="role-btn text-[10px] bg-gray-800 text-gray-400 px-3 py-1 rounded-full border border-gray-700">📢 AMPLIFIER</button>
-                </div>
                 <div class="flex gap-2">
                     <input type="text" id="chatInput" placeholder="Transmit..." class="flex-1 bg-black border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 text-sm">
                     <button onclick="sendChatMessage()" class="bg-blue-600 text-white font-bold px-4 rounded-xl">➤</button>
                 </div>
-                <p class="text-[9px] text-gray-500 mt-2 text-center">Identified as: <span id="userIdentityDisplay" class="text-blue-400 font-bold">UNKNOWN</span></p>
+                <p class="text-[9px] text-gray-500 mt-2 text-center">Identity: <span id="userIdentityDisplay" class="text-blue-400 font-bold">UNKNOWN</span></p>
             </div>
         </div>
 
@@ -305,15 +303,10 @@
 
     <script id="main-script">
         // ⚡ PASTE YOUR GOOGLE DEPLOYMENT URL HERE ⚡
-        const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbzx2nyB2BWA1pN8MPOOoNuqGug9vmaWQv_DtamSduTq2PfrYQP5yxnL1l1iLT5Fivuu/exec"; 
+        const GOOGLE_API_URL = ""; 
         const SITE_STATE = 'ACTIVE';
 
-        // 🔒 AUTH KEYS
-        const KEYS = {
-            INVESTOR: "iwillinvesT",
-            BUILDER: "AdminEDITGODMODE",
-            COMMANDER: "Admin GODMODE"
-        };
+        const KEYS = { INVESTOR: "iwillinvesT", BUILDER: "AdminEDITGODMODE", COMMANDER: "Admin GODMODE" };
 
         const STORE_CONFIG = {
             "admin": { "whatsapp": "2347068516779", "bankName": "OPay", "acctNum": "8083000771", "acctName": "LAWAL OPEYEMI MICHAEL" },
@@ -325,77 +318,46 @@
             ]
         };
 
-        let cart = {}; 
-        let adminMode = false;
+        let cart = {}; let adminMode = false;
         let currentName = localStorage.getItem('mySmoothieName') || 'UNKNOWN';
         let localUserPin = localStorage.getItem('mySmoothiePin'); 
         let tasks = []; 
-        let currentChatRole = 'ALCHEMIST'; 
 
         window.addEventListener('load', () => { 
-            checkSiteHealth();
-            renderMenu(); 
-            renderBankDetails();
-            restoreSession();
-            
+            checkSiteHealth(); renderMenu(); renderBankDetails(); restoreSession();
             document.getElementById('accessKey').addEventListener('keypress', function (e) { if (e.key === 'Enter') checkAccess(); });
             document.getElementById('newPin').addEventListener('keypress', function (e) { if (e.key === 'Enter') saveNewIdentity(); });
             document.getElementById('chatInput').addEventListener('keypress', function (e) { if (e.key === 'Enter') sendChatMessage(); });
             
             if(window.location.hash === "#employee") openLoginModal();
             if(localStorage.getItem('smoothieActiveView') === 'teamPanelVault') startNeuralLink();
-            
             document.getElementById('userIdentityDisplay').innerText = currentName;
         });
 
-        // --- SAFE POST WRAPPER (THE FIX) ---
+        // --- SAFE POST WRAPPER ---
         async function safePost(payload) {
             try {
-                // Using no-cors because Google Script redirects cause issues with strict CORS in some environments
-                // We trust the network layer. If it throws, we catch.
-                await fetch(GOOGLE_API_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify(payload)
-                });
+                await fetch(GOOGLE_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
                 showToast("SYNCED ✓", "success");
-            } catch (e) {
-                showToast("OFFLINE - SYNC FAILED", "error");
-            }
+            } catch (e) { showToast("OFFLINE", "error"); }
         }
+        function showToast(msg, type) { const t = document.getElementById('apiToast'); t.innerText = msg; t.className = type === 'error' ? 'error active' : 'active'; setTimeout(() => t.classList.remove('active'), 2000); }
 
-        function showToast(msg, type) {
-            const t = document.getElementById('apiToast');
-            t.innerText = msg;
-            t.className = type === 'error' ? 'error active' : 'active';
-            setTimeout(() => t.classList.remove('active'), 2000);
-        }
-
-        // --- AUTH SYSTEM ---
+        // --- AUTH ---
         function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; document.getElementById('accessKey').focus(); }
         function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
         function togglePassVisibility() { const i = document.getElementById('accessKey'); i.type = i.type === "password" ? "text" : "password"; }
 
         function checkAccess() {
             const val = document.getElementById('accessKey').value.trim();
-            if (val === KEYS.INVESTOR) {
-                launchApp('investorVault', "green", "🔒 INVESTOR VIEW");
-            } 
-            else if (val === KEYS.BUILDER) {
-                launchApp('investorVault', "red", "⚡ BUILDER MODE");
-                activateBuilderMode();
+            if (val === KEYS.INVESTOR) { launchApp('investorVault', "green", "🔒 INVESTOR VIEW"); closeLoginModal(); } 
+            else if (val === KEYS.BUILDER) { 
+                closeLoginModal(); // Close modal immediately
+                activateBuilderMode(); // Just unlock editing
             }
-            else if (val === KEYS.COMMANDER) {
-                document.getElementById('authStage').classList.add('hidden');
-                document.getElementById('createPinStage').classList.remove('hidden');
-                document.getElementById('newName').focus();
-            }
-            else if (localUserPin && val === localUserPin) {
-                launchApp('teamPanelVault', "blue", "⚔️ COMMANDER ACTIVE");
-                startNeuralLink();
-            } 
+            else if (val === KEYS.COMMANDER) { document.getElementById('authStage').classList.add('hidden'); document.getElementById('createPinStage').classList.remove('hidden'); document.getElementById('newName').focus(); }
+            else if (localUserPin && val === localUserPin) { launchApp('teamPanelVault', "blue", "⚔️ COMMANDER ACTIVE"); startNeuralLink(); closeLoginModal(); } 
             else { alert("ACCESS DENIED"); }
-            if(val !== KEYS.COMMANDER) closeLoginModal();
         }
 
         function saveNewIdentity() {
@@ -403,135 +365,70 @@
             const pin = document.getElementById('newPin').value.trim();
             if(name.length < 2) return alert("Name required.");
             if(pin.length < 4) return alert("PIN too short.");
-            localStorage.setItem('mySmoothieName', name);
-            localStorage.setItem('mySmoothiePin', pin);
-            localUserPin = pin;
-            currentName = name;
+            localStorage.setItem('mySmoothieName', name); localStorage.setItem('mySmoothiePin', pin);
+            localUserPin = pin; currentName = name;
             document.getElementById('userIdentityDisplay').innerText = currentName;
-            closeLoginModal();
-            launchApp('teamPanelVault', "blue", "⚔️ COMMANDER ACTIVE");
-            startNeuralLink();
+            closeLoginModal(); launchApp('teamPanelVault', "blue", "⚔️ COMMANDER ACTIVE"); startNeuralLink();
         }
 
-        function launchApp(viewId, color, badgeText) {
-            document.getElementById(viewId).classList.add('active');
-            localStorage.setItem('smoothieActiveView', viewId);
-            showStatusBadge(badgeText, color);
-        }
+        function launchApp(viewId, color, badgeText) { document.getElementById(viewId).classList.add('active'); localStorage.setItem('smoothieActiveView', viewId); showStatusBadge(badgeText, color); }
 
-        // --- GOOGLE SYNC ENGINE ---
-        function startNeuralLink() {
-            loadCloudData();
-            setInterval(loadCloudData, 5000); 
-        }
-
+        // --- SYNC ---
+        function startNeuralLink() { loadCloudData(); setInterval(loadCloudData, 5000); }
         async function loadCloudData() {
             if(!GOOGLE_API_URL) return;
             try {
                 const res = await fetch(GOOGLE_API_URL);
                 const data = await res.json();
                 
-                // RENDER CHAT
                 const chatContainer = document.getElementById('chatStream');
                 data.chat.forEach(msg => {
                     if(!document.getElementById('msg-' + msg.id)) {
                         const isSelf = msg.role === currentName;
                         const colorClass = isSelf ? 'chat-self' : 'chat-other';
                         const roleColor = isSelf ? 'text-white' : 'text-blue-400';
-                        
-                        // Messenger UI Logic
-                        let content = '';
-                        if(isSelf) {
-                            content = `<div id="msg-${msg.id}" class="msg-row self"><div class="msg-bubble">${msg.text}</div></div>`;
-                        } else {
-                            const initials = msg.role.substring(0,2).toUpperCase();
-                            content = `<div id="msg-${msg.id}" class="msg-row other">
-                                <div onclick="showMemberInfo('${msg.role}')" class="avatar-circle">${initials}</div>
-                                <div class="msg-bubble">${msg.text}</div>
-                            </div>`;
-                        }
-                        
+                        let content = isSelf ? `<div id="msg-${msg.id}" class="msg-row self"><div class="msg-bubble">${msg.text}</div></div>` : `<div id="msg-${msg.id}" class="msg-row other"><div onclick="showMemberInfo('${msg.role}')" class="avatar-circle">${msg.role.substring(0,2)}</div><div class="msg-bubble">${msg.text}</div></div>`;
                         chatContainer.insertAdjacentHTML('beforeend', content);
                         chatContainer.scrollTop = chatContainer.scrollHeight;
+                        // Add Seen Indicator to last message if self
+                        if(isSelf) {
+                             document.querySelectorAll('.seen-indicator').forEach(e => e.remove());
+                             chatContainer.lastElementChild.insertAdjacentHTML('afterend', `<div class="seen-indicator">Seen <svg class="eye-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div>`);
+                        }
                     }
                 });
-
-                // RENDER TASKS
-                tasks = data.tasks; 
-                renderTasks();
-
+                tasks = data.tasks; renderTasks();
             } catch(e) { console.log("Sync Error"); }
         }
 
-        function showMemberInfo(name) {
-            document.getElementById('memberAvatar').innerText = name.substring(0,2).toUpperCase();
-            document.getElementById('memberName').innerText = name;
-            document.getElementById('memberRole').innerText = "CORE TEAM"; 
-            document.getElementById('memberModal').classList.remove('hidden');
-        }
+        function showMemberInfo(name) { document.getElementById('memberAvatar').innerText = name.substring(0,2).toUpperCase(); document.getElementById('memberName').innerText = name; document.getElementById('memberModal').classList.remove('hidden'); }
 
         // --- OPERATIONS ---
         function sendChatMessage() {
-            const txt = document.getElementById('chatInput').value.trim();
-            if(!txt) return;
+            const txt = document.getElementById('chatInput').value.trim(); if(!txt) return;
             const newId = Date.now();
-            
-            // Optimistic UI
-            const chatContainer = document.getElementById('chatStream');
-            chatContainer.insertAdjacentHTML('beforeend', `<div id="msg-${newId}" class="msg-row self"><div class="msg-bubble">${txt}</div></div>`);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-            
             document.getElementById('chatInput').value = '';
-            
             if(GOOGLE_API_URL) safePost({ type: 'CHAT', id: newId, role: currentName, text: txt, pin: KEYS.COMMANDER });
+            loadCloudData();
         }
-
         function addNewTask() {
-            const txt = document.getElementById('newTaskInput').value.trim();
-            const role = document.getElementById('taskAssignee').value;
-            if(!txt) return;
-            const newId = Date.now();
-            document.getElementById('newTaskInput').value = '';
-            // Optimistic
-            tasks.unshift({ id: newId, text: txt, role: role, done: false });
-            renderTasks();
-            
+            const txt = document.getElementById('newTaskInput').value.trim(); const role = document.getElementById('taskAssignee').value; if(!txt) return;
+            const newId = Date.now(); document.getElementById('newTaskInput').value = '';
+            tasks.unshift({ id: newId, text: txt, role: role, done: false }); renderTasks();
             if(GOOGLE_API_URL) safePost({ type: 'TASK', action: 'ADD', id: newId, role: role, text: txt, pin: KEYS.COMMANDER });
         }
-
-        function toggleTask(id) {
-            const t = tasks.find(x => x.id === id);
-            if(t) t.done = !t.done; 
-            renderTasks();
-            if(GOOGLE_API_URL) safePost({ type: 'TASK', action: 'TOGGLE', id: id, pin: KEYS.COMMANDER });
-        }
-
-        function deleteTask(id) {
-            tasks = tasks.filter(t => t.id !== id); 
-            renderTasks();
-            if(GOOGLE_API_URL) safePost({ type: 'TASK', action: 'DELETE', id: id, pin: KEYS.COMMANDER });
-        }
-
+        function toggleTask(id) { const t = tasks.find(x => x.id === id); if(t) t.done = !t.done; renderTasks(); if(GOOGLE_API_URL) safePost({ type: 'TASK', action: 'TOGGLE', id: id, pin: KEYS.COMMANDER }); }
+        function deleteTask(id) { tasks = tasks.filter(t => t.id !== id); renderTasks(); if(GOOGLE_API_URL) safePost({ type: 'TASK', action: 'DELETE', id: id, pin: KEYS.COMMANDER }); }
+        
         function renderTasks() {
             const l = document.getElementById('taskListContainer'); l.innerHTML='';
             if(tasks.length===0) { l.innerHTML='<p class="text-gray-600 text-xs text-center">No Active Directives.</p>'; return; }
             tasks.forEach(t => {
-                let badge = 'bg-gray-600';
-                if(t.role==='URGENT') badge='bg-red-600'; else if(t.role==='OPS') badge='bg-blue-600';
-                l.innerHTML += `<div class="flex items-start gap-3 bg-gray-900/50 border border-gray-800 p-3 rounded-xl hover:border-gray-700 transition">
-                    <input type="checkbox" onchange="toggleTask(${t.id})" class="task-check hidden" id="task-${t.id}" ${t.done?'checked':''}>
-                    <label for="task-${t.id}" class="flex-shrink-0 w-5 h-5 border border-gray-600 rounded cursor-pointer flex items-center justify-center mt-1"><span class="w-3 h-3 rounded-sm"></span></label>
-                    <div class="flex-1"><span class="${badge} text-[8px] px-1.5 py-0.5 rounded text-white font-bold mb-1 inline-block">${t.role}</span><p class="text-sm text-gray-300 leading-snug ${t.done?'line-through opacity-50':''}">${t.text}</p></div>
-                    <button onclick="deleteTask(${t.id})" class="text-gray-600 hover:text-red-500 text-xs">✕</button></div>`;
+                let badge = 'bg-gray-600'; if(t.role==='URGENT') badge='bg-red-600'; else if(t.role==='OPS') badge='bg-blue-600';
+                l.innerHTML += `<div class="flex items-start gap-3 bg-gray-900/50 border border-gray-800 p-3 rounded-xl hover:border-gray-700 transition"><input type="checkbox" onchange="toggleTask(${t.id})" class="task-check hidden" id="task-${t.id}" ${t.done?'checked':''}><label for="task-${t.id}" class="flex-shrink-0 w-5 h-5 border border-gray-600 rounded cursor-pointer flex items-center justify-center mt-1"><span class="w-3 h-3 rounded-sm"></span></label><div class="flex-1"><span class="${badge} text-[8px] px-1.5 py-0.5 rounded text-white font-bold mb-1 inline-block">${t.role}</span><p class="text-sm text-gray-300 leading-snug ${t.done?'line-through opacity-50':''}">${t.text}</p></div><button onclick="deleteTask(${t.id})" class="text-gray-600 hover:text-red-500 text-xs">✕</button></div>`;
             });
         }
-
-        function broadcastToTelegram() {
-            let text = "🚀 *STATUS REPORT*\n\n*DIRECTIVES:*\n";
-            const pending = tasks.filter(t => !t.done);
-            if(pending.length > 0) { pending.forEach(t => text += `🔴 [${t.role}] ${t.text}\n`); } else { text += "✅ All Clear\n"; }
-            window.open(`tg://msg?text=${encodeURIComponent(text)}`, '_blank');
-        }
+        function broadcastToTelegram() { let text = "🚀 *STATUS REPORT*\n\n*DIRECTIVES:*\n"; const pending = tasks.filter(t => !t.done); if(pending.length > 0) { pending.forEach(t => text += `🔴 [${t.role}] ${t.text}\n`); } else { text += "✅ All Clear\n"; } window.open(`tg://msg?text=${encodeURIComponent(text)}`, '_blank'); }
 
         // --- COMPILER ---
         function compileAndSave() {
@@ -539,29 +436,21 @@
             clone.querySelectorAll('#statusBadge, #adminSaveBtn, #configExportModal, #loginModal, #productModal, #systemLockdown, #memberModal').forEach(e => e.classList.add('hidden'));
             clone.querySelectorAll('.drawer-full, .drawer-partial').forEach(e => e.classList.remove('active'));
             clone.querySelectorAll('[contenteditable]').forEach(e => { e.removeAttribute('contenteditable'); e.classList.remove('admin-editable'); });
-            
             const newConfig = { admin: STORE_CONFIG.admin, products: STORE_CONFIG.products };
             const script = clone.querySelector('#main-script').innerHTML;
             clone.querySelector('#main-script').innerHTML = script.replace(/const STORE_CONFIG = \{[\s\S]*?\};/, "const STORE_CONFIG = " + JSON.stringify(newConfig, null, 4) + ";");
-            
             document.getElementById('configOutput').value = "<!DOCTYPE html>\n" + clone.outerHTML;
             document.getElementById('configExportModal').style.display = 'flex';
         }
         function copyToClipboard() { navigator.clipboard.writeText(document.getElementById("configOutput").value); alert("COPIED"); }
 
-        // --- MENU & CART ---
-        function renderBankDetails() {
-            document.getElementById('dispBankName').innerText = STORE_CONFIG.admin.bankName;
-            document.getElementById('dispAcctNum').innerText = STORE_CONFIG.admin.acctNum;
-            document.getElementById('dispAcctName').innerText = STORE_CONFIG.admin.acctName;
-        }
+        // --- MENU ---
+        function renderBankDetails() { document.getElementById('dispBankName').innerText = STORE_CONFIG.admin.bankName; document.getElementById('dispAcctNum').innerText = STORE_CONFIG.admin.acctNum; document.getElementById('dispAcctName').innerText = STORE_CONFIG.admin.acctName; }
         function renderMenu() {
             const c = document.getElementById('menuGrid'); let h = '';
             STORE_CONFIG.products.forEach(p => {
                 const edit = adminMode ? 'contenteditable="true" class="admin-editable rounded p-1"' : '';
-                h += `<div onclick="showProductDetails(${p.id})" class="float-card bg-gray-900 border border-${p.color}-500/50 rounded-2xl p-3 shadow-lg flex flex-col justify-between cursor-pointer active:scale-95 transition shimmer-card">
-                    <div><h3 ${edit} class="font-bold text-sm uppercase mb-2 text-white">${p.name}</h3><div class="h-28 w-full rounded-xl mb-2 overflow-hidden bg-gray-800"><img src="${p.img}" class="object-cover w-full h-full"></div></div>
-                    <div class="flex justify-between items-center mt-2"><span class="text-${p.color}-400 font-bold">₦<span ${edit}>${p.price.toLocaleString()}</span></span><button onclick="event.stopPropagation(); addToCart('${p.name}', ${p.price})" class="bg-${p.color}-600 text-black text-xs font-bold px-3 py-1.5 rounded-lg z-10">+ ADD</button></div></div>`;
+                h += `<div onclick="showProductDetails(${p.id})" class="float-card bg-gray-900 border border-${p.color}-500/50 rounded-2xl p-3 shadow-lg flex flex-col justify-between cursor-pointer active:scale-95 transition shimmer-card"><div><h3 ${edit} class="font-bold text-sm uppercase mb-2 text-white">${p.name}</h3><div class="h-28 w-full rounded-xl mb-2 overflow-hidden bg-gray-800"><img src="${p.img}" class="object-cover w-full h-full"></div></div><div class="flex justify-between items-center mt-2"><span class="text-${p.color}-400 font-bold">₦<span ${edit}>${p.price.toLocaleString()}</span></span><button onclick="event.stopPropagation(); addToCart('${p.name}', ${p.price})" class="bg-${p.color}-600 text-black text-xs font-bold px-3 py-1.5 rounded-lg z-10">+ ADD</button></div></div>`;
             });
             document.getElementById('loadingMsg').style.display = 'none'; c.innerHTML = h;
         }
@@ -570,80 +459,22 @@
         function updateCart() {
             const l = document.getElementById('cartItems'); l.innerHTML=''; let t=0, c=0;
             for(const [k,v] of Object.entries(cart)) { t+=v.p*v.q; c+=v.q; l.innerHTML+=`<div class="flex justify-between text-white"><span>${k} x${v.q}</span><span>₦${(v.p*v.q).toLocaleString()}</span></div>`; }
-            document.getElementById('totalPrice').innerText = '₦'+t.toLocaleString();
-            document.getElementById('cartCount').innerText = c;
-            document.getElementById('cartCount').classList.toggle('hidden', c===0);
+            document.getElementById('totalPrice').innerText = '₦'+t.toLocaleString(); document.getElementById('cartCount').innerText = c; document.getElementById('cartCount').classList.toggle('hidden', c===0);
         }
-        function copyBank() { 
-            const num = document.getElementById('dispAcctNum').innerText;
-            navigator.clipboard.writeText(num).then(() => {
-                const btn = document.getElementById('copyBankBtn');
-                const originalText = btn.innerText;
-                btn.innerText = "COPIED!";
-                btn.classList.add('bg-green-600', 'text-white');
-                setTimeout(() => { btn.innerText = originalText; btn.classList.remove('bg-green-600', 'text-white'); }, 2000);
-            });
-        }
+        function copyBank() { const num = document.getElementById('dispAcctNum').innerText; navigator.clipboard.writeText(num).then(() => { const btn = document.getElementById('copyBankBtn'); const originalText = btn.innerText; btn.innerText = "COPIED!"; btn.classList.add('bg-green-600', 'text-white'); setTimeout(() => { btn.innerText = originalText; btn.classList.remove('bg-green-600', 'text-white'); }, 2000); }); }
         function sendOrder() {
             let m = `*NEW ORDER* 🚨%0A👤 ${document.getElementById('custName').value}%0A📍 ${document.getElementById('custAddress').value}%0A%0A`;
             for(const [k,v] of Object.entries(cart)) m+=`${k} (x${v.q}) - ₦${v.p*v.q}%0A`;
             if(GOOGLE_API_URL) safePost({ type: 'ORDER', customer: document.getElementById('custName').value, orderString: m, total: document.getElementById('totalPrice').innerText, pin: KEYS.COMMANDER });
             window.open(`https://wa.me/${STORE_CONFIG.admin.whatsapp}?text=${m}`, '_blank');
         }
-
-        // --- UI UTILS ---
-        function checkSiteHealth() {
-            if(SITE_STATE === 'MAINTENANCE') { document.getElementById('systemLockdown').style.display = 'flex'; document.getElementById('lockdownTitle').innerText = "SYSTEM UPGRADING"; }
-            else if (SITE_STATE === 'KILLED') { document.getElementById('systemLockdown').style.display = 'flex'; }
-        }
+        function checkSiteHealth() { if(SITE_STATE === 'MAINTENANCE') { document.getElementById('systemLockdown').style.display = 'flex'; document.getElementById('lockdownTitle').innerText = "SYSTEM UPGRADING"; } else if (SITE_STATE === 'KILLED') { document.getElementById('systemLockdown').style.display = 'flex'; } }
         function closeDrawer(id) { document.getElementById(id).classList.remove('active'); localStorage.setItem('smoothieActiveView', 'none'); document.getElementById('statusBadge').classList.add('hidden'); }
         function minimizeDrawer(id) { document.getElementById(id).classList.remove('active'); }
         function restoreSession() { const v = localStorage.getItem('smoothieActiveView'); if(v && v !== 'none') document.getElementById(v).classList.add('active'); }
         function showStatusBadge(text, color) { const b = document.getElementById('statusBadge'); b.innerText = text; b.className = `fixed top-4 left-4 z-[300] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl backdrop-blur-md border border-${color}-500 text-${color}-500 animate-pulse bg-black`; b.classList.remove('hidden'); }
-        function activateBuilderMode() {
-            adminMode = true; document.getElementById('adminSaveBtn').classList.remove('hidden');
-            document.querySelectorAll('[id^="plan-"]').forEach(el => { el.contentEditable = "true"; el.classList.add('admin-editable'); });
-            renderMenu();
-        }
-        function switchTab(t) {
-            document.getElementById('view-chat').className = t==='CHAT' ? 'flex-1 flex flex-col h-full overflow-hidden viewport-height' : 'hidden';
-            document.getElementById('view-tasks').className = t==='TASKS' ? 'flex-1 flex flex-col h-full overflow-hidden p-4 viewport-height' : 'hidden';
-            document.getElementById('tab-chat').className = t==='CHAT' ? "flex-1 py-3 text-xs font-bold uppercase tab-active transition" : "flex-1 py-3 text-xs font-bold uppercase tab-inactive transition";
-            document.getElementById('tab-tasks').className = t==='TASKS' ? "flex-1 py-3 text-xs font-bold uppercase tab-active transition" : "flex-1 py-3 text-xs font-bold uppercase tab-inactive transition";
-        }
-        function setRole(r) { currentChatRole = r; updateRoleUI(); }
-        function updateRoleUI() {
-            document.querySelectorAll('.role-btn').forEach(b => { b.classList.remove('bg-purple-900', 'bg-blue-900', 'bg-orange-900', 'text-white', 'border-white'); b.classList.add('bg-gray-800', 'text-gray-400'); });
-            let id = 'role-alch', active = 'bg-purple-900';
-            if(currentChatRole === 'ARCHITECT') { id = 'role-arch'; active = 'bg-blue-900'; } else if(currentChatRole === 'AMPLIFIER') { id = 'role-amp'; active = 'bg-orange-900'; }
-            const btn = document.getElementById(id); btn.classList.remove('bg-gray-800', 'text-gray-400'); btn.classList.add(active, 'text-white', 'border-white');
-        }
-
-        // --- PRODUCT DETAILS MODAL ---
-        function showProductDetails(id) {
-            const p = STORE_CONFIG.products.find(x => x.id === id);
-            if(!p) return;
-            document.getElementById('modalContent').innerHTML = `
-                <div class="text-center mb-6">
-                    <img src="${p.img}" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-${p.color}-500 mb-4 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-                    <h2 class="text-3xl font-black uppercase text-white leading-none mb-1">${p.name}</h2>
-                    <p class="text-${p.color}-400 font-bold text-xl">₦${p.price.toLocaleString()}</p>
-                </div>
-                <div class="space-y-4 text-sm text-gray-300">
-                    <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700">
-                        <p class="uppercase text-[10px] text-gray-500 font-bold tracking-widest mb-1">Function</p>
-                        <p>${p.description}</p>
-                    </div>
-                    <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700">
-                        <p class="uppercase text-[10px] text-gray-500 font-bold tracking-widest mb-1">Contains</p>
-                        <p class="italic text-gray-400">${p.ingredients}</p>
-                    </div>
-                </div>
-                <button onclick="addToCart('${p.name}', ${p.price}); closeModal()" class="w-full mt-8 bg-white text-black font-black py-4 rounded-xl uppercase hover:scale-105 transition shadow-lg">Add to Order</button>
-            `;
-            document.getElementById('productModal').style.display = 'flex';
-        }
-        function closeModal() { document.getElementById('productModal').style.display = 'none'; }
+        function activateBuilderMode() { adminMode = true; document.getElementById('adminSaveBtn').classList.remove('hidden'); showStatusBadge("⚡ BUILDER MODE", "red"); document.querySelectorAll('[id^="plan-"]').forEach(el => { el.contentEditable = "true"; el.classList.add('admin-editable'); }); renderMenu(); }
+        function switchTab(t) { document.getElementById('view-chat').className = t==='CHAT' ? 'flex-1 flex flex-col h-full overflow-hidden viewport-height' : 'hidden'; document.getElementById('view-tasks').className = t==='TASKS' ? 'flex-1 flex flex-col h-full overflow-hidden p-4 viewport-height' : 'hidden'; document.getElementById('tab-chat').className = t==='CHAT' ? "flex-1 py-3 text-xs font-bold uppercase tab-active transition" : "flex-1 py-3 text-xs font-bold uppercase tab-inactive transition"; document.getElementById('tab-tasks').className = t==='TASKS' ? "flex-1 py-3 text-xs font-bold uppercase tab-active transition" : "flex-1 py-3 text-xs font-bold uppercase tab-inactive transition"; }
     </script>
 </body>
 </html>
