@@ -2,336 +2,420 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smoothie Verse | Zero Cost</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <title>smoothiePlus+ | Bio-Hacked Nutrition</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Montserrat', 'sans-serif'] },
+                    colors: { neon: '#39ff14', dark: '#050508' }
+                }
+            }
+        }
+    </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #000; color: white; }
+        body { background-color: #050508; color: white; overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
         
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        /* Noise Texture */
+        .noise-overlay {
+            position: fixed; inset: 0; pointer-events: none; z-index: 50;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.06'/%3E%3C/svg%3E");
+            opacity: 0.4;
+        }
+
+        /* Glass Drawers */
+        .drawer { position: fixed; inset: 0; background: rgba(5, 5, 8, 0.95); backdrop-filter: blur(20px); transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32,0.72,0,1); z-index: 100; display: flex; flex-direction: column; }
+        .drawer.active { transform: translateY(0); }
+        
+        .drawer-bottom { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(20,20,30,0.95); backdrop-filter: blur(20px); border-top: 1px solid rgba(57,255,20,0.2); border-radius: 24px 24px 0 0; transform: translateY(110%); transition: transform 0.3s cubic-bezier(0.32,0.72,0,1); z-index: 90; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 -10px 40px rgba(0,0,0,0.8); }
+        .drawer-bottom.active { transform: translateY(0); }
 
         /* Animations */
-        @keyframes shimmer {
-            0% { background-position: -1000px 0; }
-            100% { background-position: 1000px 0; }
-        }
-        .shimmer-card {
-            background: linear-gradient(to right, #0f172a 4%, #1e293b 25%, #0f172a 36%);
-            background-size: 1000px 100%;
-            animation: shimmer 20s infinite linear;
-        }
+        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(57,255,20,0.7); } 70% { box-shadow: 0 0 0 15px rgba(57,255,20,0); } 100% { box-shadow: 0 0 0 0 rgba(57,255,20,0); } }
+        .pulse-glow { animation: pulse-green 2s infinite; }
         
-        /* Glassmorphism */
-        .glass {
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
+        @keyframes shimmer { 0%{background-position: -1000px 0} 100%{background-position: 1000px 0} }
+        .shimmer-card { background: linear-gradient(to right, rgba(20,20,30,0.6) 4%, rgba(57,255,20,0.05) 25%, rgba(20,20,30,0.6) 36%); background-size: 1000px 100%; animation: shimmer 20s infinite linear; border: 1px solid rgba(255,255,255,0.05); }
 
-        .float-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px -10px rgba(74, 222, 128, 0.2); }
+        /* Scanner HUD */
+        .scanner-line { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: #39ff14; box-shadow: 0 0 15px #39ff14; animation: scan-down 3s linear infinite; }
+        .hud-corner { position: absolute; width: 40px; height: 40px; border: 4px solid #39ff14; opacity: 0.8; }
+        .tl { top:20px; left:20px; border-right:none; border-bottom:none; }
+        .tr { top:20px; right:20px; border-left:none; border-bottom:none; }
+        .bl { bottom:20px; left:20px; border-right:none; border-top:none; }
+        .br { bottom:20px; right:20px; border-left:none; border-top:none; }
+        @keyframes scan-down { 0%{top:0;opacity:0} 10%{opacity:1} 90%{opacity:1} 100%{top:100%;opacity:0} }
+
+        /* Utils */
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .admin-editable { background: rgba(57,255,20,0.1); border-bottom: 1px dashed #39ff14; padding: 2px; outline: none; }
     </style>
 </head>
-<body class="bg-black min-h-screen pb-20 selection:bg-green-500 selection:text-black">
+<body class="pb-32 font-sans selection:bg-neon selection:text-black">
 
-    <div id="loadingMsg" class="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-black transition-opacity duration-500">
-        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-400 mb-4"></div>
-        <h2 class="text-green-400 font-bold tracking-widest animate-pulse">LOADING MENU...</h2>
+    <div class="noise-overlay"></div>
+
+    <div id="toast" class="fixed top-[-50px] left-1/2 transform -translate-x-1/2 bg-neon text-black px-6 py-2 rounded-full font-bold text-xs shadow-[0_0_20px_rgba(57,255,20,0.4)] z-[200] transition-all duration-300 flex items-center gap-2">
+        <i class="fas fa-check-circle"></i> <span id="toastMsg">Action Complete</span>
     </div>
 
-    <nav class="fixed top-0 w-full z-40 glass px-4 py-3 flex justify-between items-center">
-        <div class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-gradient-to-tr from-green-400 to-emerald-600 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(74,222,128,0.5)]">
-                <i class="fas fa-leaf text-black text-sm"></i>
+    <div id="scannerModal" class="fixed inset-0 z-[150] bg-black hidden flex-col">
+        <div class="relative flex-1 overflow-hidden bg-gray-900">
+            <video id="scannerVideo" class="absolute inset-0 w-full h-full object-cover opacity-60" autoplay playsinline muted></video>
+            <div class="absolute inset-0 z-10">
+                <div class="scanner-line"></div>
+                <div class="hud-corner tl"></div><div class="hud-corner tr"></div>
+                <div class="hud-corner bl"></div><div class="hud-corner br"></div>
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-neon font-mono text-xs tracking-widest animate-pulse text-center">
+                    <i class="fas fa-fingerprint text-4xl mb-2"></i><br>SCANNING BIOMETRICS
+                </div>
             </div>
-            <h1 class="font-bold text-lg tracking-tight">Zero<span class="text-green-400">Cost</span></h1>
+            <button onclick="closeScanner()" class="absolute top-8 right-8 z-50 text-white bg-black/50 rounded-full w-10 h-10 flex items-center justify-center border border-white/20">✕</button>
         </div>
-        <div class="relative cursor-pointer" onclick="toggleCart()">
-            <i class="fas fa-shopping-bag text-xl text-gray-300 hover:text-white transition"></i>
-            <span id="cartBadge" class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+        <div class="bg-gray-900/95 backdrop-blur-md p-6 text-center border-t border-gray-800 pb-12">
+            <p class="text-xs text-neon mb-2 font-mono blink">>> INITIALIZING SEQUENCE...</p>
+            <div class="h-1 w-full bg-gray-800 rounded-full overflow-hidden"><div class="h-full bg-neon w-1/3 animate-pulse"></div></div>
         </div>
-    </nav>
+    </div>
 
-    <header class="pt-24 pb-6 px-4">
-        <div class="bg-gradient-to-r from-green-900/20 to-blue-900/20 rounded-2xl p-6 border border-white/5 text-center relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-green-500/10 blur-3xl rounded-full"></div>
-            <h2 class="text-2xl font-bold mb-2">Fresh. Organic. <span class="text-green-400">Yours.</span></h2>
-            <p class="text-gray-400 text-xs max-w-md mx-auto">100% Natural ingredients delivered instantly.</p>
+    <header class="flex justify-between items-center px-6 pt-8 pb-4 relative z-20">
+        <div>
+            <h1 class="text-3xl font-black tracking-tighter uppercase leading-none italic">
+                smoothie<span class="text-transparent bg-clip-text bg-gradient-to-r from-neon to-emerald-600">Plus+</span>
+            </h1>
+            <p class="text-[10px] text-gray-500 tracking-[0.3em] uppercase mt-1">Liquid Energy v2.0</p>
         </div>
+        <button onclick="startScanner()" class="bg-gray-900/80 backdrop-blur-md border border-neon/30 text-neon rounded-full w-12 h-12 flex items-center justify-center hover:bg-neon/10 transition shadow-[0_0_15px_rgba(57,255,20,0.2)]">
+            <i class="fas fa-qrcode text-lg"></i>
+        </button>
     </header>
 
-    <div id="investorPanel" class="hidden px-4 mb-6">
-        <div class="bg-slate-900 border border-yellow-500/30 rounded-xl p-4">
-            <h3 class="text-yellow-500 text-xs font-bold uppercase tracking-widest mb-3 border-b border-white/10 pb-2">
-                <i class="fas fa-lock mr-2"></i>Investor Insight
-            </h3>
-            <div class="grid grid-cols-3 gap-2 text-center mb-4">
-                <div class="bg-black/40 p-2 rounded-lg">
-                    <p class="text-[10px] text-gray-400">Total Rev</p>
-                    <p class="text-white font-bold text-sm">₦1.2M</p>
-                </div>
-                <div class="bg-black/40 p-2 rounded-lg">
-                    <p class="text-[10px] text-gray-400">Margin</p>
-                    <p class="text-green-400 font-bold text-sm">42%</p>
-                </div>
-                <div class="bg-black/40 p-2 rounded-lg">
-                    <p class="text-[10px] text-gray-400">Orders</p>
-                    <p class="text-blue-400 font-bold text-sm">840</p>
-                </div>
-            </div>
-            <div id="investorProductGrid" class="space-y-2 max-h-32 overflow-y-auto pr-1 custom-scroll">
-                </div>
-        </div>
-    </div>
-
     <main class="px-4 pb-24">
-        <div class="flex justify-between items-end mb-4">
-            <h2 class="text-xl font-bold">Menu</h2>
-            <div class="flex gap-2">
-                <span class="text-[10px] bg-white/10 px-2 py-1 rounded-md text-gray-300">All</span>
-                <span class="text-[10px] bg-white/5 px-2 py-1 rounded-md text-gray-500">Green</span>
-                <span class="text-[10px] bg-white/5 px-2 py-1 rounded-md text-gray-500">Berry</span>
-            </div>
+        <div id="loadingMsg" class="flex flex-col items-center justify-center mt-20 gap-4">
+            <div class="w-8 h-8 border-2 border-neon border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-xs text-neon font-mono animate-pulse">DECRYPTING MENU...</p>
         </div>
-        
-        <div id="menuGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+        <div id="menuGrid" class="grid grid-cols-2 gap-4">
             </div>
     </main>
 
-    <footer class="text-center text-gray-600 text-[10px] pb-8">
-        <p>Zero Cost Smoothies © 2024</p>
-        <button onclick="toggleAdmin()" class="mt-4 text-gray-800 hover:text-gray-500 transition">
-            <i class="fas fa-fingerprint"></i> Admin Access
+    <div class="fixed bottom-8 w-full px-6 z-40 flex justify-between items-end pointer-events-none">
+        <div class="pointer-events-auto flex gap-3 bg-gray-900/90 backdrop-blur-xl px-4 py-2 rounded-full border border-white/10 shadow-2xl">
+            <button onclick="openLogin('TEAM')" class="text-[9px] text-gray-400 hover:text-white font-bold uppercase tracking-widest transition">Team</button>
+            <div class="w-[1px] bg-white/10 h-3 my-auto"></div>
+            <button onclick="openLogin('INVESTOR')" class="text-[9px] text-gray-400 hover:text-neon font-bold uppercase tracking-widest transition">Investor</button>
+        </div>
+
+        <button onclick="toggleCart()" class="pointer-events-auto bg-neon text-black w-14 h-14 rounded-full shadow-[0_0_20px_rgba(57,255,20,0.4)] flex items-center justify-center active:scale-90 transition relative group">
+            <i class="fas fa-shopping-bag text-xl group-hover:rotate-12 transition"></i>
+            <span id="cartCount" class="absolute -top-1 -right-1 bg-red-600 text-white text-[9px] font-black w-5 h-5 flex items-center justify-center rounded-full hidden">0</span>
         </button>
-    </footer>
+    </div>
 
-    <div id="cartModal" class="fixed inset-0 z-50 bg-black/90 hidden backdrop-blur-sm flex flex-col justify-end sm:justify-center sm:items-center transition-all">
-        <div class="bg-[#0f172a] w-full sm:w-96 rounded-t-3xl sm:rounded-2xl border-t sm:border border-white/10 p-6 shadow-2xl animate-slide-up relative">
+    <div id="cartDrawer" class="drawer-bottom">
+        <div class="p-6 h-full flex flex-col">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-black italic uppercase">Cart <span class="text-neon">//</span> Summary</h2>
+                <button onclick="toggleCart()" class="text-gray-400"><i class="fas fa-chevron-down"></i></button>
+            </div>
             
-            <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
-                <h2 class="text-xl font-bold">Your Cart</h2>
-                <button onclick="toggleCart()" class="text-gray-400 hover:text-white"><i class="fas fa-times text-xl"></i></button>
-            </div>
-
-            <div id="cartItems" class="max-h-60 overflow-y-auto mb-4 space-y-3">
-                <p class="text-gray-500 text-center text-sm py-4">Your cart is empty.</p>
-            </div>
-
-            <div class="border-t border-white/10 pt-4">
-                <div class="flex justify-between mb-4 text-lg font-bold">
-                    <span>Total</span>
-                    <span class="text-green-400">₦<span id="cartTotal">0</span></span>
+            <div id="cartItems" class="flex-1 overflow-y-auto space-y-3 hide-scroll">
                 </div>
-                <button onclick="checkoutWhatsApp()" class="w-full bg-green-500 hover:bg-green-600 text-black font-bold py-3 rounded-xl transition flex justify-center items-center gap-2">
-                    <i class="fab fa-whatsapp text-lg"></i> Checkout via WhatsApp
+
+            <div class="mt-4 pt-4 border-t border-white/10">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-gray-400 text-xs uppercase">Total Payload</span>
+                    <span class="text-2xl font-black text-neon">₦<span id="cartTotal">0</span></span>
+                </div>
+                <button onclick="checkout()" class="w-full bg-neon text-black font-black uppercase py-4 rounded-xl hover:bg-white transition shadow-[0_0_20px_rgba(57,255,20,0.3)] flex justify-center items-center gap-2">
+                    <i class="fab fa-whatsapp"></i> Initiate Order
                 </button>
             </div>
         </div>
     </div>
 
-    <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-white text-black px-6 py-3 rounded-full shadow-2xl z-[70] translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-2 font-bold text-sm">
-        <i class="fas fa-check-circle text-green-600"></i>
-        <span>Added to cart</span>
+    <div id="loginModal" class="fixed inset-0 z-[60] bg-black/95 hidden flex-col items-center justify-center p-6 backdrop-blur-xl">
+        <h3 id="loginTitle" class="text-neon font-mono text-xl mb-6 tracking-widest">ACCESS CONTROL</h3>
+        <input type="password" id="pinInput" placeholder="ENTER KEY" class="bg-transparent border-b-2 border-gray-700 text-center text-2xl text-white w-full max-w-[200px] mb-8 focus:border-neon focus:outline-none placeholder-gray-800 font-mono tracking-[10px]">
+        <div class="grid grid-cols-3 gap-4 mb-8">
+            <button onclick="addPin(1)" class="p-4 rounded-lg bg-gray-800/50 text-xl font-mono hover:bg-gray-700">1</button>
+            <button onclick="addPin(2)" class="p-4 rounded-lg bg-gray-800/50 text-xl font-mono hover:bg-gray-700">2</button>
+            <button onclick="addPin(3)" class="p-4 rounded-lg bg-gray-800/50 text-xl font-mono hover:bg-gray-700">3</button>
+            <button onclick="addPin(4)" class="p-4 rounded-lg bg-gray-800/50 text-xl font-mono hover:bg-gray-700">4</button>
+            <button onclick="addPin(5)" class="p-4 rounded-lg bg-gray-800/50 text-xl font-mono hover:bg-gray-700">5</button>
+            <button onclick="addPin(6)" class="p-4 rounded-lg bg-gray-800/50 text-xl font-mono hover:bg-gray-700">6</button>
+            <button onclick="addPin(7)" class="p-4 rounded-lg bg-gray-800/50 text-xl font-mono hover:bg-gray-700">7</button>
+            <button onclick="addPin(8)" class="p-4 rounded-lg bg-gray-800/50 text-xl font-mono hover:bg-gray-700">8</button>
+            <button onclick="addPin(9)" class="p-4 rounded-lg bg-gray-800/50 text-xl font-mono hover:bg-gray-700">9</button>
+            <button onclick="document.getElementById('loginModal').classList.add('hidden')" class="p-4 text-red-500 font-bold">EXIT</button>
+            <button onclick="addPin(0)" class="p-4 rounded-lg bg-gray-800/50 text-xl font-mono hover:bg-gray-700">0</button>
+            <button onclick="submitLogin()" class="p-4 text-neon font-bold">GO</button>
+        </div>
+    </div>
+
+    <div id="investorVault" class="drawer">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-black text-neon tracking-tighter">VAULT <span class="text-white text-sm opacity-50"> // READ ONLY</span></h2>
+                <button onclick="closeVault('investorVault')" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-gray-900 border border-white/5 p-4 rounded-2xl">
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest">Revenue</p>
+                    <p class="text-2xl font-mono text-white">₦1.4M</p>
+                </div>
+                <div class="bg-gray-900 border border-white/5 p-4 rounded-2xl">
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest">Net Profit</p>
+                    <p class="text-2xl font-mono text-neon">+42%</p>
+                </div>
+            </div>
+
+            <h3 class="text-xs font-bold text-gray-400 uppercase mb-4">Live Margins</h3>
+            <div id="investorProductGrid" class="space-y-3 h-[50vh] overflow-y-auto">
+                </div>
+        </div>
+    </div>
+
+    <div id="teamVault" class="drawer">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-black text-blue-500 tracking-tighter">TEAM <span class="text-white text-sm opacity-50"> // ADMIN</span></h2>
+                <button onclick="closeVault('teamVault')" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="bg-blue-500/10 border border-blue-500/20 p-4 rounded-xl mb-4 text-sm text-blue-200">
+                <i class="fas fa-info-circle mr-2"></i>Admin Mode Active. Text on menu cards is now editable.
+            </div>
+            <button onclick="closeVault('teamVault')" class="w-full py-4 bg-white text-black font-bold rounded-xl">Return to Menu (Edit Mode)</button>
+        </div>
     </div>
 
     <script>
-        // CONFIGURATION
-        const STORE_CONFIG = {
-            whatsappNumber: "2348000000000", // Replace with your number
+        // CONFIG
+        const CONFIG = {
+            whatsapp: "2348000000000",
             products: [
-                { id: 1, name: "Green Glow", price: 3500, img: "https://images.unsplash.com/photo-1610970881699-44a5587cabec?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" },
-                { id: 2, name: "Berry Blast", price: 4000, img: "https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" },
-                { id: 3, name: "Mango Madness", price: 3000, img: "https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" }, // Placeholder img
-                { id: 4, name: "Choco Protein", price: 5000, img: "https://images.unsplash.com/photo-1577805947697-89e18249d767?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" },
-                { id: 5, name: "Tropical Haze", price: 3800, img: "https://images.unsplash.com/photo-1546173159-315724a31696?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" },
-                { id: 6, name: "Avocado Power", price: 4500, img: "https://images.unsplash.com/photo-1603569283847-aa295f0d016a?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" }
-            ]
+                { id: 1, name: "Neon Detox", price: 3500, img: "https://images.unsplash.com/photo-1610970881699-44a5587cabec?auto=format&fit=crop&w=600" },
+                { id: 2, name: "Cyber Berry", price: 4000, img: "https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?auto=format&fit=crop&w=600" },
+                { id: 3, name: "Data Crunch", price: 5000, img: "https://images.unsplash.com/photo-1577805947697-89e18249d767?auto=format&fit=crop&w=600" },
+                { id: 4, name: "Void Walker", price: 4500, img: "https://images.unsplash.com/photo-1603569283847-aa295f0d016a?auto=format&fit=crop&w=600" }
+            ],
+            keys: { TEAM: "0000", INVESTOR: "1234" } // Simpler numeric pins for the modal
         };
 
         // STATE
         let cart = [];
         let adminMode = false;
+        let loginType = '';
 
-        // --- CORE FUNCTIONS ---
-
-        // 1. Render Menu (INCLUDES THE FIX)
+        // --- CORE RENDER (THE FIX) ---
         function renderMenu() {
-            const c = document.getElementById('menuGrid');
-            let h = '';
+            const grid = document.getElementById('menuGrid');
+            let html = '';
 
-            // Customer Cards
-            STORE_CONFIG.products.forEach(p => {
-                const edit = adminMode ? 'contenteditable="true" class="bg-white/10 rounded px-1 border border-dashed border-yellow-500/50"' : '';
-                const clickAction = adminMode ? '' : `onclick="showProductDetails(${p.id})"`; // Modal placeholder
-                
-                h += `
-                <div class="float-card bg-[#0f172a] border border-white/5 rounded-2xl p-3 shadow-lg flex flex-col justify-between cursor-pointer active:scale-95 transition-all shimmer-card relative overflow-hidden group">
-                    <div class="h-32 w-full rounded-xl mb-3 overflow-hidden bg-black relative">
-                        <img src="${p.img}" class="object-cover w-full h-full opacity-90 group-hover:opacity-100 group-hover:scale-110 transition duration-500" loading="lazy">
-                        ${adminMode ? '<div class="absolute top-1 right-1 bg-yellow-500 text-black text-[9px] font-bold px-1 rounded">EDIT</div>' : ''}
-                    </div>
-                    
-                    <div>
-                        <h3 ${edit} class="font-bold text-sm uppercase mb-1 text-white leading-tight">${p.name}</h3>
-                        <div class="flex justify-between items-center mt-3">
-                            <span class="text-green-400 font-bold text-sm">₦<span ${edit}>${p.price.toLocaleString()}</span></span>
-                            ${!adminMode ? `
-                            <button onclick="event.stopPropagation(); addToCart('${p.name}', ${p.price})" class="bg-white text-black text-[10px] font-bold px-3 py-1.5 rounded-lg hover:bg-gray-200 transition">
-                                + ADD
-                            </button>` : ''}
+            CONFIG.products.forEach(p => {
+                const editAttr = adminMode ? 'contenteditable="true" class="admin-editable"' : '';
+                const clickAction = adminMode ? '' : `onclick="addToCart('${p.name}', ${p.price})"`;
+
+                html += `
+                <div class="relative group">
+                    <div class="absolute inset-0 bg-neon blur-[20px] opacity-0 group-hover:opacity-20 transition duration-500"></div>
+                    <div ${clickAction} class="relative bg-[#0f1014] border border-white/5 rounded-2xl p-4 flex flex-col justify-between shimmer-card cursor-pointer active:scale-95 transition-transform overflow-hidden">
+                        
+                        <div class="h-32 w-full rounded-xl overflow-hidden bg-black mb-3 relative">
+                            <img src="${p.img}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition duration-500">
+                            ${adminMode ? '<div class="absolute top-2 right-2 bg-blue-500 text-[9px] px-2 py-1 rounded font-bold text-white">EDIT</div>' : ''}
+                        </div>
+                        
+                        <div>
+                            <h3 ${editAttr} class="font-bold text-sm text-gray-200 uppercase tracking-wide mb-1">${p.name}</h3>
+                            <div class="flex justify-between items-center mt-2">
+                                <span class="text-neon font-bold font-mono">₦<span ${editAttr}>${p.price.toLocaleString()}</span></span>
+                                ${!adminMode ? `<div class="bg-white/10 w-6 h-6 rounded flex items-center justify-center text-xs text-white group-hover:bg-neon group-hover:text-black transition">+</div>` : ''}
+                            </div>
                         </div>
                     </div>
                 </div>`;
             });
 
-            c.innerHTML = h;
+            grid.innerHTML = html;
+            
+            // THE FIX: Hide Loading Message
+            const loader = document.getElementById('loadingMsg');
+            if(loader) loader.style.display = 'none';
 
-            // --- THE CRITICAL FIX: HIDE LOADER ---
-            const loadingMsg = document.getElementById('loadingMsg');
-            if (loadingMsg) {
-                // Small timeout to ensure the DOM paint is visible first
-                setTimeout(() => {
-                    loadingMsg.style.opacity = '0';
-                    setTimeout(() => loadingMsg.style.display = 'none', 500);
-                }, 500); // 0.5s artificial delay for effect
-            }
-
-            // Investor Grid Logic
             renderInvestorGrid();
         }
 
-        // 2. Render Investor Grid (Admin Only)
         function renderInvestorGrid() {
-            const invGrid = document.getElementById('investorProductGrid');
-            if(invGrid) {
-                let invHtml = '';
-                STORE_CONFIG.products.forEach(p => {
-                    // Calculate 60% Cost / 40% Margin Logic
-                    const cost = Math.round(p.price * 0.6);
-                    const margin = p.price - cost;
-                    invHtml += `
-                    <div class="flex items-center justify-between bg-black/20 p-2 rounded border border-white/5">
-                        <div class="flex items-center gap-2">
-                            <img src="${p.img}" class="w-6 h-6 rounded-full object-cover">
-                            <p class="text-white text-[10px] font-bold">${p.name}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-gray-500 text-[8px]">Cost: ₦${cost}</p>
-                            <p class="text-green-400 text-[9px] font-bold">+₦${margin}</p>
-                        </div>
-                    </div>`;
-                });
-                invGrid.innerHTML = invHtml;
-            }
-        }
-
-        // 3. Cart Logic
-        function addToCart(name, price) {
-            cart.push({ name, price });
-            updateCartUI();
-            showToast(`Added ${name}`);
-        }
-
-        function updateCartUI() {
-            document.getElementById('cartBadge').innerText = cart.length;
-            document.getElementById('cartBadge').style.display = cart.length > 0 ? 'block' : 'none';
-            
-            const list = document.getElementById('cartItems');
-            const totalEl = document.getElementById('cartTotal');
-            
-            if (cart.length === 0) {
-                list.innerHTML = '<p class="text-gray-500 text-center text-sm py-4">Your cart is empty.</p>';
-                totalEl.innerText = '0';
-                return;
-            }
-
+            const grid = document.getElementById('investorProductGrid');
             let html = '';
-            let total = 0;
-            
-            cart.forEach((item, index) => {
-                total += item.price;
+            CONFIG.products.forEach(p => {
+                const cost = Math.round(p.price * 0.6);
+                const margin = p.price - cost;
                 html += `
-                <div class="flex justify-between items-center bg-white/5 p-3 rounded-lg border border-white/5">
-                    <span class="text-sm font-medium">${item.name}</span>
-                    <div class="flex items-center gap-3">
-                        <span class="text-green-400 text-sm">₦${item.price.toLocaleString()}</span>
-                        <button onclick="removeFromCart(${index})" class="text-red-400 hover:text-red-300"><i class="fas fa-trash text-xs"></i></button>
+                <div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/5">
+                    <img src="${p.img}" class="w-10 h-10 rounded-full object-cover grayscale opacity-70">
+                    <div class="flex-1">
+                        <p class="text-xs font-bold text-white">${p.name}</p>
+                        <div class="flex justify-between mt-1 text-[10px] font-mono">
+                            <span class="text-gray-500">COST: ₦${cost}</span>
+                            <span class="text-neon">PROF: ₦${margin}</span>
+                        </div>
                     </div>
                 </div>`;
             });
+            grid.innerHTML = html;
+        }
+
+        // --- CART LOGIC ---
+        function addToCart(name, price) {
+            cart.push({ name, price });
+            updateCart();
+            showToast(`ACQUIRED: ${name}`);
+        }
+
+        function updateCart() {
+            const countEl = document.getElementById('cartCount');
+            const itemsEl = document.getElementById('cartItems');
+            const totalEl = document.getElementById('cartTotal');
             
-            list.innerHTML = html;
+            countEl.innerText = cart.length;
+            countEl.style.display = cart.length > 0 ? 'flex' : 'none';
+            
+            let total = 0;
+            let html = cart.length === 0 ? '<div class="text-center text-gray-600 font-mono text-xs mt-10">NO DATA FOUND</div>' : '';
+
+            cart.forEach((item, idx) => {
+                total += item.price;
+                html += `
+                <div class="flex justify-between items-center bg-white/5 p-3 rounded-lg border border-white/5">
+                    <span class="text-xs font-bold text-gray-300">${item.name}</span>
+                    <div class="flex items-center gap-3">
+                        <span class="text-neon text-xs font-mono">₦${item.price}</span>
+                        <button onclick="removeFromCart(${idx})" class="text-red-500 hover:text-red-400"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>`;
+            });
+
+            itemsEl.innerHTML = html;
             totalEl.innerText = total.toLocaleString();
         }
 
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            updateCartUI();
+        function removeFromCart(idx) {
+            cart.splice(idx, 1);
+            updateCart();
         }
 
         function toggleCart() {
-            const modal = document.getElementById('cartModal');
-            if (modal.classList.contains('hidden')) {
-                modal.classList.remove('hidden');
+            const drawer = document.getElementById('cartDrawer');
+            if(drawer.classList.contains('active')) {
+                drawer.classList.remove('active');
             } else {
+                drawer.classList.add('active');
+            }
+        }
+
+        function checkout() {
+            if(cart.length === 0) return;
+            let msg = "INITIATING ORDER SEQ...%0A";
+            cart.forEach(i => msg += `> ${i.name} (₦${i.price})%0A`);
+            msg += `%0ATOTAL: ₦${document.getElementById('cartTotal').innerText}`;
+            window.open(`https://wa.me/${CONFIG.whatsapp}?text=${msg}`, '_blank');
+        }
+
+        // --- SCANNER LOGIC ---
+        async function startScanner() {
+            const modal = document.getElementById('scannerModal');
+            const video = document.getElementById('scannerVideo');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex'; // Ensure flex layout
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                video.srcObject = stream;
+                
+                // Mock scanning delay then "Find" random fruit
+                setTimeout(() => {
+                    showToast("BIOMETRIC MATCH FOUND");
+                    closeScanner();
+                    // Add a random item as an easter egg
+                    addToCart(CONFIG.products[0].name, CONFIG.products[0].price);
+                }, 3000);
+
+            } catch (err) {
+                console.error("Camera access denied");
+                showToast("SENSOR ERROR: CAMERA BLOCKED");
+                setTimeout(closeScanner, 1000);
+            }
+        }
+
+        function closeScanner() {
+            const modal = document.getElementById('scannerModal');
+            const video = document.getElementById('scannerVideo');
+            if(video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+            }
+            modal.classList.add('hidden');
+        }
+
+        // --- LOGIN/VAULT SYSTEM ---
+        function openLogin(type) {
+            loginType = type;
+            document.getElementById('loginModal').classList.remove('hidden');
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('pinInput').value = '';
+            document.getElementById('loginTitle').innerText = `${type} ACCESS`;
+        }
+
+        function addPin(num) {
+            const input = document.getElementById('pinInput');
+            if(input.value.length < 4) input.value += num;
+        }
+
+        function submitLogin() {
+            const pin = document.getElementById('pinInput').value;
+            const modal = document.getElementById('loginModal');
+            
+            if(pin === CONFIG.keys[loginType]) {
                 modal.classList.add('hidden');
-            }
-        }
-
-        // 4. Admin Toggle
-        function toggleAdmin() {
-            adminMode = !adminMode;
-            const panel = document.getElementById('investorPanel');
-            
-            if (adminMode) {
-                panel.classList.remove('hidden');
-                document.body.style.border = "4px solid #eab308"; // Gold border indicator
-                showToast("Admin Mode Active");
+                showToast("ACCESS GRANTED");
+                
+                if(loginType === 'INVESTOR') {
+                    document.getElementById('investorVault').classList.add('active');
+                } else if(loginType === 'TEAM') {
+                    document.getElementById('teamVault').classList.add('active');
+                    adminMode = true;
+                    renderMenu(); // Re-render to show edit buttons
+                }
             } else {
-                panel.classList.add('hidden');
-                document.body.style.border = "none";
-                showToast("Admin Mode Exit");
+                showToast("ACCESS DENIED");
+                document.getElementById('pinInput').value = '';
             }
-            renderMenu(); // Re-render to show/hide edit inputs
         }
 
-        // 5. Checkout
-        function checkoutWhatsApp() {
-            if (cart.length === 0) return;
-            
-            let msg = "Hello! I'd like to order:%0A";
-            let total = 0;
-            cart.forEach(item => {
-                msg += `- ${item.name} (₦${item.price})%0A`;
-                total += item.price;
-            });
-            msg += `%0ATotal: ₦${total.toLocaleString()}`;
-            
-            window.open(`https://wa.me/${STORE_CONFIG.whatsappNumber}?text=${msg}`, '_blank');
+        function closeVault(id) {
+            document.getElementById(id).classList.remove('active');
         }
 
-        // 6. UI Utilities
-        function showToast(text) {
+        function showToast(msg) {
             const t = document.getElementById('toast');
-            t.querySelector('span').innerText = text;
-            t.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                t.classList.add('translate-y-20', 'opacity-0');
-            }, 2000);
+            document.getElementById('toastMsg').innerText = msg;
+            t.style.top = "20px";
+            setTimeout(() => t.style.top = "-50px", 2000);
         }
 
-        function showProductDetails(id) {
-            // Placeholder for modal expansion if needed later
-            console.log("View product", id);
-        }
-
-        // INITIALIZE
-        window.onload = renderMenu;
+        // INIT
+        window.onload = () => {
+            renderMenu();
+        };
 
     </script>
 </body>
