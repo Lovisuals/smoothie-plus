@@ -3,443 +3,501 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#000000">
-    <title>smoothiePlus+ | Bio-Hacked Nutrition</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { 
-                        sans: ['Montserrat', 'sans-serif'],
-                        mono: ['Share Tech Mono', 'monospace']
-                    },
-                    colors: { 
-                        neon: '#39ff14', 
-                        dark: '#050508',
-                        glass: 'rgba(20, 20, 30, 0.7)'
-                    },
-                    animation: {
-                        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                    }
-                }
+<title>smoothiePlus+ | Liquid Energy</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+
+<link id="manifest-placeholder" rel="manifest">
+
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: { sans: ['Montserrat', 'sans-serif'] },
+                colors: { darkBg: '#0a0a12', msgSelf: '#0084ff', msgOther: '#3e4042', neon: '#39ff14' }
             }
         }
-    </script>
-    <style>
-        body { background-color: #050508; color: white; overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
+    }
+</script>
+<style>
+    body { background-color: #050508; color: white; overscroll-behavior: none; }
+    input, textarea { -webkit-user-select: text; user-select: text; }
+    
+    /* 100dvh FIX */
+    .drawer-full { position: fixed; bottom: 0; left: 0; right: 0; top: 0; background: #0f172a; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); z-index: 100; display: flex; flex-direction: column; height: 100dvh; }
+    .drawer-full.active { transform: translateY(0); }
+    .drawer-partial { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(20, 20, 30, 0.98); border-top: 1px solid rgba(255,255,255,0.1); border-top-left-radius: 24px; border-top-right-radius: 24px; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1); z-index: 90; max-height: 85vh; display: flex; flex-direction: column; }
+    .drawer-partial.active { transform: translateY(0); }
+
+    /* SCROLL & UTILS */
+    .scroll-area { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 20px; }
+    .fixed-bottom { flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); }
+    .admin-editable { border: 1px dashed #ff0000; background: rgba(255, 0, 0, 0.1); cursor: text; }
+    .glass-panel { background: rgba(20, 20, 30, 0.95); border-top: 1px solid rgba(255, 255, 255, 0.15); }
+    
+    /* ANIMATIONS */
+    @keyframes liquid-float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
+    .float-card { animation: liquid-float 6s ease-in-out infinite; transition: transform 0.2s; }
+    .float-card:active { transform: scale(0.98); }
+    .pulse-glow { animation: pulse-green 2s infinite; }
+    @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(57, 255, 20, 0); } 100% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0); } }
+
+    /* AR SCANNER HUD */
+    .scanner-overlay { position: absolute; inset: 0; pointer-events: none; border: 2px solid rgba(57, 255, 20, 0.1); z-index: 10; }
+    .scanner-line { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: #39ff14; box-shadow: 0 0 10px #39ff14; animation: scan-down 3s linear infinite; }
+    .hud-corner { position: absolute; width: 40px; height: 40px; border: 4px solid #39ff14; opacity: 0.8; }
+    .tl { top: 20px; left: 20px; border-right: none; border-bottom: none; }
+    .tr { top: 20px; right: 20px; border-left: none; border-bottom: none; }
+    .bl { bottom: 20px; left: 20px; border-right: none; border-top: none; }
+    .br { bottom: 20px; right: 20px; border-left: none; border-top: none; }
+    @keyframes scan-down { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+
+    /* TOAST & CHAT */
+    #apiToast { position: fixed; top: -50px; left: 50%; transform: translateX(-50%); background: #22c55e; color: black; padding: 8px 16px; border-radius: 20px; font-size: 10px; font-weight: bold; z-index: 9999; transition: top 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+    #apiToast.active { top: 20px; }
+    #apiToast.error { background: #ef4444; color: white; }
+    .chat-bubble { max-width: 85%; padding: 12px; border-radius: 16px; margin-bottom: 8px; font-size: 13px; line-height: 1.4; animation: popIn 0.2s ease-out; }
+    .chat-self { background-color: #2563eb; color: white; align-self: flex-end; border-bottom-right-radius: 4px; margin-left: auto; }
+    .chat-other { background-color: #1f2937; color: #e5e7eb; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #374151; }
+    .avatar-circle { width: 28px; height: 28px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: #aaa; border: 1px solid #555; cursor: pointer; }
+    .seen-indicator { font-size: 10px; color: #65676b; text-align: right; margin-top: 2px; margin-right: 4px; display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+    .eye-icon { width: 12px; height: 12px; opacity: 0.7; }
+    @keyframes popIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    
+    /* SHIMMER */
+    .shimmer-card { position: relative; overflow: hidden; background: rgba(20, 20, 30, 0.6); backdrop-filter: blur(10px); }
+    .shimmer-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.05), transparent); transform: skewX(-25deg); animation: shimmer 6s infinite; pointer-events: none; }
+    @keyframes shimmer { 0% { left: -100%; } 20% { left: 200%; } 100% { left: 200%; } }
+    
+    .task-check:checked + label span { background-color: #22c55e; border-color: #22c55e; }
+    .task-check:checked + label p { text-decoration: line-through; color: #6b7280; }
+    .tab-active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
+    .tab-inactive { border-bottom: 2px solid transparent; color: #6b7280; }
+</style></head>
+<body class="pb-32 overflow-x-hidden font-sans">
+
+<div id="apiToast">SYNCED ✓</div>
+
+<div id="systemLockdown" class="fixed inset-0 z-[99999] bg-black hidden flex-col items-center justify-center text-center p-6">
+    <h1 id="lockdownTitle" class="text-4xl font-black text-red-600 mb-4">OFFLINE</h1>
+    <p id="lockdownMsg" class="text-gray-500 font-mono text-xs">MAINTENANCE PROTOCOL ACTIVE</p>
+</div>
+
+<div id="statusBadge" class="hidden fixed top-4 left-4 z-[300] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl bg-black border animate-bounce"></div>
+
+<div id="memberModal" class="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm hidden">
+    <div class="bg-gray-900 border border-gray-700 w-full max-w-xs rounded-2xl p-6 text-center shadow-2xl relative">
+        <button onclick="document.getElementById('memberModal').classList.add('hidden')" class="absolute top-3 right-3 text-gray-500 hover:text-white">✕</button>
+        <div id="memberAvatar" class="w-16 h-16 rounded-full bg-blue-600 mx-auto mb-3 flex items-center justify-center text-2xl font-bold"></div>
+        <h3 id="memberName" class="text-xl font-bold text-white mb-1"></h3>
+        <p class="text-xs text-gray-400 uppercase tracking-widest mb-4">CORE TEAM MEMBER</p>
+        <div class="border-t border-gray-700 pt-4">
+            <p class="text-[10px] text-gray-500">NEURAL LINK STATUS: <span class="text-green-500">ONLINE</span></p>
+        </div>
+    </div>
+</div>
+
+<div id="scannerModal" class="fixed inset-0 z-[150] bg-black hidden flex-col">
+    <div class="relative flex-1 overflow-hidden bg-black">
+        <video id="scannerVideo" class="absolute inset-0 w-full h-full object-cover opacity-80" autoplay playsinline muted></video>
+        <div class="scanner-overlay">
+            <div class="scanner-line"></div>
+            <div class="hud-corner tl"></div><div class="hud-corner tr"></div>
+            <div class="hud-corner bl"></div><div class="hud-corner br"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-neon font-mono text-xs tracking-widest animate-pulse">ANALYZING BIOMETRICS...</div>
+        </div>
+        <button onclick="closeScanner()" class="absolute top-4 right-4 z-50 text-white font-bold bg-black/50 rounded-full w-10 h-10 flex items-center justify-center border border-white/20">✕</button>
+    </div>
+    <div class="bg-gray-900 p-6 text-center border-t border-gray-800">
+        <p class="text-xs text-gray-400 mb-2">POINT CAMERA AT FRUIT OR HAND</p>
+        <div class="h-1 w-full bg-gray-800 rounded-full overflow-hidden">
+            <div class="h-full bg-green-500 w-1/3 animate-pulse"></div>
+        </div>
+    </div>
+</div>
+
+<div class="flex justify-between items-center px-4 pt-6 pb-2 relative z-50">
+    <div>
+        <h1 class="text-2xl font-black tracking-tighter uppercase leading-none">
+            smoothie<span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">Plus+</span>
+        </h1>
+    </div>
+    <button onclick="startScanner()" class="bg-gray-900 border border-green-500/50 text-green-400 rounded-full w-10 h-10 flex items-center justify-center hover:bg-green-500 hover:text-black transition shadow-[0_0_15px_rgba(57,255,20,0.3)]">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+    </button>
+</div>
+<p class="text-center text-gray-400 text-xs tracking-widest uppercase mb-6">Premium Bio-Hacked Blends</p>
+
+<main id="menuGrid" class="px-4 grid grid-cols-2 gap-4 max-w-md mx-auto relative z-10 min-h-[50vh]">
+    <div id="loadingMsg" class="col-span-2 text-center text-gray-500 mt-10">Loading Menu...</div>
+</main>
+
+<footer class="mt-20 mb-32 text-center space-y-6">
+    <button onclick="openLoginModal()" class="text-[10px] text-gray-600 hover:text-white transition uppercase tracking-widest py-3 px-6 border border-gray-800 rounded-full flex items-center justify-center gap-2 mx-auto bg-gray-900/50">
+        <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> Employee Portal
+    </button>
+    <button onclick="openLoginModal()" class="text-[9px] text-gray-700 hover:text-green-500 transition uppercase tracking-widest">
+         Investor Relations
+    </button>
+</footer>
+
+<button id="adminSaveBtn" onclick="compileAndSave()" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 bg-red-600 text-white font-bold py-3 px-6 rounded-full shadow-2xl z-[200] border-2 border-white text-xs tracking-wider hover:bg-red-700 transition">
+     SAVE FULL SITE
+</button>
+
+<button onclick="toggleSheet()" class="fixed bottom-6 right-6 bg-green-500 text-black w-14 h-14 rounded-full shadow-2xl z-40 pulse-glow flex items-center justify-center transform active:scale-90 transition">
+    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+    <span id="cartCount" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full hidden border border-black">0</span>
+</button>
+
+<div id="productModal" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md" style="display:none;">
+    <div class="bg-gray-900 border border-gray-700 w-full max-w-sm rounded-3xl p-6 relative shadow-2xl shimmer-card">
+        <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white font-bold bg-gray-800 rounded-full w-8 h-8 flex items-center justify-center z-20">✕</button>
+        <div id="modalContent"></div>
+    </div>
+</div>
+
+<div id="loginModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95" style="display:none;">
+    <div class="w-full max-w-sm text-center bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-2xl relative shimmer-card">
+        <h2 class="text-2xl font-black uppercase text-white mb-2">Access Portal</h2>
+        <div id="authStage">
+            <p id="authPrompt" class="text-gray-500 text-xs mb-6">Enter Passkey</p>
+            <div class="relative w-full mb-6">
+                <input type="password" id="accessKey" placeholder="ENTER KEY" class="w-full bg-gray-800 border border-gray-700 text-center text-white text-xl tracking-widest rounded-xl px-4 py-4 focus:outline-none focus:border-green-500 pr-12">
+                <button type="button" onclick="togglePassVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 z-50 p-2 text-gray-400 hover:text-white"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
+            </div>
+            <button onclick="checkAccess()" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200">AUTHENTICATE</button>
+        </div>
         
-        /* 1. CINEMATIC NOISE OVERLAY */
-        .noise-overlay {
-            position: fixed; inset: 0; pointer-events: none; z-index: 50;
-            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
-            mix-blend-mode: overlay;
-        }
-
-        /* 2. GLASS DRAWERS (smooth physics) */
-        .drawer { position: fixed; inset: 0; background: rgba(5, 5, 8, 0.98); backdrop-filter: blur(20px); transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 100; display: flex; flex-direction: column; }
-        .drawer.active { transform: translateY(0); }
-        
-        .drawer-bottom { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15,15,25,0.95); backdrop-filter: blur(15px); border-top: 1px solid rgba(57,255,20,0.3); border-radius: 24px 24px 0 0; transform: translateY(120%); transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); z-index: 90; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 -20px 50px rgba(0,0,0,0.9); }
-        .drawer-bottom.active { transform: translateY(0); }
-
-        /* 3. SCANNER HUD */
-        .scanner-line { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: #39ff14; box-shadow: 0 0 20px #39ff14; animation: scan-down 2s linear infinite; }
-        .hud-corner { position: absolute; width: 40px; height: 40px; border: 4px solid #39ff14; opacity: 0.8; }
-        .tl { top:20px; left:20px; border-right:none; border-bottom:none; }
-        .tr { top:20px; right:20px; border-left:none; border-bottom:none; }
-        .bl { bottom:20px; left:20px; border-right:none; border-top:none; }
-        .br { bottom:20px; right:20px; border-left:none; border-top:none; }
-        @keyframes scan-down { 0%{top:0;opacity:0} 10%{opacity:1} 90%{opacity:1} 100%{top:100%;opacity:0} }
-
-        /* 4. UTILITIES */
-        .shimmer-card { position: relative; overflow: hidden; }
-        .shimmer-card::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent); transform: skewX(-25deg); animation: shimmer 6s infinite; }
-        @keyframes shimmer { 0%{left:-100%} 20%{left:200%} 100%{left:200%} }
-        
-        .admin-editable { border-bottom: 1px dashed #eab308; background: rgba(234, 179, 8, 0.1); padding: 0 4px; border-radius: 4px; outline: none; }
-        .hide-scroll::-webkit-scrollbar { display: none; }
-    </style>
-</head>
-<body class="pb-32 font-sans selection:bg-neon selection:text-black">
-
-    <div class="noise-overlay"></div>
-
-    <div id="toast" class="fixed top-[-60px] left-1/2 transform -translate-x-1/2 bg-neon text-black px-6 py-3 rounded-none skew-x-[-10deg] font-bold text-xs shadow-[0_0_20px_rgba(57,255,20,0.4)] z-[200] transition-all duration-300 flex items-center gap-3 border border-black">
-        <i class="fas fa-terminal"></i> <span id="toastMsg" class="font-mono">SYSTEM READY</span>
+        <div id="createPinStage" class="hidden">
+            <p class="text-green-500 text-xs mb-2 font-bold">Identity Protocol</p>
+            <p class="text-gray-500 text-[10px] mb-6">Register your callsign and local PIN.</p>
+            <input type="text" id="newName" placeholder="YOUR NAME" class="w-full bg-gray-800 border border-blue-500 text-center text-white text-sm rounded-xl px-4 py-3 focus:outline-none mb-3 uppercase">
+            <input type="password" id="newPin" placeholder="CREATE PIN" class="w-full bg-gray-800 border border-green-500 text-center text-white text-xl tracking-widest rounded-xl px-4 py-3 focus:outline-none mb-6">
+            <button onclick="saveNewIdentity()" class="w-full bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-500 transition">REGISTER & LOGIN</button>
+        </div>
+        <button onclick="closeLoginModal()" class="mt-6 text-xs text-gray-600 block w-full hover:text-white">CANCEL</button>
     </div>
+</div>
 
-    <div id="scannerModal" class="fixed inset-0 z-[150] bg-black hidden flex-col">
-        <div class="relative flex-1 overflow-hidden bg-gray-900">
-            <video id="scannerVideo" class="absolute inset-0 w-full h-full object-cover opacity-70" autoplay playsinline muted></video>
-            <div class="absolute inset-0 z-10 pointer-events-none">
-                <div class="scanner-line"></div>
-                <div class="hud-corner tl"></div><div class="hud-corner tr"></div>
-                <div class="hud-corner bl"></div><div class="hud-corner br"></div>
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-neon font-mono text-xs tracking-widest animate-pulse text-center bg-black/50 p-2 backdrop-blur">
-                    <i class="fas fa-fingerprint text-4xl mb-2"></i><br>ANALYZING BIOMETRICS
-                </div>
-            </div>
-            <button onclick="closeScanner()" class="absolute top-8 right-8 z-50 text-white bg-black/60 rounded-full w-12 h-12 flex items-center justify-center border border-white/20 hover:bg-white/20 transition">✕</button>
-        </div>
-        <div class="bg-black/90 backdrop-blur-md p-6 text-center border-t border-gray-800 pb-12">
-            <p class="text-xs text-neon mb-2 font-mono blink">>> SEARCHING DATABASE...</p>
-            <div class="h-1 w-64 mx-auto bg-gray-800 rounded-full overflow-hidden"><div class="h-full bg-neon w-1/3 animate-pulse"></div></div>
-        </div>
+<div id="configExportModal" class="hidden fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95">
+    <div class="bg-gray-900 w-full max-w-lg p-6 rounded-2xl border border-red-500">
+        <h2 class="text-xl font-bold text-red-500 mb-2"> SAVE CHANGES</h2>
+        <button onclick="copyToClipboard()" class="w-full bg-green-500 text-black font-bold py-4 rounded-xl mb-4 uppercase"> Copy All Code</button>
+        <textarea id="configOutput" class="w-full h-32 bg-black text-green-400 font-mono text-xs p-4 rounded-xl border border-gray-700 select-all"></textarea>
+        <button onclick="document.getElementById('configExportModal').style.display='none'" class="w-full mt-4 bg-gray-800 text-white py-2 rounded-xl hover:bg-gray-700">CLOSE</button>
     </div>
+</div>
 
-    <header class="flex justify-between items-center px-6 pt-10 pb-4 relative z-20">
-        <div>
-            <div class="flex items-center gap-2">
-                <div class="w-3 h-3 bg-neon rounded-full animate-pulse shadow-[0_0_10px_#39ff14]"></div>
-                <h1 class="text-3xl font-black tracking-tighter uppercase leading-none italic">
-                    smoothie<span class="text-transparent bg-clip-text bg-gradient-to-r from-neon to-emerald-600">Plus+</span>
-                </h1>
+<div id="investorVault" class="drawer-full">
+    <div class="max-w-2xl mx-auto w-full h-full flex flex-col bg-gray-900">
+        <div class="flex justify-between items-center px-6 py-4 border-b border-gray-800 bg-gray-900/95">
+            <h2 class="text-xl font-black text-green-500">INVESTOR PROTOCOL</h2>
+            <div class="flex gap-4">
+                <button onclick="minimizeDrawer('investorVault')" class="text-gray-500 hover:text-white text-xl">_</button>
+                <button onclick="closeDrawer('investorVault')" class="text-gray-500 hover:text-red-500 text-xl">✕</button>
             </div>
-            <p class="text-[9px] text-gray-500 font-mono mt-1 ml-5">V 3.0 // LIQUID ENERGY</p>
         </div>
-        <button onclick="startScanner()" class="bg-gray-900/80 backdrop-blur-md border border-neon/30 text-neon rounded-xl w-12 h-12 flex items-center justify-center hover:bg-neon/10 transition shadow-[0_0_15px_rgba(57,255,20,0.2)]">
-            <i class="fas fa-qrcode text-xl"></i>
-        </button>
-    </header>
-
-    <main class="px-4 pb-24">
-        <div id="loadingMsg" class="flex flex-col items-center justify-center mt-32 gap-4">
-            <div class="w-10 h-10 border-4 border-neon border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-xs text-neon font-mono animate-pulse">DECRYPTING ASSETS...</p>
-        </div>
-
-        <div id="menuGrid" class="grid grid-cols-2 gap-3 md:gap-4">
-            </div>
-    </main>
-
-    <div class="fixed bottom-8 w-full px-6 z-40 flex justify-between items-end pointer-events-none">
-        <div class="pointer-events-auto flex gap-0 bg-gray-900/90 backdrop-blur-xl rounded-full border border-white/10 shadow-2xl overflow-hidden">
-            <button onclick="openLogin('TEAM')" class="px-5 py-3 text-[10px] text-gray-400 hover:text-white hover:bg-white/5 font-bold uppercase tracking-widest transition border-r border-white/10">Team</button>
-            <button onclick="openLogin('INVESTOR')" class="px-5 py-3 text-[10px] text-gray-400 hover:text-neon hover:bg-white/5 font-bold uppercase tracking-widest transition">Inv</button>
-        </div>
-
-        <button onclick="toggleCart()" class="pointer-events-auto bg-neon text-black w-14 h-14 rounded-full shadow-[0_0_30px_rgba(57,255,20,0.5)] flex items-center justify-center active:scale-90 transition relative group z-50">
-            <i class="fas fa-shopping-bag text-xl group-hover:rotate-12 transition"></i>
-            <span id="cartCount" class="absolute -top-1 -right-1 bg-red-600 text-white text-[9px] font-black w-5 h-5 flex items-center justify-center rounded-full hidden border border-black">0</span>
-        </button>
-    </div>
-
-    <div id="cartDrawer" class="drawer-bottom">
-        <div class="p-6 h-full flex flex-col">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-black italic uppercase">Cart <span class="text-neon">//</span> Summary</h2>
-                <button onclick="toggleCart()" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400"><i class="fas fa-chevron-down"></i></button>
-            </div>
-            
-            <div id="cartItems" class="flex-1 overflow-y-auto space-y-3 hide-scroll">
+        <div class="scroll-area p-6 pb-32">
+            <section class="mb-12">
+                <h3 class="text-3xl font-black text-white mb-4">01. THE VISION</h3>
+                <p id="plan-vision" class="text-gray-400 leading-relaxed mb-4">Bio-hacked hydration utilizing unique "Zero-Water" blending processes.</p>
+                <div class="grid grid-cols-2 gap-4 mt-6">
+                    <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shimmer-card"><p class="text-green-500 font-bold text-lg">Precision Prep</p><p class="text-xs text-gray-500 uppercase">Potato Slicer Consistency</p></div>
+                    <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shimmer-card"><p class="text-green-500 font-bold text-lg">3 Flavor Bases</p><p class="text-xs text-gray-500 uppercase">Milk / Honey / Tiger Nut</p></div>
                 </div>
-
-            <div class="mt-4 pt-4 border-t border-white/10">
-                <div class="flex justify-between items-center mb-4">
-                    <span class="text-gray-400 text-xs font-mono uppercase">Total Payload</span>
-                    <span class="text-3xl font-black text-neon">₦<span id="cartTotal">0</span></span>
+            </section>
+            <section class="mb-12">
+                <h3 class="text-3xl font-black text-white mb-4">02. PRODUCT LINE</h3>
+                <div id="investorProductGrid" class="grid grid-cols-2 gap-3"></div>
+            </section>
+            <section class="mb-12">
+                <h3 class="text-3xl font-black text-white mb-4">03. SCALABILITY</h3>
+                <div class="bg-gray-800 border border-green-500/20 p-6 rounded-2xl shimmer-card">
+                    <h4 class="font-bold text-white mb-2">The "Pod" Model</h4>
+                    <div id="plan-scale"><ul class="text-sm text-gray-300 space-y-2"><li> Standardized Slicing (Potato Slicer Tech)</li><li> Pre-Squashed Inventory (Casing Technique)</li><li> Centralized Base Production</li></ul></div>
                 </div>
-                <button onclick="checkout()" class="w-full bg-neon text-black font-black uppercase py-4 rounded-xl hover:bg-white transition shadow-[0_0_20px_rgba(57,255,20,0.3)] flex justify-center items-center gap-2">
-                    <i class="fab fa-whatsapp text-lg"></i> Initiate Order
-                </button>
-            </div>
+            </section>
+            <section class="mb-12">
+                <h3 class="text-3xl font-black text-white mb-4">04. UNIT ECONOMICS</h3>
+                <div class="glass-panel p-6 rounded-2xl shimmer-card">
+                    <div class="flex justify-between mb-2"><span class="text-gray-400">Avg. Order Value</span><span id="plan-aov" class="text-white font-bold">₦4,000</span></div>
+                    <div class="flex justify-between mb-2"><span class="text-gray-400">COGS</span><span id="plan-cogs" class="text-red-400 font-bold">-₦1,800</span></div>
+                    <div class="border-t border-gray-700 my-2 pt-2 flex justify-between"><span class="text-green-500 font-bold uppercase">Gross Margin</span><span id="plan-margin" class="text-green-500 font-bold">55%</span></div>
+                </div>
+            </section>
         </div>
     </div>
+</div>
 
-    <div id="loginModal" class="fixed inset-0 z-[200] bg-black/95 hidden flex-col items-center justify-center p-6 backdrop-blur-xl">
-        <div class="w-full max-w-sm">
-            <h3 id="loginTitle" class="text-neon font-mono text-center text-xl mb-8 tracking-[0.2em] border-b border-gray-800 pb-4">ACCESS CONTROL</h3>
-            <div class="relative mb-8">
-                <input type="password" id="pinInput" placeholder="____" maxlength="4" class="bg-transparent border-2 border-gray-700 rounded-xl text-center text-3xl text-white w-full py-4 focus:border-neon focus:shadow-[0_0_20px_rgba(57,255,20,0.2)] focus:outline-none placeholder-gray-800 font-mono tracking-[1em] transition-all">
+<div id="teamPanelVault" class="drawer-full bg-[#0f172a]">
+    <div class="flex justify-between items-center bg-gray-900/95 backdrop-blur-md py-4 px-4 border-b border-gray-800 flex-shrink-0">
+        <div><h2 class="text-lg font-black text-blue-500 tracking-tighter flex items-center gap-2"><span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span></span>NEURAL LINK</h2><p class="text-[10px] text-gray-500 uppercase">Synced Operations</p></div>
+        <div class="flex gap-4"><button onclick="minimizeDrawer('teamPanelVault')" class="text-gray-500 hover:text-white text-xl">_</button><button onclick="closeDrawer('teamPanelVault')" class="text-gray-500 hover:text-red-500 text-xl">✕</button></div>
+    </div>
+    <div class="flex border-b border-gray-800 bg-gray-900">
+        <button onclick="switchTab('CHAT')" id="tab-chat" class="flex-1 py-3 text-xs font-bold uppercase tab-active transition">Chat</button>
+        <button onclick="switchTab('TASKS')" id="tab-tasks" class="flex-1 py-3 text-xs font-bold uppercase tab-inactive transition">Directives</button>
+    </div>
+    <div id="view-chat" class="flex-1 flex flex-col h-full overflow-hidden viewport-height">
+        <div id="chatStream" class="scroll-area p-4 space-y-2"></div>
+        <div class="bg-gray-900 p-4 border-t border-gray-800 fixed-bottom">
+            <div class="flex gap-2">
+                <input type="text" id="chatInput" placeholder="Transmit..." class="flex-1 bg-black border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 text-sm">
+                <button onclick="sendChatMessage()" class="bg-blue-600 text-white font-bold px-4 rounded-xl">➤</button>
             </div>
-            <div class="grid grid-cols-3 gap-3 mb-6">
-                <button onclick="addPin(1)" class="h-16 rounded-xl bg-gray-800/50 text-xl font-mono hover:bg-gray-700 text-white border border-white/5 transition">1</button>
-                <button onclick="addPin(2)" class="h-16 rounded-xl bg-gray-800/50 text-xl font-mono hover:bg-gray-700 text-white border border-white/5 transition">2</button>
-                <button onclick="addPin(3)" class="h-16 rounded-xl bg-gray-800/50 text-xl font-mono hover:bg-gray-700 text-white border border-white/5 transition">3</button>
-                <button onclick="addPin(4)" class="h-16 rounded-xl bg-gray-800/50 text-xl font-mono hover:bg-gray-700 text-white border border-white/5 transition">4</button>
-                <button onclick="addPin(5)" class="h-16 rounded-xl bg-gray-800/50 text-xl font-mono hover:bg-gray-700 text-white border border-white/5 transition">5</button>
-                <button onclick="addPin(6)" class="h-16 rounded-xl bg-gray-800/50 text-xl font-mono hover:bg-gray-700 text-white border border-white/5 transition">6</button>
-                <button onclick="addPin(7)" class="h-16 rounded-xl bg-gray-800/50 text-xl font-mono hover:bg-gray-700 text-white border border-white/5 transition">7</button>
-                <button onclick="addPin(8)" class="h-16 rounded-xl bg-gray-800/50 text-xl font-mono hover:bg-gray-700 text-white border border-white/5 transition">8</button>
-                <button onclick="addPin(9)" class="h-16 rounded-xl bg-gray-800/50 text-xl font-mono hover:bg-gray-700 text-white border border-white/5 transition">9</button>
-                <button onclick="document.getElementById('loginModal').classList.add('hidden')" class="h-16 text-red-500 font-bold text-xs uppercase tracking-widest">Cancel</button>
-                <button onclick="addPin(0)" class="h-16 rounded-xl bg-gray-800/50 text-xl font-mono hover:bg-gray-700 text-white border border-white/5 transition">0</button>
-                <button onclick="submitLogin()" class="h-16 bg-neon text-black font-bold rounded-xl shadow-[0_0_15px_rgba(57,255,20,0.4)]">ENTER</button>
-            </div>
+            <p class="text-[9px] text-gray-500 mt-2 text-center">Identity: <span id="userIdentityDisplay" class="text-blue-400 font-bold">UNKNOWN</span></p>
         </div>
     </div>
-
-    <div id="investorVault" class="drawer">
-        <div class="p-6 h-full flex flex-col">
-            <div class="flex justify-between items-start mb-8 border-b border-gray-800 pb-4">
-                <div>
-                    <h2 class="text-3xl font-black text-white tracking-tighter">TERMINAL<span class="text-neon">.01</span></h2>
-                    <p class="text-xs font-mono text-gray-500">SECURE CONNECTION ESTABLISHED</p>
-                </div>
-                <button onclick="closeVault('investorVault')" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-red-500 hover:text-white transition"><i class="fas fa-power-off"></i></button>
+    <div id="view-tasks" class="hidden flex-1 flex flex-col h-full overflow-hidden p-4 viewport-height">
+        <div class="bg-black border border-gray-800 p-4 rounded-2xl mb-4 shimmer-card">
+            <input type="text" id="newTaskInput" placeholder="New Directive..." class="w-full bg-gray-900 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm mb-2">
+            <div class="flex gap-2">
+                <select id="taskAssignee" class="bg-gray-900 border border-gray-700 text-gray-300 text-xs rounded-lg px-2 py-2 flex-1 focus:outline-none"><option value="GENERAL">GENERAL</option><option value="URGENT">URGENT</option><option value="OPS">OPS</option></select>
+                <button onclick="addNewTask()" class="bg-blue-600 text-white text-xs font-bold px-4 rounded-lg">ADD</button>
             </div>
-            
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="bg-gray-900 border border-white/10 p-4 rounded-xl">
-                    <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Total Revenue</p>
-                    <p class="text-2xl font-mono text-white">₦1,450,200</p>
-                    <div class="w-full bg-gray-800 h-1 mt-2 rounded-full"><div class="w-[70%] bg-white h-full rounded-full"></div></div>
-                </div>
-                <div class="bg-gray-900 border border-neon/20 p-4 rounded-xl shadow-[0_0_15px_rgba(57,255,20,0.05)]">
-                    <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Net Margin</p>
-                    <p class="text-2xl font-mono text-neon">+42.8%</p>
-                    <div class="w-full bg-gray-800 h-1 mt-2 rounded-full"><div class="w-[42%] bg-neon h-full rounded-full"></div></div>
-                </div>
-            </div>
-
-            <h3 class="text-xs font-bold text-gray-400 uppercase mb-4 font-mono">Unit Economics (Live)</h3>
-            <div id="investorProductGrid" class="space-y-2 flex-1 overflow-y-auto pr-2 custom-scroll">
-                </div>
         </div>
-    </div>
-
-    <div id="teamVault" class="drawer">
-        <div class="p-6 flex flex-col items-center justify-center h-full text-center">
-            <div class="w-20 h-20 rounded-full bg-yellow-500/10 flex items-center justify-center mb-6 border border-yellow-500">
-                <i class="fas fa-fingerprint text-3xl text-yellow-500"></i>
-            </div>
-            <h2 class="text-2xl font-bold text-white mb-2">GOD MODE ACTIVE</h2>
-            <p class="text-gray-400 text-sm mb-8 max-w-xs">You now have write access to the menu grid. Tap any text on the main screen to edit pricing or names instantly.</p>
-            
-            <button onclick="closeVault('teamVault')" class="w-full max-w-xs py-4 bg-yellow-500 text-black font-bold rounded-xl shadow-lg hover:bg-yellow-400 transition">
-                RETURN TO MENU
+        <div id="taskListContainer" class="scroll-area space-y-3 pb-24"></div>
+        <div class="fixed-bottom p-4 bg-gray-900 border-t border-gray-800">
+            <button onclick="broadcastToTelegram()" class="w-full text-[10px] text-gray-500 border border-gray-800 py-3 rounded-lg hover:bg-gray-800 hover:text-blue-400 transition flex items-center justify-center gap-1">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.361 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.693-1.653-1.124-2.678-1.8-1.185-.781-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.141.119.098.152.228.166.33.016.115.022.242.018.365z"/></svg> SYNC TO TELEGRAM
             </button>
-            <p class="text-[10px] text-gray-600 mt-4 font-mono">CHANGES AUTO-SAVE TO LOCAL STORAGE</p>
         </div>
     </div>
+</div>
 
-    <script>
-        // --- CONFIGURATION ---
-        const CONFIG = {
-            whatsapp: "2348000000000",
-            keys: { TEAM: "0000", INVESTOR: "1234" },
-            products: [
-                { id: 1, name: "Green Protocol", price: 3500, img: "https://images.unsplash.com/photo-1610970881699-44a5587cabec?auto=format&fit=crop&w=600" },
-                { id: 2, name: "Berry Cybernetics", price: 4000, img: "https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?auto=format&fit=crop&w=600" },
-                { id: 3, name: "Mango Mainframe", price: 3000, img: "https://images.unsplash.com/photo-1546173159-315724a31696?auto=format&fit=crop&w=600" },
-                { id: 4, name: "Neural Chocolate", price: 5000, img: "https://images.unsplash.com/photo-1577805947697-89e18249d767?auto=format&fit=crop&w=600" },
-                { id: 5, name: "Void Walker", price: 4500, img: "https://images.unsplash.com/photo-1603569283847-aa295f0d016a?auto=format&fit=crop&w=600" },
-                { id: 6, name: "Solar Flare", price: 3800, img: "https://images.unsplash.com/photo-1628557044797-f21a177c37ec?auto=format&fit=crop&w=600" }
-            ]
-        };
+<div id="orderSheet" class="drawer-partial">
+    <div class="w-12 h-1 bg-gray-500 rounded-full mx-auto mb-6 mt-4 cursor-pointer" onclick="toggleSheet()"></div>
+    <div class="px-6 pb-6 scroll-area">
+        <div class="flex justify-between items-center mb-2">
+            <h3 class="text-xs text-gray-400 uppercase font-bold">Order Summary</h3>
+            <button onclick="toggleSheet()" class="text-xs text-red-400 font-bold border border-red-400/30 px-2 py-1 rounded">CLOSE</button>
+        </div>
+        <div id="cartItems" class="space-y-2 mb-4 text-sm font-medium text-gray-200"><p class="text-gray-500 italic text-xs">Your cart is empty.</p></div>
+        <div class="border-t border-gray-600 my-4 pt-4">
+            <div class="flex justify-between items-end mb-4"><span class="text-gray-400 text-sm">Total to Pay:</span><span id="totalPrice" class="text-3xl font-black text-green-400">₦0</span></div>
+            <div class="bg-gray-800/80 rounded-xl p-3 border border-gray-600 mb-6 flex justify-between items-center shimmer-card">
+                <div>
+                    <p class="text-[10px] text-gray-400 uppercase tracking-widest">Bank Transfer (<span id="dispBankName"></span>)</p>
+                    <p id="dispAcctNum" class="font-mono text-white font-bold text-lg select-all"></p>
+                    <p id="dispAcctName" class="text-[10px] text-gray-400"></p>
+                </div>
+                <button id="copyBankBtn" onclick="copyBank()" class="text-xs bg-gray-700 text-gray-300 px-3 py-1.5 rounded transition">Copy</button>
+            </div>
+        </div>
+        <div class="space-y-3 mb-6">
+            <h3 class="text-xs text-gray-400 uppercase font-bold">Your Details</h3>
+            <input type="text" id="custName" placeholder="Your Name" class="w-full bg-gray-900/80 border border-gray-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 transition placeholder-gray-500">
+            <textarea id="custAddress" rows="2" placeholder="Delivery Address" class="w-full bg-gray-900/80 border border-gray-600 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 transition placeholder-gray-500"></textarea>
+        </div>
+        <button onclick="sendOrder()" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-black font-black uppercase py-4 rounded-xl shadow-[0_0_20px_rgba(34,197,94,0.4)] active:scale-95 transition flex items-center justify-center gap-2 mb-4">Submit Order via WhatsApp</button>
+    </div>
+</div>
 
-        // --- STATE MANAGEMENT ---
-        let cart = [];
-        let adminMode = false;
-        let loginTarget = '';
+<script id="main-script">
+    //  PASTE YOUR GOOGLE DEPLOYMENT URL HERE 
+    const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbylW3_w8NdVfE-Ow-2qdaMDJn-b90Nvj-M2bKfz-d_w4IYCLtSFE5kL0i16tKQp906R/exec"; 
+    const SITE_STATE = 'ACTIVE';
 
-        // --- CRITICAL: MENU RENDERER ---
-        function renderMenu() {
-            const grid = document.getElementById('menuGrid');
-            let html = '';
+    const KEYS = { INVESTOR: "iwillinvesT", BUILDER: "AdminEDITGODMODE", COMMANDER: "Admin GODMODE" };
 
-            CONFIG.products.forEach(p => {
-                const edit = adminMode ? 'contenteditable="true" class="admin-editable"' : '';
-                const action = adminMode ? '' : `onclick="addToCart('${p.name}', ${p.price})"`;
-                const adminBadge = adminMode ? '<div class="absolute top-2 right-2 bg-yellow-500 text-black text-[9px] font-bold px-2 py-1 rounded">EDIT</div>' : '';
+    const STORE_CONFIG = {
+        "admin": { "whatsapp": "2347068516779", "bankName": "OPay", "acctNum": "8083000771", "acctName": "LAWAL OPEYEMI MICHAEL" },
+        "products": [
+            { "id": 1, "name": "Diabetes Defense", "price": 3500, "img": "https://images.unsplash.com/photo-1610970881699-44a5587cabec?auto=format&fit=crop&w=500&q=80", "color": "green", "description": "Low-glycemic blend.", "ingredients": "Green Apple, Cucumber" },
+            { "id": 2, "name": "Mood Lifter", "price": 4200, "img": "https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?auto=format&fit=crop&w=500&q=80", "color": "purple", "description": "Antidepressant focus.", "ingredients": "Banana, Berries" },
+            { "id": 3, "name": "Workaholic Energy", "price": 3800, "img": "https://images.unsplash.com/photo-1595981267035-7b04ca84a82d?auto=format&fit=crop&w=500&q=80", "color": "orange", "description": "Instant natural energy.", "ingredients": "Watermelon, Pineapple" },
+            { "id": 4, "name": "Pure Hydration", "price": 3000, "img": "https://images.unsplash.com/photo-1589984662646-e7b2e4962f18?auto=format&fit=crop&w=500&q=80", "color": "cyan", "description": "Single-fruit variety.", "ingredients": "100% Watermelon" }
+        ]
+    };
 
-                html += `
-                <div ${action} class="shimmer-card bg-[#0f1014] border border-white/5 rounded-2xl p-3 shadow-lg flex flex-col justify-between cursor-pointer active:scale-95 transition-all group relative overflow-hidden">
-                    <div class="h-32 w-full rounded-xl mb-3 overflow-hidden bg-black relative">
-                        <img src="${p.img}" class="object-cover w-full h-full opacity-80 group-hover:opacity-100 group-hover:scale-110 transition duration-700">
-                        ${adminBadge}
-                    </div>
-                    <div>
-                        <h3 ${edit} class="font-bold text-xs text-gray-300 uppercase tracking-widest mb-1 leading-tight">${p.name}</h3>
-                        <div class="flex justify-between items-center mt-2">
-                            <span class="text-neon font-bold font-mono">₦<span ${edit}>${p.price.toLocaleString()}</span></span>
-                            ${!adminMode ? `<div class="w-6 h-6 rounded bg-white/10 flex items-center justify-center text-white text-xs group-hover:bg-neon group-hover:text-black transition">+</div>` : ''}
-                        </div>
-                    </div>
-                </div>`;
-            });
+    let cart = {}; let adminMode = false;
+    let currentName = localStorage.getItem('mySmoothieName') || 'UNKNOWN';
+    let localUserPin = localStorage.getItem('mySmoothiePin'); 
+    let tasks = []; 
 
-            grid.innerHTML = html;
+    // INJECT DYNAMIC PWA MANIFEST
+    const manifest = {
+        "name": "smoothiePlus+", "short_name": "sPlus+", "start_url": ".", "display": "standalone", "background_color": "#050508", "theme_color": "#000000",
+        "icons": [{ "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Ccircle cx='256' cy='256' r='256' fill='%23050508'/%3E%3Ctext x='50%25' y='50%25' font-family='sans-serif' font-weight='900' font-size='300' fill='%2339ff14' text-anchor='middle' dy='.35em'%3ES+%3C/text%3E%3C/svg%3E", "sizes": "512x512", "type": "image/svg+xml" }]
+    };
+    document.getElementById('manifest-placeholder').setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest)));
 
-            // --- THE BUG FIX: HIDE LOADER ---
-            const loader = document.getElementById('loadingMsg');
-            if (loader) loader.style.display = 'none';
+    window.addEventListener('load', () => { 
+        checkSiteHealth(); renderMenu(); renderBankDetails(); restoreSession();
+        document.getElementById('accessKey').addEventListener('keypress', function (e) { if (e.key === 'Enter') checkAccess(); });
+        document.getElementById('newPin').addEventListener('keypress', function (e) { if (e.key === 'Enter') saveNewIdentity(); });
+        document.getElementById('chatInput').addEventListener('keypress', function (e) { if (e.key === 'Enter') sendChatMessage(); });
+        if(window.location.hash === "#employee") openLoginModal();
+        if(localStorage.getItem('smoothieActiveView') === 'teamPanelVault') startNeuralLink();
+        document.getElementById('userIdentityDisplay').innerText = currentName;
+    });
 
-            // Update Investor Data
-            renderInvestorGrid();
-        }
+    // --- AR SCANNER ---
+    function startScanner() {
+        document.getElementById('scannerModal').style.display = 'flex';
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(stream => {
+            document.getElementById('scannerVideo').srcObject = stream;
+            setTimeout(() => {
+                const randomProduct = STORE_CONFIG.products[Math.floor(Math.random() * STORE_CONFIG.products.length)];
+                closeScanner();
+                showProductDetails(randomProduct.id);
+                showToast("MATCH FOUND: " + randomProduct.name, "success");
+            }, 3500); 
+        }).catch(e => { alert("Camera access required for Bio-Scan."); closeScanner(); });
+    }
+    function closeScanner() {
+        document.getElementById('scannerModal').style.display = 'none';
+        const vid = document.getElementById('scannerVideo');
+        if(vid.srcObject) vid.srcObject.getTracks().forEach(t => t.stop());
+    }
 
-        // --- INVESTOR LOGIC ---
-        function renderInvestorGrid() {
-            const grid = document.getElementById('investorProductGrid');
-            let html = '';
-            CONFIG.products.forEach(p => {
-                const cost = Math.round(p.price * 0.6); // 60% Cost
-                const profit = p.price - cost;
-                html += `
-                <div class="flex items-center justify-between bg-white/5 p-3 rounded-lg border border-white/5">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-gray-800 overflow-hidden"><img src="${p.img}" class="w-full h-full object-cover grayscale opacity-60"></div>
-                        <div>
-                            <p class="text-[10px] font-bold text-gray-300 uppercase">${p.name}</p>
-                            <p class="text-[9px] text-gray-600 font-mono">BASE: ₦${cost}</p>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-neon font-mono text-xs font-bold">+₦${profit}</p>
-                        <p class="text-[8px] text-neon/50 tracking-widest">MARGIN</p>
-                    </div>
-                </div>`;
-            });
-            grid.innerHTML = html;
-        }
+    // --- SAFE POST ---
+    async function safePost(payload) {
+        try { await fetch(GOOGLE_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); showToast("SYNCED ✓", "success"); } 
+        catch (e) { showToast("OFFLINE", "error"); }
+    }
+    function showToast(msg, type) { const t = document.getElementById('apiToast'); t.innerText = msg; t.className = type === 'error' ? 'error active' : 'active'; setTimeout(() => t.classList.remove('active'), 2000); }
 
-        // --- CART SYSTEM ---
-        function addToCart(name, price) {
-            cart.push({ name, price });
-            updateCartUI();
-            showToast(`ACQUIRED: ${name}`);
-        }
+    // --- AUTH ---
+    function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; document.getElementById('accessKey').focus(); }
+    function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
+    function togglePassVisibility() { const i = document.getElementById('accessKey'); i.type = i.type === "password" ? "text" : "password"; }
 
-        function updateCartUI() {
-            const badge = document.getElementById('cartCount');
-            const items = document.getElementById('cartItems');
-            const total = document.getElementById('cartTotal');
-            
-            badge.innerText = cart.length;
-            badge.style.display = cart.length > 0 ? 'flex' : 'none';
+    function checkAccess() {
+        const val = document.getElementById('accessKey').value.trim();
+        if (val === KEYS.INVESTOR) { launchApp('investorVault', "green", " INVESTOR VIEW"); closeLoginModal(); } 
+        else if (val === KEYS.BUILDER) { closeLoginModal(); activateBuilderMode(); }
+        else if (val === KEYS.COMMANDER) { document.getElementById('authStage').classList.add('hidden'); document.getElementById('createPinStage').classList.remove('hidden'); document.getElementById('newName').focus(); }
+        else if (localUserPin && val === localUserPin) { launchApp('teamPanelVault', "blue", " COMMANDER ACTIVE"); startNeuralLink(); closeLoginModal(); } 
+        else { alert("ACCESS DENIED"); }
+    }
 
-            if (cart.length === 0) {
-                items.innerHTML = '<p class="text-center text-gray-600 font-mono text-xs mt-10">NO ITEMS DETECTED</p>';
-                total.innerText = '0';
-                return;
-            }
+    function saveNewIdentity() {
+        const name = document.getElementById('newName').value.trim().toUpperCase(); const pin = document.getElementById('newPin').value.trim();
+        if(name.length < 2) return alert("Name required."); if(pin.length < 4) return alert("PIN too short.");
+        localStorage.setItem('mySmoothieName', name); localStorage.setItem('mySmoothiePin', pin);
+        localUserPin = pin; currentName = name; document.getElementById('userIdentityDisplay').innerText = currentName;
+        closeLoginModal(); launchApp('teamPanelVault', "blue", " COMMANDER ACTIVE"); startNeuralLink();
+    }
 
-            let html = '';
-            let sum = 0;
-            cart.forEach((item, idx) => {
-                sum += item.price;
-                html += `
-                <div class="flex justify-between items-center bg-white/5 p-3 rounded border border-white/5">
-                    <span class="text-xs font-bold text-gray-300">${item.name}</span>
-                    <div class="flex items-center gap-3">
-                        <span class="text-neon text-xs font-mono">₦${item.price}</span>
-                        <button onclick="removeFromCart(${idx})" class="text-red-500 hover:text-white transition"><i class="fas fa-times"></i></button>
-                    </div>
-                </div>`;
-            });
-            items.innerHTML = html;
-            total.innerText = sum.toLocaleString();
-        }
+    function launchApp(viewId, color, badgeText) { document.getElementById(viewId).classList.add('active'); localStorage.setItem('smoothieActiveView', viewId); showStatusBadge(badgeText, color); }
 
-        function removeFromCart(idx) {
-            cart.splice(idx, 1);
-            updateCartUI();
-        }
-
-        function toggleCart() {
-            const d = document.getElementById('cartDrawer');
-            d.classList.toggle('active');
-        }
-
-        function checkout() {
-            if (cart.length === 0) return;
-            let msg = "INITIATING ORDER SEQUENCE:%0A";
-            cart.forEach(i => msg += `> ${i.name} (₦${i.price})%0A`);
-            msg += `%0ATOTAL PAYLOAD: ₦${document.getElementById('cartTotal').innerText}`;
-            window.open(`https://wa.me/${CONFIG.whatsapp}?text=${msg}`, '_blank');
-        }
-
-        // --- SECURITY & SCANNER ---
-        async function startScanner() {
-            const modal = document.getElementById('scannerModal');
-            const video = document.getElementById('scannerVideo');
-            modal.classList.remove('hidden');
-            modal.style.display = 'flex';
-
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-                video.srcObject = stream;
-                
-                // Mock scanning delay
-                setTimeout(() => {
-                    showToast("BIOMETRIC MATCH VERIFIED");
-                    closeScanner();
-                    // Fun Easter Egg: Add a random item
-                    addToCart(CONFIG.products[0].name, CONFIG.products[0].price);
-                }, 3500);
-            } catch (e) {
-                showToast("SENSOR ERROR - USING MANUAL OVERRIDE");
-                setTimeout(closeScanner, 1000);
-            }
-        }
-
-        function closeScanner() {
-            const modal = document.getElementById('scannerModal');
-            const video = document.getElementById('scannerVideo');
-            if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
-            modal.classList.add('hidden');
-        }
-
-        // --- AUTHENTICATION ---
-        function openLogin(type) {
-            loginTarget = type;
-            document.getElementById('loginModal').classList.remove('hidden');
-            document.getElementById('loginModal').style.display = 'flex';
-            document.getElementById('loginTitle').innerText = `${type} PROTOCOL`;
-            document.getElementById('pinInput').value = '';
-        }
-
-        function addPin(n) {
-            const el = document.getElementById('pinInput');
-            if(el.value.length < 4) el.value += n;
-        }
-
-        function submitLogin() {
-            const pin = document.getElementById('pinInput').value;
-            const modal = document.getElementById('loginModal');
-
-            if (pin === CONFIG.keys[loginTarget]) {
-                modal.classList.add('hidden');
-                showToast("ACCESS GRANTED");
-                
-                if (loginTarget === 'INVESTOR') {
-                    document.getElementById('investorVault').classList.add('active');
-                } else {
-                    document.getElementById('teamVault').classList.add('active');
-                    adminMode = true;
-                    document.body.style.border = "2px solid #eab308";
-                    renderMenu(); // Re-render to show edit interfaces
+    // --- SYNC ---
+    function startNeuralLink() { loadCloudData(); setInterval(loadCloudData, 5000); }
+    async function loadCloudData() {
+        if(!GOOGLE_API_URL) return;
+        try {
+            const res = await fetch(GOOGLE_API_URL); const data = await res.json();
+            const chatContainer = document.getElementById('chatStream');
+            data.chat.forEach(msg => {
+                if(!document.getElementById('msg-' + msg.id)) {
+                    const isSelf = msg.role === currentName;
+                    const colorClass = isSelf ? 'chat-self' : 'chat-other';
+                    const roleColor = isSelf ? 'text-white' : 'text-blue-400';
+                    let content = isSelf ? `<div id="msg-${msg.id}" class="msg-row self"><div class="msg-bubble">${msg.text}</div></div>` : `<div id="msg-${msg.id}" class="msg-row other"><div onclick="showMemberInfo('${msg.role}')" class="avatar-circle">${msg.role.substring(0,2)}</div><div class="msg-bubble">${msg.text}</div></div>`;
+                    chatContainer.insertAdjacentHTML('beforeend', content);
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                    if(isSelf) { document.querySelectorAll('.seen-indicator').forEach(e => e.remove()); chatContainer.lastElementChild.insertAdjacentHTML('afterend', `<div class="seen-indicator">Seen <svg class="eye-icon" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg></div>`); }
                 }
-            } else {
-                showToast("ACCESS DENIED");
-                document.getElementById('pinInput').value = '';
-                document.getElementById('pinInput').classList.add('animate-pulse');
-                setTimeout(() => document.getElementById('pinInput').classList.remove('animate-pulse'), 500);
-            }
-        }
+            });
+            tasks = data.tasks; renderTasks();
+        } catch(e) { console.log("Sync Error"); }
+    }
 
-        function closeVault(id) {
-            document.getElementById(id).classList.remove('active');
-        }
+    function showMemberInfo(name) { document.getElementById('memberAvatar').innerText = name.substring(0,2).toUpperCase(); document.getElementById('memberName').innerText = name; document.getElementById('memberModal').classList.remove('hidden'); }
 
-        // --- UI UTILS ---
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            document.getElementById('toastMsg').innerText = msg;
-            t.style.top = "20px";
-            setTimeout(() => t.style.top = "-60px", 2500);
-        }
+    // --- OPERATIONS ---
+    function sendChatMessage() {
+        const txt = document.getElementById('chatInput').value.trim(); if(!txt) return;
+        const newId = Date.now(); document.getElementById('chatInput').value = '';
+        if(GOOGLE_API_URL) safePost({ type: 'CHAT', id: newId, role: currentName, text: txt, pin: KEYS.COMMANDER });
+        loadCloudData();
+    }
+    function addNewTask() {
+        const txt = document.getElementById('newTaskInput').value.trim(); const role = document.getElementById('taskAssignee').value; if(!txt) return;
+        const newId = Date.now(); document.getElementById('newTaskInput').value = '';
+        tasks.unshift({ id: newId, text: txt, role: role, done: false }); renderTasks();
+        if(GOOGLE_API_URL) safePost({ type: 'TASK', action: 'ADD', id: newId, role: role, text: txt, pin: KEYS.COMMANDER });
+    }
+    function toggleTask(id) { const t = tasks.find(x => x.id === id); if(t) t.done = !t.done; renderTasks(); if(GOOGLE_API_URL) safePost({ type: 'TASK', action: 'TOGGLE', id: id, pin: KEYS.COMMANDER }); }
+    function deleteTask(id) { tasks = tasks.filter(t => t.id !== id); renderTasks(); if(GOOGLE_API_URL) safePost({ type: 'TASK', action: 'DELETE', id: id, pin: KEYS.COMMANDER }); }
+    
+    function renderTasks() {
+        const l = document.getElementById('taskListContainer'); l.innerHTML='';
+        if(tasks.length===0) { l.innerHTML='<p class="text-gray-600 text-xs text-center">No Active Directives.</p>'; return; }
+        tasks.forEach(t => {
+            let badge = 'bg-gray-600'; if(t.role==='URGENT') badge='bg-red-600'; else if(t.role==='OPS') badge='bg-blue-600';
+            l.innerHTML += `<div class="flex items-start gap-3 bg-gray-900/50 border border-gray-800 p-3 rounded-xl hover:border-gray-700 transition"><input type="checkbox" onchange="toggleTask(${t.id})" class="task-check hidden" id="task-${t.id}" ${t.done?'checked':''}><label for="task-${t.id}" class="flex-shrink-0 w-5 h-5 border border-gray-600 rounded cursor-pointer flex items-center justify-center mt-1"><span class="w-3 h-3 rounded-sm"></span></label><div class="flex-1"><span class="${badge} text-[8px] px-1.5 py-0.5 rounded text-white font-bold mb-1 inline-block">${t.role}</span><p class="text-sm text-gray-300 leading-snug ${t.done?'line-through opacity-50':''}">${t.text}</p></div><button onclick="deleteTask(${t.id})" class="text-gray-600 hover:text-red-500 text-xs">✕</button></div>`;
+        });
+    }
+    function broadcastToTelegram() { let text = " *STATUS REPORT*\n\n*DIRECTIVES:*\n"; const pending = tasks.filter(t => !t.done); if(pending.length > 0) { pending.forEach(t => text += ` [${t.role}] ${t.text}\n`); } else { text += " All Clear\n"; } window.open(`tg://msg?text=${encodeURIComponent(text)}`, '_blank'); }
 
-        // --- INITIALIZATION ---
-        window.onload = () => {
-            // Artificial delay to show off the loader before fixing it
-            setTimeout(renderMenu, 800); 
-        };
-    </script>
-</body>
+    // --- COMPILER ---
+    function compileAndSave() {
+        const clone = document.documentElement.cloneNode(true);
+        clone.querySelectorAll('#statusBadge, #adminSaveBtn, #configExportModal, #loginModal, #productModal, #systemLockdown, #memberModal, #scannerModal').forEach(e => e.classList.add('hidden'));
+        clone.querySelectorAll('.drawer-full, .drawer-partial').forEach(e => e.classList.remove('active'));
+        clone.querySelectorAll('[contenteditable]').forEach(e => { e.removeAttribute('contenteditable'); e.classList.remove('admin-editable'); });
+        const newConfig = { admin: STORE_CONFIG.admin, products: STORE_CONFIG.products };
+        const script = clone.querySelector('#main-script').innerHTML;
+        clone.querySelector('#main-script').innerHTML = script.replace(/const STORE_CONFIG = \{[\s\S]*?\};/, "const STORE_CONFIG = " + JSON.stringify(newConfig, null, 4) + ";");
+        document.getElementById('configOutput').value = "<!DOCTYPE html>\n" + clone.outerHTML;
+        document.getElementById('configExportModal').style.display = 'flex';
+    }
+    function copyToClipboard() { navigator.clipboard.writeText(document.getElementById("configOutput").value); alert("COPIED"); }
+
+    // --- MENU & CART ---
+    function renderBankDetails() { document.getElementById('dispBankName').innerText = STORE_CONFIG.admin.bankName; document.getElementById('dispAcctNum').innerText = STORE_CONFIG.admin.acctNum; document.getElementById('dispAcctName').innerText = STORE_CONFIG.admin.acctName; }
+    
+    function renderMenu() {
+        const c = document.getElementById('menuGrid'); let h = '';
+        STORE_CONFIG.products.forEach(p => {
+            const edit = adminMode ? 'contenteditable="true" class="admin-editable rounded p-1"' : '';
+            h += `<div onclick="showProductDetails(${p.id})" class="float-card bg-gray-900 border border-${p.color}-500/50 rounded-2xl p-3 shadow-lg flex flex-col justify-between cursor-pointer active:scale-95 transition shimmer-card"><div><h3 ${edit} class="font-bold text-sm uppercase mb-2 text-white">${p.name}</h3><div class="h-28 w-full rounded-xl mb-2 overflow-hidden bg-gray-800"><img src="${p.img}" class="object-cover w-full h-full"></div></div><div class="flex justify-between items-center mt-2"><span class="text-${p.color}-400 font-bold">₦<span ${edit}>${p.price.toLocaleString()}</span></span><button onclick="event.stopPropagation(); addToCart('${p.name}', ${p.price})" class="bg-${p.color}-600 text-black text-xs font-bold px-3 py-1.5 rounded-lg z-10">+ ADD</button></div></div>`;
+        });
+        document.getElementById('loadingMsg').style.display = 'none'; c.innerHTML = h;
+        
+        // Render Investor Grid as well
+        const invGrid = document.getElementById('investorProductGrid');
+        if(invGrid) {
+            let invHtml = '';
+            STORE_CONFIG.products.forEach(p => {
+                const margin = Math.round(p.price * 0.6);
+                invHtml += `<div class="bg-gray-800 p-3 rounded-xl border border-gray-700 flex items-center gap-3 shimmer-card"><img src="${p.img}" class="w-12 h-12 rounded-full object-cover"><div><p class="text-white font-bold text-sm">${p.name}</p><p class="text-neon text-xs">Margin ₦${margin.toLocaleString()}</p></div></div>`;
+            });
+            invGrid.innerHTML = invHtml;
+        }
+    }
+
+    function addToCart(n, p) { if(cart[n]) cart[n].q++; else cart[n]={p:p, q:1}; updateCart(); document.getElementById('orderSheet').classList.add('active'); }
+    function toggleSheet() { document.getElementById('orderSheet').classList.toggle('active'); }
+    function updateCart() {
+        const l = document.getElementById('cartItems'); l.innerHTML=''; let t=0, c=0;
+        for(const [k,v] of Object.entries(cart)) { t+=v.p*v.q; c+=v.q; l.innerHTML+=`<div class="flex justify-between text-white"><span>${k} x${v.q}</span><span>₦${(v.p*v.q).toLocaleString()}</span></div>`; }
+        document.getElementById('totalPrice').innerText = '₦'+t.toLocaleString(); document.getElementById('cartCount').innerText = c; document.getElementById('cartCount').classList.toggle('hidden', c===0);
+    }
+    function copyBank() { const num = document.getElementById('dispAcctNum').innerText; navigator.clipboard.writeText(num).then(() => { const btn = document.getElementById('copyBankBtn'); const originalText = btn.innerText; btn.innerText = "COPIED!"; btn.classList.add('bg-green-600', 'text-white'); setTimeout(() => { btn.innerText = originalText; btn.classList.remove('bg-green-600', 'text-white'); }, 2000); }); }
+    function sendOrder() {
+        let m = `*NEW ORDER* %0A ${document.getElementById('custName').value}%0A ${document.getElementById('custAddress').value}%0A%0A`;
+        for(const [k,v] of Object.entries(cart)) m+=`${k} (x${v.q}) - ₦${v.p*v.q}%0A`;
+        if(GOOGLE_API_URL) safePost({ type: 'ORDER', customer: document.getElementById('custName').value, orderString: m, total: document.getElementById('totalPrice').innerText, pin: KEYS.COMMANDER });
+        window.open(`https://wa.me/${STORE_CONFIG.admin.whatsapp}?text=${m}`, '_blank');
+    }
+    function checkSiteHealth() { if(SITE_STATE === 'MAINTENANCE') { document.getElementById('systemLockdown').style.display = 'flex'; document.getElementById('lockdownTitle').innerText = "SYSTEM UPGRADING"; } else if (SITE_STATE === 'KILLED') { document.getElementById('systemLockdown').style.display = 'flex'; } }
+    function closeDrawer(id) { document.getElementById(id).classList.remove('active'); localStorage.setItem('smoothieActiveView', 'none'); document.getElementById('statusBadge').classList.add('hidden'); }
+    function minimizeDrawer(id) { document.getElementById(id).classList.remove('active'); }
+    function restoreSession() { const v = localStorage.getItem('smoothieActiveView'); if(v && v !== 'none') document.getElementById(v).classList.add('active'); }
+    function showStatusBadge(text, color) { const b = document.getElementById('statusBadge'); b.innerText = text; b.className = `fixed top-4 left-4 z-[300] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl backdrop-blur-md border border-${color}-500 text-${color}-500 animate-pulse bg-black`; b.classList.remove('hidden'); }
+    function activateBuilderMode() { adminMode = true; document.getElementById('adminSaveBtn').classList.remove('hidden'); showStatusBadge(" BUILDER MODE", "red"); document.querySelectorAll('[id^="plan-"]').forEach(el => { el.contentEditable = "true"; el.classList.add('admin-editable'); }); renderMenu(); }
+    function switchTab(t) { document.getElementById('view-chat').className = t==='CHAT' ? 'flex-1 flex flex-col h-full overflow-hidden viewport-height' : 'hidden'; document.getElementById('view-tasks').className = t==='TASKS' ? 'flex-1 flex flex-col h-full overflow-hidden p-4 viewport-height' : 'hidden'; document.getElementById('tab-chat').className = t==='CHAT' ? "flex-1 py-3 text-xs font-bold uppercase tab-active transition" : "flex-1 py-3 text-xs font-bold uppercase tab-inactive transition"; document.getElementById('tab-tasks').className = t==='TASKS' ? "flex-1 py-3 text-xs font-bold uppercase tab-active transition" : "flex-1 py-3 text-xs font-bold uppercase tab-inactive transition"; }
+    function showProductDetails(id) { const p = STORE_CONFIG.products.find(x => x.id === id); if(!p) return; document.getElementById('modalContent').innerHTML = `<div class="text-center mb-6"><img src="${p.img}" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-${p.color}-500 mb-4 shadow-[0_0_30px_rgba(255,255,255,0.2)]"><h2 class="text-3xl font-black uppercase text-white leading-none mb-1">${p.name}</h2><p class="text-${p.color}-400 font-bold text-xl">₦${p.price.toLocaleString()}</p></div><div class="space-y-4 text-sm text-gray-300"><div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700"><p class="uppercase text-[10px] text-gray-500 font-bold tracking-widest mb-1">Function</p><p>${p.description}</p></div><div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700"><p class="uppercase text-[10px] text-gray-500 font-bold tracking-widest mb-1">Contains</p><p class="italic text-gray-400">${p.ingredients}</p></div></div><button onclick="addToCart('${p.name}', ${p.price}); closeModal()" class="w-full mt-8 bg-white text-black font-black py-4 rounded-xl uppercase hover:scale-105 transition shadow-lg">Add to Order</button>`; document.getElementById('productModal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('productModal').style.display = 'none'; }
+</script></body>
 </html>
+
