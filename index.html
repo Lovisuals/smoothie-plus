@@ -50,16 +50,16 @@
             color: var(--text-main); 
             transition: background-color 0.3s ease, color 0.3s ease; 
             overscroll-behavior: none; 
-            padding-top: 40px; /* Space for Ticker */
+            padding-top: 50px; /* Space for Ticker */
         }
 
-        /* --- TICKER ANIMATION (Endless Scroll) --- */
+        /* --- TICKER ANIMATION (Slower + Pause on Hover) --- */
         .ticker-wrap {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            height: 40px;
+            height: 44px; /* Slightly taller */
             overflow: hidden;
             background: var(--ticker-bg);
             backdrop-filter: blur(5px);
@@ -72,7 +72,13 @@
         .ticker {
             display: flex;
             white-space: nowrap;
-            animation: ticker 30s linear infinite;
+            /* SLOWED DOWN: 80s instead of 30s */
+            animation: ticker 80s linear infinite;
+        }
+        
+        /* PAUSE ON HOVER/TOUCH */
+        .ticker-wrap:hover .ticker {
+            animation-play-state: paused;
         }
 
         .ticker-item {
@@ -105,8 +111,13 @@
         .drawer-partial { position: fixed; bottom: 0; left: 0; right: 0; background: var(--drawer-bg); border-radius: 24px 24px 0 0; transform: translateY(100%); transition: transform 0.3s ease-out; z-index: 90; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); border-top: 1px solid var(--glass-border); }
         .drawer-partial.active { transform: translateY(0); }
 
-        /* TOAST */
-        #toast { top: 60px; left: 50%; transform: translateX(-50%) translateY(-200%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        /* TOAST (Moved to Bottom) */
+        #toast { 
+            bottom: 20px; 
+            left: 50%; 
+            transform: translateX(-50%) translateY(200%); /* Start hidden below */
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
         .toast-active { transform: translateX(-50%) translateY(0) !important; }
 
         /* CHECKBOX */
@@ -136,7 +147,7 @@
         <span id="toastIcon">✓</span> <span id="toastMsg">SYSTEM ONLINE</span>
     </div>
 
-    <header class="flex justify-between items-center px-6 pt-8 pb-4 relative z-50">
+    <header class="flex justify-between items-center px-6 pt-6 pb-4 relative z-50">
         <div>
             <h1 class="text-2xl font-black tracking-tighter uppercase leading-none italic">
                 smoothie<span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">Plus+</span>
@@ -271,7 +282,6 @@
     </div>
 
     <script>
-        // --- CONFIG ---
         const CONFIG = {
             supabaseUrl: 'https://jkopygadpzkmqrnmzxmc.supabase.co', 
             supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imprb3B5Z2FkcHprbXFybm16eG1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxNDAxNzcsImV4cCI6MjA4MTcxNjE3N30.hnPxhg8rmvGC-oHt7SWXekyG55EBcV26jPFTC8S5IeU',
@@ -299,18 +309,16 @@
             try {
                 if (window.supabase) {
                     sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
-                    
-                    // FETCH ALERTS (TICKER)
                     fetchAlerts();
                     sb.channel('public:alerts').on('postgres_changes', { event: '*', schema: 'public', table: 'alerts' }, () => fetchAlerts()).subscribe();
 
-                    // FETCH MENU
                     const { data: products } = await sb.from('products').select('*').eq('active', true).order('id');
                     if (products && products.length > 0) {
                         menuItems = products; renderMenu(menuItems);
                         sb.channel('public:products').on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => initApp()).subscribe();
                         document.getElementById('connectionStatus').classList.remove('bg-red-500');
                         document.getElementById('connectionStatus').classList.add('bg-green-500');
+                        document.getElementById('connectionStatus').classList.add('shadow-[0_0_10px_rgba(34,197,94,0.5)]');
                         checkSession();
                     } else {
                         document.getElementById('menuGrid').innerHTML = '<div class="col-span-2 text-center mt-20" style="color: var(--text-muted)">Menu Offline</div>';
@@ -319,16 +327,14 @@
             } catch (err) { console.error("Init Error", err); }
         }
 
-        // --- ALERT TICKER ENGINE ---
         async function fetchAlerts() {
             const { data: alerts } = await sb.from('alerts').select('*').eq('is_active', true).order('id');
             const ticker = document.getElementById('alertTicker');
             if(alerts && alerts.length > 0) {
-                // Duplicate items to ensure smooth infinite scroll if few items
                 const content = alerts.map(a => `<div class="ticker-item"><span class="text-green-500">◆</span> ${a.message}</div>`).join('');
-                ticker.innerHTML = content + content + content; // Repeat for length
+                ticker.innerHTML = content + content + content; // Tripled for smooth loop
             } else {
-                ticker.innerHTML = ''; // Clear if empty
+                ticker.innerHTML = '';
             }
         }
 
