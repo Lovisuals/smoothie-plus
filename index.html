@@ -17,9 +17,8 @@
     </script>
 
     <style>
-        /* --- THEME ENGINE (CSS Variables) --- */
+        /* --- THEME ENGINE --- */
         :root {
-            /* Dark Mode (Default) */
             --bg-body: #050508;
             --text-main: #ffffff;
             --text-muted: #9ca3af;
@@ -28,18 +27,21 @@
             --card-bg: rgba(15, 23, 42, 0.6);
             --drawer-bg: #0f172a;
             --input-bg: rgba(0, 0, 0, 0.3);
+            --ticker-bg: rgba(5, 255, 20, 0.1);
+            --ticker-text: #4ade80;
         }
 
         body.light-mode {
-            /* Light Mode */
             --bg-body: #f3f4f6;
             --text-main: #111827;
             --text-muted: #4b5563;
-            --glass-bg: rgba(255, 255, 255, 0.75); /* Frosted Ice */
+            --glass-bg: rgba(255, 255, 255, 0.75);
             --glass-border: rgba(0, 0, 0, 0.05);
             --card-bg: #ffffff;
             --drawer-bg: #ffffff;
             --input-bg: rgba(0, 0, 0, 0.05);
+            --ticker-bg: rgba(0, 0, 0, 0.05);
+            --ticker-text: #059669;
         }
 
         /* --- BASE --- */
@@ -48,48 +50,87 @@
             color: var(--text-main); 
             transition: background-color 0.3s ease, color 0.3s ease; 
             overscroll-behavior: none; 
+            padding-top: 40px; /* Space for Ticker */
         }
 
-        /* --- GLASSMORPHISM --- */
-        .glass-panel { 
-            background: var(--glass-bg); 
-            backdrop-filter: blur(12px); 
-            -webkit-backdrop-filter: blur(12px); 
-            border-top: 1px solid var(--glass-border); 
+        /* --- TICKER ANIMATION (Endless Scroll) --- */
+        .ticker-wrap {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            overflow: hidden;
+            background: var(--ticker-bg);
+            backdrop-filter: blur(5px);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 999;
+            display: flex;
+            align-items: center;
         }
 
-        /* --- UTILS --- */
+        .ticker {
+            display: flex;
+            white-space: nowrap;
+            animation: ticker 30s linear infinite;
+        }
+
+        .ticker-item {
+            padding: 0 2rem;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--ticker-text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        @keyframes ticker {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* --- GLASSMORPHISM & UTILS --- */
+        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--glass-border); }
         .float-card { animation: float 6s ease-in-out infinite; }
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
-        
         .pulse-glow { animation: pulse 2s infinite; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
-
-        /* --- DRAWERS --- */
+        
+        /* DRAWERS */
         .drawer-full { position: fixed; inset: 0; background: var(--drawer-bg); transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); z-index: 100; display: flex; flex-direction: column; }
         .drawer-full.active { transform: translateY(0); }
-        
         .drawer-partial { position: fixed; bottom: 0; left: 0; right: 0; background: var(--drawer-bg); border-radius: 24px 24px 0 0; transform: translateY(100%); transition: transform 0.3s ease-out; z-index: 90; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); border-top: 1px solid var(--glass-border); }
         .drawer-partial.active { transform: translateY(0); }
 
-        /* --- TOAST --- */
-        #toast { top: 20px; left: 50%; transform: translateX(-50%) translateY(-150%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        /* TOAST */
+        #toast { top: 60px; left: 50%; transform: translateX(-50%) translateY(-200%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .toast-active { transform: translateX(-50%) translateY(0) !important; }
 
-        /* --- PC FIX --- */
+        /* CHECKBOX */
+        input[type="checkbox"]:checked + div { background-color: #22c55e; border-color: #22c55e; }
+        input[type="checkbox"]:checked ~ p { text-decoration: line-through; color: #6b7280; }
+
+        /* PC FIX */
         @media (min-width: 768px) {
             body { max-width: 480px; margin: 0 auto; border-left: 1px solid var(--glass-border); border-right: 1px solid var(--glass-border); min-height: 100vh; position: relative; }
-            .drawer-full, .drawer-partial, #authModal, #productModal { left: 0; right: 0; margin: auto; max-width: 480px; }
+            .drawer-full, .drawer-partial, #authModal, #productModal, .ticker-wrap { left: 0; right: 0; margin: auto; max-width: 480px; }
             ::-webkit-scrollbar { width: 6px; }
             ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 4px; }
         }
-        
-        /* SCROLL AREA */
         .scroll-area { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 80px; }
         .hide-scroll::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="pb-32 font-sans selection:bg-green-500 selection:text-black">
+
+    <div class="ticker-wrap">
+        <div class="ticker" id="alertTicker">
+            <div class="ticker-item">CONNECTING TO LIVE FEED...</div>
+        </div>
+    </div>
 
     <div id="toast" class="fixed bg-green-600 text-white px-6 py-3 rounded-full text-xs font-bold shadow-2xl z-[9999] flex items-center gap-2">
         <span id="toastIcon">✓</span> <span id="toastMsg">SYSTEM ONLINE</span>
@@ -230,7 +271,7 @@
     </div>
 
     <script>
-        // --- 1. CONFIGURATION ---
+        // --- CONFIG ---
         const CONFIG = {
             supabaseUrl: 'https://jkopygadpzkmqrnmzxmc.supabase.co', 
             supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imprb3B5Z2FkcHprbXFybm16eG1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxNDAxNzcsImV4cCI6MjA4MTcxNjE3N30.hnPxhg8rmvGC-oHt7SWXekyG55EBcV26jPFTC8S5IeU',
@@ -238,16 +279,9 @@
             bank: { name: "OPay", acct: "8083000771", holder: "LAWAL OPEYEMI MICHAEL" }
         };
 
-        // --- 2. INIT & THEME ---
-        let sb = null;
-        let menuItems = []; 
-        let cart = {};
+        let sb = null, menuItems = [], cart = {}, currentUser = null;
         
-        window.addEventListener('load', () => {
-            initApp();
-            renderBankDetails();
-            loadTheme();
-        });
+        window.addEventListener('load', () => { initApp(); renderBankDetails(); loadTheme(); });
 
         function toggleTheme() {
             document.body.classList.toggle('light-mode');
@@ -258,43 +292,46 @@
 
         function loadTheme() {
             const saved = localStorage.getItem('smoothieTheme');
-            if(saved === 'light') {
-                document.body.classList.add('light-mode');
-                document.getElementById('themeIcon').innerText = '🌙';
-            }
+            if(saved === 'light') { document.body.classList.add('light-mode'); document.getElementById('themeIcon').innerText = '🌙'; }
         }
 
-        // --- 3. DATABASE ENGINE (DYNAMIC) ---
         async function initApp() {
             try {
                 if (window.supabase) {
                     sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
                     
-                    // FETCH DYNAMIC MENU
-                    const { data: products, error } = await sb.from('products').select('*').eq('active', true).order('id');
-                    
-                    if (products && products.length > 0) {
-                        menuItems = products;
-                        renderMenu(menuItems);
-                        
-                        // LISTEN FOR PRICE UPDATES
-                        sb.channel('public:products')
-                            .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload => initApp())
-                            .subscribe();
+                    // FETCH ALERTS (TICKER)
+                    fetchAlerts();
+                    sb.channel('public:alerts').on('postgres_changes', { event: '*', schema: 'public', table: 'alerts' }, () => fetchAlerts()).subscribe();
 
+                    // FETCH MENU
+                    const { data: products } = await sb.from('products').select('*').eq('active', true).order('id');
+                    if (products && products.length > 0) {
+                        menuItems = products; renderMenu(menuItems);
+                        sb.channel('public:products').on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => initApp()).subscribe();
                         document.getElementById('connectionStatus').classList.remove('bg-red-500');
                         document.getElementById('connectionStatus').classList.add('bg-green-500');
-                        document.getElementById('connectionStatus').classList.add('shadow-[0_0_10px_rgba(34,197,94,0.5)]');
                         checkSession();
                     } else {
-                        console.error("Menu Fetch Error:", error);
                         document.getElementById('menuGrid').innerHTML = '<div class="col-span-2 text-center mt-20" style="color: var(--text-muted)">Menu Offline</div>';
                     }
                 }
             } catch (err) { console.error("Init Error", err); }
         }
 
-        // --- 4. RENDERERS ---
+        // --- ALERT TICKER ENGINE ---
+        async function fetchAlerts() {
+            const { data: alerts } = await sb.from('alerts').select('*').eq('is_active', true).order('id');
+            const ticker = document.getElementById('alertTicker');
+            if(alerts && alerts.length > 0) {
+                // Duplicate items to ensure smooth infinite scroll if few items
+                const content = alerts.map(a => `<div class="ticker-item"><span class="text-green-500">◆</span> ${a.message}</div>`).join('');
+                ticker.innerHTML = content + content + content; // Repeat for length
+            } else {
+                ticker.innerHTML = ''; // Clear if empty
+            }
+        }
+
         function renderMenu(items) {
             const grid = document.getElementById('menuGrid');
             grid.innerHTML = items.map(p => `
@@ -318,10 +355,11 @@
         function openProduct(id) {
             const p = menuItems.find(x => x.id === id);
             const modal = document.getElementById('productModal');
+            const colorHex = p.color === 'green' ? '#4ade80' : p.color === 'purple' ? '#c084fc' : p.color === 'orange' ? '#fb923c' : '#22d3ee';
             document.getElementById('modalContent').innerHTML = `
                 <div class="text-center">
                     <div class="relative w-32 h-32 mx-auto mb-6">
-                        <img src="${p.image_url}" class="w-full h-full rounded-full object-cover relative z-10 border-2" style="border-color: ${p.color === 'green' ? '#4ade80' : '#fb923c'}">
+                        <img src="${p.image_url}" class="w-full h-full rounded-full object-cover relative z-10 border-2" style="border-color: ${colorHex}">
                     </div>
                     <h2 class="text-2xl font-black uppercase mb-2 tracking-tighter leading-none" style="color: var(--text-main)">${p.name}</h2>
                     <p class="text-xs mb-6 px-4" style="color: var(--text-muted)">${p.description}</p>
@@ -330,20 +368,16 @@
                         <span class="text-xl font-mono text-green-500">₦${p.price.toLocaleString()}</span>
                     </div>
                     <button onclick="addToCart(${p.id}); document.getElementById('productModal').classList.add('hidden')" class="w-full bg-white text-black font-black py-4 rounded-xl uppercase tracking-widest hover:scale-105 transition shadow-lg">Add to Cart</button>
-                </div>
-            `;
+                </div>`;
             modal.classList.remove('hidden');
         }
 
         function addToCart(id) {
             const p = menuItems.find(x => x.id === id);
-            if(cart[p.name]) cart[p.name].q++;
-            else cart[p.name] = { p: p.price, q: 1 };
-            updateCartUI();
-            showToast('ADDED TO MANIFEST');
+            if(cart[p.name]) cart[p.name].q++; else cart[p.name] = { p: p.price, q: 1 };
+            updateCartUI(); showToast('ADDED TO MANIFEST');
         }
 
-        // --- 5. CART & CHECKOUT ---
         function updateCartUI() {
             let total = 0, count = 0, html = '';
             for(const [name, item] of Object.entries(cart)) {
@@ -352,109 +386,40 @@
             }
             document.getElementById('cartList').innerHTML = html || '<div class="text-center py-8 opacity-50"><p class="text-4xl mb-2" style="color: var(--text-muted)">🛒</p><p class="text-xs uppercase tracking-widest" style="color: var(--text-muted)">Empty</p></div>';
             document.getElementById('cartTotal').innerText = '₦' + total.toLocaleString();
-            
-            const badge = document.getElementById('cartCount');
-            badge.innerText = count;
-            badge.classList.toggle('scale-0', count === 0);
-
-            // Smart Lock
+            document.getElementById('cartCount').innerText = count;
+            document.getElementById('cartCount').classList.toggle('scale-0', count === 0);
             const btn = document.getElementById('checkoutBtn');
-            if (count === 0) {
-                btn.disabled = true;
-                btn.classList.add('opacity-50', 'grayscale', 'cursor-not-allowed');
-                btn.innerText = "SELECT ITEMS FIRST";
-            } else {
-                btn.disabled = false;
-                btn.classList.remove('opacity-50', 'grayscale', 'cursor-not-allowed');
-                btn.innerText = "INITIALIZE ORDER";
-            }
+            if (count === 0) { btn.disabled = true; btn.classList.add('opacity-50', 'grayscale'); btn.innerText = "SELECT ITEMS FIRST"; } 
+            else { btn.disabled = false; btn.classList.remove('opacity-50', 'grayscale'); btn.innerText = "INITIALIZE ORDER"; }
         }
 
         async function checkout() {
             const name = document.getElementById('custName').value.trim();
             const addr = document.getElementById('custAddr').value.trim();
             if(!name || !addr) return showToast("MISSING DETAILS", "error");
-            
             let items = Object.entries(cart).map(([k,v]) => `${k} x${v.q}`).join(', ');
             let total = document.getElementById('cartTotal').innerText;
             const orderId = `ORD-${Date.now().toString().slice(-4)}-${Math.floor(Math.random()*100)}`;
-            
-            if(sb) {
-                const { error } = await sb.from('orders').insert([{ id: orderId, customer: name, items: items, total: total }]);
-                if(error) showToast("DB SYNC FAILED", "error");
-                else showToast("ORDER SECURED");
-            }
-
-            const msg = `*NEW ORDER: ${orderId}* %0A👤 ${name}%0A📍 ${addr}%0A%0A*ITEMS:*%0A${items}%0A%0A*TOTAL: ${total}*`;
-            window.open(`https://wa.me/${CONFIG.whatsapp}?text=${msg}`, '_blank');
+            if(sb) await sb.from('orders').insert([{ id: orderId, customer: name, items: items, total: total }]);
+            window.open(`https://wa.me/${CONFIG.whatsapp}?text=*NEW ORDER: ${orderId}* %0A👤 ${name}%0A📍 ${addr}%0A%0A*ITEMS:*%0A${items}%0A%0A*TOTAL: ${total}*`, '_blank');
             cart = {}; updateCartUI(); toggleSheet('orderSheet');
         }
 
-        // --- 6. UTILS & HELPERS ---
         function toggleSheet(id) { document.getElementById(id).classList.toggle('active'); }
-        function showToast(msg, type='success') {
-            const t = document.getElementById('toast');
-            t.classList.toggle('bg-red-600', type !== 'success');
-            document.getElementById('toastMsg').innerText = msg;
-            t.classList.add('toast-active');
-            setTimeout(() => t.classList.remove('toast-active'), 3000);
-        }
-        function renderBankDetails() {
-            document.getElementById('dispBankName').innerText = CONFIG.bank.name;
-            document.getElementById('dispAcctNum').innerText = CONFIG.bank.acct;
-            document.getElementById('dispAcctName').innerText = CONFIG.bank.holder;
-        }
+        function showToast(msg, type='success') { const t = document.getElementById('toast'); t.classList.toggle('bg-red-600', type !== 'success'); document.getElementById('toastMsg').innerText = msg; t.classList.add('toast-active'); setTimeout(() => t.classList.remove('toast-active'), 3000); }
+        function renderBankDetails() { document.getElementById('dispBankName').innerText = CONFIG.bank.name; document.getElementById('dispAcctNum').innerText = CONFIG.bank.acct; document.getElementById('dispAcctName').innerText = CONFIG.bank.holder; }
         function copyBank() { navigator.clipboard.writeText(CONFIG.bank.acct).then(() => showToast("COPIED")); }
-
-        // --- 7. AUTH & OPS ---
-        let currentUser = null;
-        async function checkSession() {
-            const { data } = await sb.auth.getSession();
-            if (data.session) { currentUser = data.session.user; document.getElementById('userEmailDisplay').innerText = currentUser.email; updateAuthUI(true); initRealtime(); }
-        }
+        
+        async function checkSession() { const { data } = await sb.auth.getSession(); if (data.session) { currentUser = data.session.user; document.getElementById('userEmailDisplay').innerText = currentUser.email; updateAuthUI(true); initRealtimeOps(); } }
         function checkAuth() { currentUser ? openOpsCenter() : document.getElementById('authModal').classList.remove('hidden'); }
-        async function handleLogin() {
-            const email = document.getElementById('emailInput').value;
-            const password = document.getElementById('passInput').value;
-            const { data, error } = await sb.auth.signInWithPassword({ email, password });
-            if (error) { document.getElementById('authError').innerText = error.message; document.getElementById('authError').classList.remove('hidden'); }
-            else { currentUser = data.user; updateAuthUI(true); initRealtime(); openOpsCenter(); }
-        }
+        async function handleLogin() { const email = document.getElementById('emailInput').value; const password = document.getElementById('passInput').value; const { data, error } = await sb.auth.signInWithPassword({ email, password }); if (error) { document.getElementById('authError').innerText = error.message; document.getElementById('authError').classList.remove('hidden'); } else { currentUser = data.user; updateAuthUI(true); initRealtimeOps(); openOpsCenter(); } }
         async function handleLogout() { await sb.auth.signOut(); location.reload(); }
-        function updateAuthUI(isLoggedIn) {
-            document.getElementById('loginForm').classList.toggle('hidden', isLoggedIn);
-            document.getElementById('loggedInView').classList.toggle('hidden', !isLoggedIn);
-        }
+        function updateAuthUI(isLoggedIn) { document.getElementById('loginForm').classList.toggle('hidden', isLoggedIn); document.getElementById('loggedInView').classList.toggle('hidden', !isLoggedIn); }
         function openOpsCenter() { document.getElementById('authModal').classList.add('hidden'); document.getElementById('opsDrawer').classList.add('active'); }
-
-        // --- 8. REALTIME OPS ---
-        function initRealtime() {
-            fetchTasks();
-            sb.channel('tasks').on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, payload => fetchTasks()).subscribe();
-        }
-        async function fetchTasks() {
-            const { data } = await sb.from('tasks').select('*').order('created_at', { ascending: false });
-            const list = document.getElementById('taskList');
-            list.innerHTML = data.map(t => {
-                let badgeColor = t.role === 'URGENT' ? 'text-red-400 border-red-500/30' : 'text-blue-400 border-blue-500/30';
-                return `
-                <div class="flex items-start gap-3 p-4 rounded-xl transition hover:bg-white/5 border border-gray-500/20" style="background: var(--card-bg)">
-                    <div class="relative flex items-center justify-center w-5 h-5 mt-0.5">
-                        <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask('${t.id}', this.checked)" class="peer appearance-none w-5 h-5 border-2 border-gray-500 rounded cursor-pointer checked:bg-green-500 checked:border-green-500">
-                        <svg class="w-3 h-3 text-white absolute opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7"></path></svg>
-                    </div>
-                    <div class="flex-1"><span class="text-[9px] uppercase font-bold border px-1.5 py-0.5 rounded ${badgeColor}">${t.role}</span><p class="text-sm mt-1 ${t.done ? 'line-through opacity-40' : ''}" style="color: var(--text-main)">${t.text}</p></div>
-                    <button onclick="deleteTask('${t.id}')" class="text-red-500 hover:text-white transition">✕</button>
-                </div>`;
-            }).join('');
-        }
-        async function addTask() {
-            const text = document.getElementById('newTaskInput').value.trim();
-            if(text) {
-                await sb.from('tasks').insert([{ text, role: document.getElementById('taskRole').value }]);
-                document.getElementById('newTaskInput').value = '';
-            }
-        }
+        
+        function initRealtimeOps() { fetchTasks(); sb.channel('tasks').on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => fetchTasks()).subscribe(); }
+        async function fetchTasks() { const { data } = await sb.from('tasks').select('*').order('created_at', { ascending: false }); const list = document.getElementById('taskList'); list.innerHTML = data.map(t => `<div class="flex items-start gap-3 p-4 rounded-xl transition hover:bg-white/5 border border-gray-500/20" style="background: var(--card-bg)"><input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask('${t.id}', this.checked)" class="mt-1"><div class="flex-1"><span class="text-[9px] uppercase font-bold border px-1.5 py-0.5 rounded text-blue-400 border-blue-500/30">${t.role}</span><p class="text-sm mt-1" style="color: var(--text-main)">${t.text}</p></div><button onclick="deleteTask('${t.id}')" class="text-red-500">✕</button></div>`).join(''); }
+        async function addTask() { const text = document.getElementById('newTaskInput').value.trim(); if(text) { await sb.from('tasks').insert([{ text, role: document.getElementById('taskRole').value }]); document.getElementById('newTaskInput').value = ''; } }
         async function toggleTask(id, status) { await sb.from('tasks').update({ done: status }).eq('id', id); }
         async function deleteTask(id) { await sb.from('tasks').delete().eq('id', id); }
     </script>
