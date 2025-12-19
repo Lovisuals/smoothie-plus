@@ -11,50 +11,82 @@
     
     <script>
         tailwind.config = {
-            theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { darkBg: '#050508', neon: '#39ff14' } } }
+            darkMode: 'class',
+            theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { neon: '#39ff14' } } }
         }
     </script>
 
     <style>
-        /* BASE STYLES */
-        body { background-color: #050508; color: white; overscroll-behavior: none; }
-        input, textarea, select { -webkit-user-select: text; user-select: text; font-size: 16px !important; }
-        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border-top: 1px solid rgba(255, 255, 255, 0.1); }
-        .scroll-area { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 80px; }
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        
-        /* DRAWERS */
-        .drawer-full { position: fixed; inset: 0; background: #0f172a; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); z-index: 100; display: flex; flex-direction: column; }
-        .drawer-full.active { transform: translateY(0); }
-        .drawer-partial { position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; border-radius: 24px 24px 0 0; transform: translateY(100%); transition: transform 0.3s ease-out; z-index: 90; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); }
-        .drawer-partial.active { transform: translateY(0); }
+        /* --- THEME ENGINE (CSS Variables) --- */
+        :root {
+            /* Dark Mode (Default) */
+            --bg-body: #050508;
+            --text-main: #ffffff;
+            --text-muted: #9ca3af;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --card-bg: rgba(15, 23, 42, 0.6);
+            --drawer-bg: #0f172a;
+            --input-bg: rgba(0, 0, 0, 0.3);
+        }
 
-        /* ANIMATIONS */
+        body.light-mode {
+            /* Light Mode */
+            --bg-body: #f3f4f6;
+            --text-main: #111827;
+            --text-muted: #4b5563;
+            --glass-bg: rgba(255, 255, 255, 0.75); /* Frosted Ice */
+            --glass-border: rgba(0, 0, 0, 0.05);
+            --card-bg: #ffffff;
+            --drawer-bg: #ffffff;
+            --input-bg: rgba(0, 0, 0, 0.05);
+        }
+
+        /* --- BASE --- */
+        body { 
+            background-color: var(--bg-body); 
+            color: var(--text-main); 
+            transition: background-color 0.3s ease, color 0.3s ease; 
+            overscroll-behavior: none; 
+        }
+
+        /* --- GLASSMORPHISM --- */
+        .glass-panel { 
+            background: var(--glass-bg); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px); 
+            border-top: 1px solid var(--glass-border); 
+        }
+
+        /* --- UTILS --- */
         .float-card { animation: float 6s ease-in-out infinite; }
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
+        
         .pulse-glow { animation: pulse 2s infinite; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+
+        /* --- DRAWERS --- */
+        .drawer-full { position: fixed; inset: 0; background: var(--drawer-bg); transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); z-index: 100; display: flex; flex-direction: column; }
+        .drawer-full.active { transform: translateY(0); }
         
-        /* TOAST ANIMATION */
-        #toast { 
-            top: 20px; 
-            left: 50%; 
-            transform: translateX(-50%) translateY(-150%); 
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+        .drawer-partial { position: fixed; bottom: 0; left: 0; right: 0; background: var(--drawer-bg); border-radius: 24px 24px 0 0; transform: translateY(100%); transition: transform 0.3s ease-out; z-index: 90; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); border-top: 1px solid var(--glass-border); }
+        .drawer-partial.active { transform: translateY(0); }
+
+        /* --- TOAST --- */
+        #toast { top: 20px; left: 50%; transform: translateX(-50%) translateY(-150%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .toast-active { transform: translateX(-50%) translateY(0) !important; }
 
-        /* UI LOGIC */
-        input[type="checkbox"]:checked + div { background-color: #22c55e; border-color: #22c55e; }
-        input[type="checkbox"]:checked ~ p { text-decoration: line-through; color: #6b7280; }
-
-        /* PC FIX */
+        /* --- PC FIX --- */
         @media (min-width: 768px) {
-            body { max-width: 480px; margin: 0 auto; border-x: 1px solid #333; min-height: 100vh; position: relative; }
+            body { max-width: 480px; margin: 0 auto; border-left: 1px solid var(--glass-border); border-right: 1px solid var(--glass-border); min-height: 100vh; position: relative; }
             .drawer-full, .drawer-partial, #authModal, #productModal { left: 0; right: 0; margin: auto; max-width: 480px; }
             ::-webkit-scrollbar { width: 6px; }
-            ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+            ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 4px; }
         }
+        
+        /* SCROLL AREA */
+        .scroll-area { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 80px; }
+        .hide-scroll::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="pb-32 font-sans selection:bg-green-500 selection:text-black">
@@ -68,9 +100,15 @@
             <h1 class="text-2xl font-black tracking-tighter uppercase leading-none italic">
                 smoothie<span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">Plus+</span>
             </h1>
-            <p class="text-[9px] text-gray-500 tracking-[0.3em] uppercase mt-1 ml-1">Organic Fuel</p>
+            <p class="text-[9px] tracking-[0.3em] uppercase mt-1 ml-1" style="color: var(--text-muted)">Organic Fuel</p>
         </div>
-        <div id="connectionStatus" class="w-2 h-2 rounded-full bg-red-500 transition-colors duration-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]" title="DB Status"></div>
+        
+        <div class="flex items-center gap-3">
+            <button onclick="toggleTheme()" class="w-8 h-8 rounded-full bg-gray-500/10 border border-gray-500/20 flex items-center justify-center transition hover:bg-gray-500/20">
+                <span id="themeIcon" class="text-sm">☀️</span>
+            </button>
+            <div id="connectionStatus" class="w-2 h-2 rounded-full bg-red-500 transition-colors duration-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]" title="DB Status"></div>
+        </div>
     </header>
 
     <main id="menuGrid" class="px-4 grid grid-cols-2 gap-4 max-w-md mx-auto relative z-10 pb-32">
@@ -81,8 +119,8 @@
     </main>
 
     <footer class="fixed bottom-8 left-0 right-0 flex justify-center z-40 pointer-events-none">
-        <div class="pointer-events-auto inline-flex bg-gray-900/90 backdrop-blur-md rounded-full p-1 border border-white/10 shadow-2xl">
-            <button onclick="checkAuth()" class="text-[10px] text-gray-400 hover:text-white font-bold uppercase tracking-widest px-6 py-3 rounded-full transition flex items-center gap-2">
+        <div class="pointer-events-auto inline-flex glass-panel rounded-full p-1 shadow-2xl">
+            <button onclick="checkAuth()" class="text-[10px] font-bold uppercase tracking-widest px-6 py-3 rounded-full transition flex items-center gap-2 hover:bg-white/10" style="color: var(--text-muted)">
                 Staff Ops
             </button>
         </div>
@@ -94,15 +132,15 @@
     </button>
 
     <div id="authModal" class="fixed inset-0 z-[150] bg-black/95 flex items-center justify-center p-4 hidden backdrop-blur-sm">
-        <div class="bg-gray-900 border border-gray-800 w-full max-w-sm rounded-3xl p-8 relative shadow-2xl">
+        <div class="glass-panel w-full max-w-sm rounded-3xl p-8 relative shadow-2xl" style="background: var(--card-bg)">
             <button onclick="document.getElementById('authModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500 hover:text-white transition">✕</button>
-            <h2 class="text-2xl font-black text-white mb-1 uppercase tracking-tighter">Staff Portal</h2>
-            <p class="text-xs text-gray-500 mb-6">SECURE ACCESS REQUIRED</p>
+            <h2 class="text-2xl font-black mb-1 uppercase tracking-tighter" style="color: var(--text-main)">Staff Portal</h2>
+            <p class="text-xs mb-6" style="color: var(--text-muted)">SECURE ACCESS REQUIRED</p>
             
             <div id="loginForm">
                 <div class="space-y-3">
-                    <input type="email" id="emailInput" placeholder="OPERATOR EMAIL" class="w-full bg-black/50 border border-gray-700 text-white p-4 rounded-xl text-sm focus:border-green-500 outline-none transition font-mono">
-                    <input type="password" id="passInput" placeholder="ACCESS KEY" class="w-full bg-black/50 border border-gray-700 text-white p-4 rounded-xl text-sm focus:border-green-500 outline-none transition font-mono">
+                    <input type="email" id="emailInput" placeholder="OPERATOR EMAIL" class="w-full border border-gray-500/30 p-4 rounded-xl text-sm focus:border-green-500 outline-none transition font-mono" style="background: var(--input-bg); color: var(--text-main)">
+                    <input type="password" id="passInput" placeholder="ACCESS KEY" class="w-full border border-gray-500/30 p-4 rounded-xl text-sm focus:border-green-500 outline-none transition font-mono" style="background: var(--input-bg); color: var(--text-main)">
                 </div>
                 <button onclick="handleLogin()" class="w-full bg-white text-black font-bold py-4 rounded-xl mt-6 hover:bg-gray-200 transition text-xs uppercase tracking-widest shadow-lg">Authenticate</button>
                 <p id="authError" class="text-red-500 text-xs mt-4 text-center hidden font-bold"></p>
@@ -112,29 +150,29 @@
                 <div class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/50">
                     <span class="text-2xl">🔓</span>
                 </div>
-                <p class="text-white font-bold text-lg mb-1">Identity Verified</p>
-                <p id="userEmailDisplay" class="text-gray-500 text-xs mb-6 font-mono">user@system</p>
+                <p class="font-bold text-lg mb-1" style="color: var(--text-main)">Identity Verified</p>
+                <p id="userEmailDisplay" class="text-xs mb-6 font-mono" style="color: var(--text-muted)">user@system</p>
                 <button onclick="openOpsCenter()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl mb-3 transition shadow-lg shadow-blue-900/20">Open Ops Center</button>
-                <button onclick="handleLogout()" class="w-full border border-gray-700 text-gray-400 hover:text-white py-3 rounded-xl text-xs transition">Terminate Session</button>
+                <button onclick="handleLogout()" class="w-full border border-gray-500/30 text-gray-400 hover:text-white py-3 rounded-xl text-xs transition">Terminate Session</button>
             </div>
         </div>
     </div>
 
     <div id="opsDrawer" class="drawer-full">
-        <div class="flex justify-between items-center bg-gray-900/95 p-6 border-b border-gray-800 sticky top-0 z-10 backdrop-blur-md">
+        <div class="flex justify-between items-center p-6 border-b sticky top-0 z-10 backdrop-blur-md glass-panel">
             <div>
                 <h2 class="text-xl font-black text-blue-500 tracking-tighter">OPS CENTER</h2>
-                <p class="text-[10px] text-gray-500 uppercase tracking-widest flex items-center gap-2">
+                <p class="text-[10px] uppercase tracking-widest flex items-center gap-2" style="color: var(--text-muted)">
                     <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Live Feed
                 </p>
             </div>
-            <button onclick="toggleSheet('opsDrawer')" class="text-gray-400 text-2xl hover:text-white transition">✕</button>
+            <button onclick="toggleSheet('opsDrawer')" class="text-2xl hover:text-red-500 transition" style="color: var(--text-muted)">✕</button>
         </div>
-        <div class="flex-1 p-6 overflow-hidden flex flex-col bg-black">
-            <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl mb-6 shadow-xl">
-                <input type="text" id="newTaskInput" placeholder="New Directive..." class="w-full bg-transparent text-white text-sm outline-none mb-4 border-b border-gray-700 pb-2 placeholder-gray-600">
+        <div class="flex-1 p-6 overflow-hidden flex flex-col">
+            <div class="border border-gray-500/20 p-4 rounded-2xl mb-6 shadow-xl" style="background: var(--card-bg)">
+                <input type="text" id="newTaskInput" placeholder="New Directive..." class="w-full bg-transparent text-sm outline-none mb-4 border-b border-gray-500/30 pb-2" style="color: var(--text-main)">
                 <div class="flex justify-between items-center">
-                    <select id="taskRole" class="bg-black border border-gray-700 text-[10px] text-gray-400 rounded-lg px-3 py-2 outline-none uppercase tracking-wide">
+                    <select id="taskRole" class="border border-gray-500/30 text-[10px] rounded-lg px-3 py-2 outline-none uppercase tracking-wide" style="background: var(--input-bg); color: var(--text-muted)">
                         <option value="GENERAL">General</option>
                         <option value="URGENT">Urgent</option>
                         <option value="KITCHEN">Kitchen</option>
@@ -142,44 +180,40 @@
                     <button onclick="addTask()" class="text-[10px] bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-bold uppercase tracking-widest transition">Add Task</button>
                 </div>
             </div>
-            <div id="taskList" class="scroll-area space-y-3">
-                <div class="text-center mt-10 opacity-50">
-                    <p class="text-xs uppercase tracking-widest">Waiting for Data...</p>
-                </div>
-            </div>
+            <div id="taskList" class="scroll-area space-y-3"></div>
         </div>
     </div>
 
     <div id="orderSheet" class="drawer-partial">
-        <div class="w-12 h-1 bg-gray-600 rounded-full mx-auto mb-6 mt-4 cursor-pointer hover:bg-white transition" onclick="toggleSheet('orderSheet')"></div>
+        <div class="w-12 h-1 bg-gray-500/50 rounded-full mx-auto mb-6 mt-4 cursor-pointer hover:bg-white transition" onclick="toggleSheet('orderSheet')"></div>
         <div class="px-6 pb-8 scroll-area">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-sm font-bold uppercase tracking-wide text-gray-300">Manifest</h3>
-                <button onclick="toggleSheet('orderSheet')" class="text-[10px] text-gray-500 hover:text-white border border-gray-700 px-3 py-1 rounded-full transition">CLOSE</button>
+                <h3 class="text-sm font-bold uppercase tracking-wide" style="color: var(--text-muted)">Manifest</h3>
+                <button onclick="toggleSheet('orderSheet')" class="text-[10px] border border-gray-500/30 px-3 py-1 rounded-full transition hover:bg-white hover:text-black" style="color: var(--text-muted)">CLOSE</button>
             </div>
             
-            <div id="cartList" class="space-y-3 mb-6 text-sm text-gray-300"></div>
+            <div id="cartList" class="space-y-3 mb-6 text-sm" style="color: var(--text-muted)"></div>
             
-            <div class="bg-gray-800/50 rounded-xl p-4 mb-6 border border-white/5">
+            <div class="rounded-xl p-4 mb-6 border border-gray-500/10" style="background: var(--card-bg)">
                 <div class="flex justify-between items-end">
-                    <span class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Total Value</span>
-                    <span id="cartTotal" class="text-2xl font-black text-green-400 font-mono tracking-tighter">₦0</span>
+                    <span class="text-[10px] uppercase tracking-widest font-bold" style="color: var(--text-muted)">Total Value</span>
+                    <span id="cartTotal" class="text-2xl font-black text-green-500 font-mono tracking-tighter">₦0</span>
                 </div>
             </div>
 
-            <div class="bg-black/40 rounded-xl p-4 mb-6 border border-white/5 flex justify-between items-center">
+            <div class="rounded-xl p-4 mb-6 border border-gray-500/10 flex justify-between items-center" style="background: var(--card-bg)">
                 <div>
-                    <p class="text-[9px] text-gray-500 uppercase font-bold mb-1">Payment Channel</p>
-                    <p id="dispBankName" class="text-xs text-gray-400"></p>
-                    <p id="dispAcctNum" class="font-mono text-white font-bold text-lg tracking-widest select-all mt-1"></p>
-                    <p id="dispAcctName" class="text-[9px] text-gray-500 uppercase mt-1"></p>
+                    <p class="text-[9px] uppercase font-bold mb-1" style="color: var(--text-muted)">Payment Channel</p>
+                    <p id="dispBankName" class="text-xs" style="color: var(--text-main)"></p>
+                    <p id="dispAcctNum" class="font-mono font-bold text-lg tracking-widest select-all mt-1" style="color: var(--text-main)"></p>
+                    <p id="dispAcctName" class="text-[9px] uppercase mt-1" style="color: var(--text-muted)"></p>
                 </div>
-                <button onclick="copyBank()" class="text-[9px] bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-lg transition uppercase font-bold tracking-wider">Copy</button>
+                <button onclick="copyBank()" class="text-[9px] bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg transition uppercase font-bold tracking-wider" style="color: var(--text-main)">Copy</button>
             </div>
 
             <div class="space-y-3 mb-6">
-                <input type="text" id="custName" placeholder="YOUR NAME" class="w-full bg-black/30 border border-gray-700 text-white rounded-xl p-4 text-sm outline-none focus:border-green-500 transition">
-                <textarea id="custAddr" rows="2" placeholder="DELIVERY COORDINATES" class="w-full bg-black/30 border border-gray-700 text-white rounded-xl p-4 text-sm outline-none focus:border-green-500 transition"></textarea>
+                <input type="text" id="custName" placeholder="YOUR NAME" class="w-full border border-gray-500/30 rounded-xl p-4 text-sm outline-none focus:border-green-500 transition" style="background: var(--input-bg); color: var(--text-main)">
+                <textarea id="custAddr" rows="2" placeholder="DELIVERY COORDINATES" class="w-full border border-gray-500/30 rounded-xl p-4 text-sm outline-none focus:border-green-500 transition" style="background: var(--input-bg); color: var(--text-main)"></textarea>
             </div>
             
             <button id="checkoutBtn" onclick="checkout()" disabled class="w-full bg-green-600 hover:bg-green-500 text-white font-black py-4 rounded-xl uppercase tracking-widest shadow-lg shadow-green-900/20 active:scale-95 transition flex items-center justify-center gap-2 opacity-50 grayscale cursor-not-allowed">
@@ -188,9 +222,9 @@
         </div>
     </div>
 
-    <div id="productModal" class="fixed inset-0 z-[110] bg-black/90 flex items-end sm:items-center justify-center sm:p-6 hidden backdrop-blur-sm transition-opacity duration-300">
-        <div class="bg-gray-900 border border-gray-700 w-full max-w-sm rounded-t-3xl sm:rounded-3xl p-6 relative shadow-2xl">
-            <button onclick="document.getElementById('productModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-white bg-white/5 rounded-full w-8 h-8 flex items-center justify-center">✕</button>
+    <div id="productModal" class="fixed inset-0 z-[110] bg-black/80 flex items-end sm:items-center justify-center sm:p-6 hidden backdrop-blur-sm transition-opacity duration-300">
+        <div class="glass-panel w-full max-w-sm rounded-t-3xl sm:rounded-3xl p-6 relative shadow-2xl" style="background: var(--card-bg)">
+            <button onclick="document.getElementById('productModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500 hover:text-white">✕</button>
             <div id="modalContent"></div>
         </div>
     </div>
@@ -201,42 +235,51 @@
             supabaseUrl: 'https://jkopygadpzkmqrnmzxmc.supabase.co', 
             supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imprb3B5Z2FkcHprbXFybm16eG1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxNDAxNzcsImV4cCI6MjA4MTcxNjE3N30.hnPxhg8rmvGC-oHt7SWXekyG55EBcV26jPFTC8S5IeU',
             whatsapp: '2347068516779',
-            bank: { name: "OPay", acct: "8083000771", holder: "LAWAL OPEYEMI MICHAEL" },
-            // Menu is now loaded dynamically, fallback only
-            fallbackMenu: [
-                { id: 1, name: "Menu Loading...", price: 0, img: "", color: "gray", desc: "Please check connection" }
-            ]
+            bank: { name: "OPay", acct: "8083000771", holder: "LAWAL OPEYEMI MICHAEL" }
         };
 
-        // --- 2. INIT & GLOBAL STATE ---
+        // --- 2. INIT & THEME ---
         let sb = null;
-        let menuItems = [];
+        let menuItems = []; 
         let cart = {};
-        let tasks = [];
-        let currentUser = null;
         
         window.addEventListener('load', () => {
             initApp();
             renderBankDetails();
+            loadTheme();
         });
 
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            document.getElementById('themeIcon').innerText = isLight ? '🌙' : '☀️';
+            localStorage.setItem('smoothieTheme', isLight ? 'light' : 'dark');
+        }
+
+        function loadTheme() {
+            const saved = localStorage.getItem('smoothieTheme');
+            if(saved === 'light') {
+                document.body.classList.add('light-mode');
+                document.getElementById('themeIcon').innerText = '🌙';
+            }
+        }
+
+        // --- 3. DATABASE ENGINE (DYNAMIC) ---
         async function initApp() {
             try {
                 if (window.supabase) {
                     sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
                     
-                    // 1. Fetch Dynamic Menu
+                    // FETCH DYNAMIC MENU
                     const { data: products, error } = await sb.from('products').select('*').eq('active', true).order('id');
                     
                     if (products && products.length > 0) {
                         menuItems = products;
                         renderMenu(menuItems);
                         
-                        // 2. Setup Realtime Listener for Price Changes
+                        // LISTEN FOR PRICE UPDATES
                         sb.channel('public:products')
-                            .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload => {
-                                initApp(); // Reload menu on change
-                            })
+                            .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload => initApp())
                             .subscribe();
 
                         document.getElementById('connectionStatus').classList.remove('bg-red-500');
@@ -245,27 +288,26 @@
                         checkSession();
                     } else {
                         console.error("Menu Fetch Error:", error);
-                        // Fallback logic could go here
-                        document.getElementById('menuGrid').innerHTML = '<div class="col-span-2 text-center mt-20">Menu Offline</div>';
+                        document.getElementById('menuGrid').innerHTML = '<div class="col-span-2 text-center mt-20" style="color: var(--text-muted)">Menu Offline</div>';
                     }
                 }
             } catch (err) { console.error("Init Error", err); }
         }
 
-        // --- 3. RENDERERS ---
+        // --- 4. RENDERERS ---
         function renderMenu(items) {
             const grid = document.getElementById('menuGrid');
             grid.innerHTML = items.map(p => `
-                <div onclick="openProduct(${p.id})" class="float-card bg-gray-900 border border-white/5 rounded-3xl p-4 shadow-lg active:scale-95 transition group cursor-pointer relative overflow-hidden">
-                    <div class="h-32 w-full rounded-2xl bg-black/50 mb-4 overflow-hidden relative">
-                        <img src="${p.image_url}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition duration-500">
+                <div onclick="openProduct(${p.id})" class="float-card border border-white/5 rounded-3xl p-4 shadow-lg active:scale-95 transition group cursor-pointer relative overflow-hidden" style="background: var(--card-bg)">
+                    <div class="h-32 w-full rounded-2xl bg-black/20 mb-4 overflow-hidden relative">
+                        <img src="${p.image_url}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition duration-500" alt="${p.name}">
                     </div>
                     <div class="relative z-10">
-                        <h3 class="font-black text-sm uppercase text-white mb-1 tracking-wide">${p.name}</h3>
+                        <h3 class="font-black text-xs uppercase mb-1 tracking-wide" style="color: var(--text-main)">${p.name}</h3>
                         <div class="flex justify-between items-center mt-2">
-                            <span class="text-${p.color === 'green' ? 'green-400' : p.color === 'purple' ? 'purple-400' : p.color === 'orange' ? 'orange-400' : 'cyan-400'} font-bold text-sm font-mono">₦${p.price.toLocaleString()}</span>
-                            <div class="bg-white/10 p-1.5 rounded-lg text-white">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            <span class="font-bold text-sm font-mono" style="color: ${p.color === 'green' ? '#4ade80' : p.color === 'purple' ? '#c084fc' : p.color === 'orange' ? '#fb923c' : '#22d3ee'}">₦${p.price.toLocaleString()}</span>
+                            <div class="bg-gray-500/10 p-1.5 rounded-lg">
+                                <svg class="w-3 h-3 text-current" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--text-main)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                             </div>
                         </div>
                     </div>
@@ -276,19 +318,16 @@
         function openProduct(id) {
             const p = menuItems.find(x => x.id === id);
             const modal = document.getElementById('productModal');
-            // Dynamic color handling
-            const colorHex = p.color === 'green' ? '#4ade80' : p.color === 'purple' ? '#c084fc' : p.color === 'orange' ? '#fb923c' : '#22d3ee';
-            
             document.getElementById('modalContent').innerHTML = `
                 <div class="text-center">
                     <div class="relative w-32 h-32 mx-auto mb-6">
-                        <img src="${p.image_url}" class="w-full h-full rounded-full object-cover relative z-10 border-2" style="border-color: ${colorHex}">
+                        <img src="${p.image_url}" class="w-full h-full rounded-full object-cover relative z-10 border-2" style="border-color: ${p.color === 'green' ? '#4ade80' : '#fb923c'}">
                     </div>
-                    <h2 class="text-3xl font-black uppercase mb-2 tracking-tighter leading-none">${p.name}</h2>
-                    <p class="text-sm text-gray-400 mb-6 px-4">${p.description}</p>
-                    <div class="flex items-center justify-between bg-black/40 rounded-2xl p-4 border border-white/5 mb-6">
-                        <span class="text-gray-500 text-xs uppercase tracking-widest">Price</span>
-                        <span class="text-2xl font-mono" style="color: ${colorHex}">₦${p.price.toLocaleString()}</span>
+                    <h2 class="text-2xl font-black uppercase mb-2 tracking-tighter leading-none" style="color: var(--text-main)">${p.name}</h2>
+                    <p class="text-xs mb-6 px-4" style="color: var(--text-muted)">${p.description}</p>
+                    <div class="flex items-center justify-between bg-black/10 rounded-2xl p-4 border border-gray-500/20 mb-6">
+                        <span class="text-xs uppercase tracking-widest" style="color: var(--text-muted)">Price</span>
+                        <span class="text-xl font-mono text-green-500">₦${p.price.toLocaleString()}</span>
                     </div>
                     <button onclick="addToCart(${p.id}); document.getElementById('productModal').classList.add('hidden')" class="w-full bg-white text-black font-black py-4 rounded-xl uppercase tracking-widest hover:scale-105 transition shadow-lg">Add to Cart</button>
                 </div>
@@ -296,7 +335,6 @@
             modal.classList.remove('hidden');
         }
 
-        // --- 4. CART & CHECKOUT ---
         function addToCart(id) {
             const p = menuItems.find(x => x.id === id);
             if(cart[p.name]) cart[p.name].q++;
@@ -305,18 +343,14 @@
             showToast('ADDED TO MANIFEST');
         }
 
+        // --- 5. CART & CHECKOUT ---
         function updateCartUI() {
             let total = 0, count = 0, html = '';
             for(const [name, item] of Object.entries(cart)) {
                 total += item.p * item.q; count += item.q;
-                html += `
-                <div class="flex justify-between items-center bg-gray-800/30 p-3 rounded-lg border border-white/5">
-                    <div><p class="font-bold text-white text-sm">${name}</p><p class="text-xs text-gray-500">Qty: ${item.q}</p></div>
-                    <span class="font-mono text-green-400 text-sm">₦${(item.p * item.q).toLocaleString()}</span>
-                </div>`;
+                html += `<div class="flex justify-between items-center p-3 rounded-lg border border-gray-500/20 mb-2" style="background: var(--glass-bg)"><div><p class="font-bold text-sm" style="color: var(--text-main)">${name}</p><p class="text-xs" style="color: var(--text-muted)">Qty: ${item.q}</p></div><span class="font-mono text-green-500 text-sm">₦${(item.p * item.q).toLocaleString()}</span></div>`;
             }
-            
-            document.getElementById('cartList').innerHTML = html || '<div class="text-center py-8 opacity-50"><p class="text-4xl mb-2">🛒</p><p class="text-xs uppercase tracking-widest">System Empty</p></div>';
+            document.getElementById('cartList').innerHTML = html || '<div class="text-center py-8 opacity-50"><p class="text-4xl mb-2" style="color: var(--text-muted)">🛒</p><p class="text-xs uppercase tracking-widest" style="color: var(--text-muted)">Empty</p></div>';
             document.getElementById('cartTotal').innerText = '₦' + total.toLocaleString();
             
             const badge = document.getElementById('cartCount');
@@ -328,12 +362,10 @@
             if (count === 0) {
                 btn.disabled = true;
                 btn.classList.add('opacity-50', 'grayscale', 'cursor-not-allowed');
-                btn.classList.remove('active:scale-95', 'shadow-lg');
                 btn.innerText = "SELECT ITEMS FIRST";
             } else {
                 btn.disabled = false;
                 btn.classList.remove('opacity-50', 'grayscale', 'cursor-not-allowed');
-                btn.classList.add('active:scale-95', 'shadow-lg');
                 btn.innerText = "INITIALIZE ORDER";
             }
         }
@@ -358,23 +390,15 @@
             cart = {}; updateCartUI(); toggleSheet('orderSheet');
         }
 
-        // --- 5. UTILS ---
+        // --- 6. UTILS & HELPERS ---
         function toggleSheet(id) { document.getElementById(id).classList.toggle('active'); }
-        
         function showToast(msg, type='success') {
             const t = document.getElementById('toast');
-            const icon = document.getElementById('toastIcon');
-            const txt = document.getElementById('toastMsg');
-            
             t.classList.toggle('bg-red-600', type !== 'success');
-            t.classList.toggle('bg-green-600', type === 'success');
-            icon.innerText = type === 'success' ? '✓' : '⚠';
-            txt.innerText = msg;
-            
+            document.getElementById('toastMsg').innerText = msg;
             t.classList.add('toast-active');
             setTimeout(() => t.classList.remove('toast-active'), 3000);
         }
-
         function renderBankDetails() {
             document.getElementById('dispBankName').innerText = CONFIG.bank.name;
             document.getElementById('dispAcctNum').innerText = CONFIG.bank.acct;
@@ -382,14 +406,13 @@
         }
         function copyBank() { navigator.clipboard.writeText(CONFIG.bank.acct).then(() => showToast("COPIED")); }
 
-        // --- 6. OPS AUTH & REALTIME ---
+        // --- 7. AUTH & OPS ---
+        let currentUser = null;
         async function checkSession() {
-            if(!sb) return;
             const { data } = await sb.auth.getSession();
             if (data.session) { currentUser = data.session.user; document.getElementById('userEmailDisplay').innerText = currentUser.email; updateAuthUI(true); initRealtime(); }
         }
         function checkAuth() { currentUser ? openOpsCenter() : document.getElementById('authModal').classList.remove('hidden'); }
-        
         async function handleLogin() {
             const email = document.getElementById('emailInput').value;
             const password = document.getElementById('passInput').value;
@@ -397,7 +420,6 @@
             if (error) { document.getElementById('authError').innerText = error.message; document.getElementById('authError').classList.remove('hidden'); }
             else { currentUser = data.user; updateAuthUI(true); initRealtime(); openOpsCenter(); }
         }
-        
         async function handleLogout() { await sb.auth.signOut(); location.reload(); }
         function updateAuthUI(isLoggedIn) {
             document.getElementById('loginForm').classList.toggle('hidden', isLoggedIn);
@@ -405,7 +427,7 @@
         }
         function openOpsCenter() { document.getElementById('authModal').classList.add('hidden'); document.getElementById('opsDrawer').classList.add('active'); }
 
-        // --- 7. TASKS ENGINE ---
+        // --- 8. REALTIME OPS ---
         function initRealtime() {
             fetchTasks();
             sb.channel('tasks').on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, payload => fetchTasks()).subscribe();
@@ -414,17 +436,15 @@
             const { data } = await sb.from('tasks').select('*').order('created_at', { ascending: false });
             const list = document.getElementById('taskList');
             list.innerHTML = data.map(t => {
-                let badgeColor = t.role === 'URGENT' ? 'bg-red-500/20 text-red-400 border-red-500/30' : 
-                                 t.role === 'KITCHEN' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 
-                                 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+                let badgeColor = t.role === 'URGENT' ? 'text-red-400 border-red-500/30' : 'text-blue-400 border-blue-500/30';
                 return `
-                <div class="flex items-start gap-3 p-4 rounded-xl transition hover:bg-white/5 border border-white/5" style="background: rgba(30, 41, 59, 0.4)">
+                <div class="flex items-start gap-3 p-4 rounded-xl transition hover:bg-white/5 border border-gray-500/20" style="background: var(--card-bg)">
                     <div class="relative flex items-center justify-center w-5 h-5 mt-0.5">
-                        <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask('${t.id}', this.checked)" class="peer appearance-none w-5 h-5 border-2 border-gray-600 rounded cursor-pointer checked:bg-green-500 checked:border-green-500">
-                        <svg class="w-3 h-3 text-white absolute opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                        <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask('${t.id}', this.checked)" class="peer appearance-none w-5 h-5 border-2 border-gray-500 rounded cursor-pointer checked:bg-green-500 checked:border-green-500">
+                        <svg class="w-3 h-3 text-white absolute opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7"></path></svg>
                     </div>
-                    <div class="flex-1"><span class="text-[9px] uppercase font-bold border px-1.5 py-0.5 rounded ${badgeColor} mb-1 inline-block">${t.role}</span><p class="text-sm text-gray-300 ${t.done ? 'line-through opacity-40' : ''}">${t.text}</p></div>
-                    <button onclick="deleteTask('${t.id}')" class="text-gray-600 hover:text-red-500">✕</button>
+                    <div class="flex-1"><span class="text-[9px] uppercase font-bold border px-1.5 py-0.5 rounded ${badgeColor}">${t.role}</span><p class="text-sm mt-1 ${t.done ? 'line-through opacity-40' : ''}" style="color: var(--text-main)">${t.text}</p></div>
+                    <button onclick="deleteTask('${t.id}')" class="text-red-500 hover:text-white transition">✕</button>
                 </div>`;
             }).join('');
         }
