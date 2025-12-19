@@ -1,253 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#000000">
-    <title>smoothiePlus+ | OPS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Montserrat', 'sans-serif'] },
-                    colors: { darkBg: '#0a0a12', neon: '#39ff14', glass: 'rgba(255,255,255,0.05)' }
-                }
-            }
-        }
-    </script>
-
-    <style>
-        /* --- CORE VISUALS --- */
-        body { background-color: #050508; color: white; overscroll-behavior: none; }
-        input, textarea, select { -webkit-user-select: text; user-select: text; font-size: 16px !important; }
-        
-        /* --- ANIMATIONS --- */
-        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
-        .float-card { animation: float 6s ease-in-out infinite; }
-        .float-card:active { animation: none; transform: scale(0.98); transition: transform 0.1s; }
-        
-        @keyframes pulse-neon { 0% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(57, 255, 20, 0); } 100% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0); } }
-        .pulse-glow { animation: pulse-neon 2s infinite; }
-
-        /* --- UTILS --- */
-        .glass-panel { background: rgba(20, 20, 30, 0.95); backdrop-filter: blur(20px); border-top: 1px solid rgba(255, 255, 255, 0.1); }
-        .scroll-area { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 30px; }
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        .admin-editable { border: 1px dashed #ef4444; background: rgba(239, 68, 68, 0.1); padding: 2px; border-radius: 4px; }
-
-        /* --- DRAWERS (Mobile Logic) --- */
-        .drawer-full { position: fixed; bottom: 0; left: 0; right: 0; top: 0; background: #0f172a; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); z-index: 100; display: flex; flex-direction: column; }
-        .drawer-full.active { transform: translateY(0); }
-
-        .drawer-partial { position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; border-top: 1px solid rgba(255,255,255,0.1); border-radius: 24px 24px 0 0; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1); z-index: 90; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 -20px 40px rgba(0,0,0,0.5); }
-        .drawer-partial.active { transform: translateY(0); }
-
-        /* --- TOAST --- */
-        #apiToast { position: fixed; top: -50px; left: 50%; transform: translateX(-50%); background: #22c55e; color: black; padding: 8px 20px; border-radius: 30px; font-size: 11px; font-weight: 800; z-index: 9999; transition: top 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
-        #apiToast.active { top: 20px; }
-        #apiToast.error { background: #ef4444; color: white; }
-
-        /* --- PC / DESKTOP FIX (Security & Layout) --- */
-        @media (min-width: 768px) {
-            body { max-width: 480px; margin: 0 auto; border-left: 1px solid #333; border-right: 1px solid #333; min-height: 100vh; position: relative; }
-            .drawer-full, .drawer-partial, #loginModal, #productModal, #configExportModal, #systemLockdown { left: 0; right: 0; margin: auto; max-width: 480px; }
-            ::-webkit-scrollbar { width: 6px; display: block; }
-            ::-webkit-scrollbar-track { background: transparent; }
-            ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
-            button[onclick="toggleSheet()"] { right: auto !important; left: 50% !important; margin-left: 160px; }
-            #adminSaveBtn { left: 50%; transform: translateX(-50%); }
-        }
-    </style>
-</head>
-<body class="pb-32 font-sans selection:bg-green-500 selection:text-black">
-
-    <div id="apiToast">SYNCED ✓</div>
-    <div id="statusBadge" class="hidden fixed top-4 left-4 z-[300] px-3 py-1 rounded-full text-[9px] font-black tracking-widest uppercase bg-black border border-green-500 text-green-500 shadow-xl"></div>
-    
-    <div id="systemLockdown" class="fixed inset-0 z-[99999] bg-black/95 hidden flex-col items-center justify-center text-center p-6 backdrop-blur-xl">
-        <h1 class="text-4xl font-black text-red-600 mb-2">OFFLINE</h1>
-        <p class="text-gray-500 font-mono text-xs">MAINTENANCE PROTOCOL ACTIVE</p>
-    </div>
-
-    <header class="flex justify-between items-center px-6 pt-8 pb-4 relative z-50">
-        <div>
-            <h1 class="text-2xl font-black tracking-tighter uppercase leading-none italic">
-                smoothie<span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">Plus+</span>
-            </h1>
-            <p class="text-[9px] text-gray-500 tracking-[0.3em] uppercase mt-1 ml-1">Organic Fuel</p>
-        </div>
-        <div class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-            <svg class="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-        </div>
-    </header>
-
-    <main id="menuGrid" class="px-4 grid grid-cols-2 gap-4 max-w-md mx-auto relative z-10 min-h-[60vh]">
-        <div id="loadingMsg" class="col-span-2 text-center text-gray-500 mt-20 flex flex-col items-center">
-            <div class="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <span class="text-[10px] tracking-widest animate-pulse">DECRYPTING MENU...</span>
-        </div>
-    </main>
-
-    <footer class="mt-16 mb-32 text-center">
-        <div class="inline-flex bg-white/5 backdrop-blur-md rounded-full p-1 border border-white/10 shadow-2xl">
-            <button onclick="openLoginModal()" class="text-[9px] text-gray-400 hover:text-white font-bold uppercase tracking-widest px-5 py-2.5 rounded-full transition flex items-center gap-2">
-                <span class="w-1.5 h-1.5 bg-gray-500 rounded-full"></span> Employee
-            </button>
-            <div class="w-[1px] bg-white/10 my-1"></div>
-            <button onclick="openLoginModal()" class="text-[9px] text-gray-400 hover:text-green-400 font-bold uppercase tracking-widest px-5 py-2.5 rounded-full transition">
-                Investor
-            </button>
-        </div>
-    </footer>
-
-    <button onclick="toggleSheet()" class="fixed bottom-8 right-6 bg-green-500 text-black w-14 h-14 rounded-full shadow-lg shadow-green-500/20 z-40 pulse-glow flex items-center justify-center active:scale-90 transition group">
-        <svg class="w-6 h-6 group-hover:rotate-12 transition" fill="currentColor" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
-        <span id="cartCount" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full hidden border border-black">0</span>
-    </button>
-
-    <div id="productModal" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
-        <div class="bg-gray-900 border border-gray-700 w-full max-w-sm rounded-3xl p-6 relative shadow-2xl">
-            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white bg-white/5 rounded-full w-8 h-8 flex items-center justify-center z-20">✕</button>
-            <div id="modalContent"></div>
-        </div>
-    </div>
-
-    <div id="loginModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95 hidden">
-        <div class="w-full max-w-sm text-center bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-2xl relative">
-            <h2 class="text-xl font-black uppercase text-white mb-2 tracking-tighter">Secure Access</h2>
-            
-            <div id="authStage">
-                <p class="text-gray-500 text-[10px] mb-6 tracking-widest uppercase">Identity Verification Required</p>
-                <input type="password" id="accessKey" placeholder="ENTER PASSKEY" class="w-full bg-black/50 border border-gray-700 text-center text-white text-lg tracking-[0.2em] rounded-xl px-4 py-4 focus:outline-none focus:border-green-500 mb-4 transition font-mono">
-                <button onclick="checkAccess()" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition text-xs uppercase tracking-widest">Authenticate</button>
-            </div>
-            
-            <div id="createPinStage" class="hidden">
-                <p class="text-blue-500 text-[10px] mb-4 font-bold uppercase tracking-widest">New Operator Setup</p>
-                <input type="text" id="newName" placeholder="CODENAME" class="w-full bg-black/50 border border-blue-900 text-center text-white text-sm rounded-xl px-4 py-3 mb-3 uppercase tracking-wider focus:outline-none focus:border-blue-500">
-                <input type="password" id="newPin" placeholder="SET PIN" class="w-full bg-black/50 border border-green-900 text-center text-white text-lg tracking-[0.2em] rounded-xl px-4 py-3 mb-6 focus:outline-none focus:border-green-500">
-                <button onclick="saveNewIdentity()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-500 transition text-xs uppercase tracking-widest">Initialize Link</button>
-            </div>
-            
-            <button onclick="closeLoginModal()" class="mt-6 text-[10px] text-gray-600 hover:text-white uppercase tracking-widest">Cancel Connection</button>
-        </div>
-    </div>
-
-    <div id="teamPanelVault" class="drawer-full">
-        <div class="flex justify-between items-center bg-gray-900/95 backdrop-blur-md py-4 px-6 border-b border-gray-800 flex-shrink-0 sticky top-0 z-50">
-            <div>
-                <h2 class="text-lg font-black text-blue-500 tracking-tighter flex items-center gap-2">
-                    <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span></span>
-                    OPS CENTER
-                </h2>
-                <p class="text-[9px] text-gray-500 uppercase tracking-widest">Live Directives</p>
-            </div>
-            <button onclick="closeDrawer('teamPanelVault')" class="text-gray-500 hover:text-red-500 text-xl leading-none">✕</button>
-        </div>
-
-        <div class="flex-1 flex flex-col h-full overflow-hidden p-6 pb-24 relative bg-gray-900">
-            <div class="bg-black/30 border border-white/5 p-4 rounded-2xl mb-6 shadow-inner">
-                <div class="flex gap-2 mb-2">
-                    <input type="text" id="newTaskInput" placeholder="New Directive..." class="w-full bg-transparent border-b border-gray-700 text-white px-2 py-2 text-sm focus:outline-none focus:border-blue-500 transition placeholder-gray-600">
-                </div>
-                <div class="flex justify-between items-center mt-2">
-                    <select id="taskAssignee" class="bg-gray-800 border border-gray-700 text-gray-400 text-[10px] rounded px-2 py-1 focus:outline-none uppercase tracking-wide">
-                        <option value="GENERAL">General</option>
-                        <option value="URGENT">Urgent</option>
-                        <option value="KITCHEN">Kitchen</option>
-                    </select>
-                    <button onclick="addNewTask()" class="text-blue-400 hover:text-white text-[10px] font-bold border border-blue-500/30 px-3 py-1 rounded transition uppercase">Add</button>
-                </div>
-            </div>
-
-            <div id="taskListContainer" class="scroll-area space-y-2 pb-32"></div>
-        </div>
-    </div>
-
-    <div id="investorVault" class="drawer-full">
-        <div class="max-w-2xl mx-auto w-full h-full flex flex-col bg-gray-900">
-            <div class="flex justify-between items-center px-6 py-4 border-b border-gray-800 bg-gray-900/95 sticky top-0 z-50">
-                <h2 class="text-lg font-black text-green-500 uppercase tracking-tighter">Investor Protocol</h2>
-                <button onclick="closeDrawer('investorVault')" class="text-gray-500 hover:text-red-500 text-xl">✕</button>
-            </div>
-            <div class="scroll-area p-6 pb-32">
-                <div class="grid grid-cols-2 gap-4 mb-8">
-                    <div class="glass-panel p-4 rounded-xl border-l-2 border-white">
-                        <p class="text-[9px] text-gray-500 uppercase tracking-widest mb-1">Gross Rev</p>
-                        <p class="text-xl font-mono font-bold text-white">₦1.2M</p>
-                    </div>
-                    <div class="glass-panel p-4 rounded-xl border-l-2 border-green-500">
-                        <p class="text-[9px] text-gray-500 uppercase tracking-widest mb-1">Net Margin</p>
-                        <p class="text-xl font-mono font-bold text-green-500">42%</p>
-                    </div>
-                </div>
-                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Unit Economics</h3>
-                <div id="investorProductGrid" class="space-y-3"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="orderSheet" class="drawer-partial">
-        <div class="w-12 h-1 bg-gray-600 rounded-full mx-auto mb-6 mt-4 cursor-pointer hover:bg-white transition" onclick="toggleSheet()"></div>
-        <div class="px-6 pb-6 scroll-area">
-            <div class="flex justify-between items-center mb-4 border-b border-white/5 pb-2">
-                <h3 class="text-sm font-bold uppercase tracking-wide text-gray-300">Order Manifest</h3>
-                <button onclick="toggleSheet()" class="text-[10px] text-red-400 hover:text-white font-bold px-2 py-1 border border-red-500/30 rounded">CLOSE</button>
-            </div>
-            
-            <div id="cartItems" class="space-y-2 mb-6 text-sm font-medium text-gray-200">
-                <p class="text-gray-600 italic text-xs text-center py-4">Scanning for items...</p>
-            </div>
-
-            <div class="bg-white/5 rounded-xl p-4 border border-white/5 mb-6">
-                <div class="flex justify-between items-end mb-4">
-                    <span class="text-gray-500 text-[10px] uppercase tracking-widest">Total Value</span>
-                    <span id="totalPrice" class="text-2xl font-black text-green-400 font-mono">₦0</span>
-                </div>
-                <div class="bg-black/40 rounded-lg p-3 flex justify-between items-center border border-white/5">
-                    <div>
-                        <p class="text-[9px] text-gray-500 uppercase font-bold mb-1">Transfer Destination</p>
-                        <p id="dispAcctNum" class="font-mono text-white font-bold text-sm tracking-widest select-all"></p>
-                        <p id="dispBankName" class="text-[9px] text-gray-400 mt-0.5"></p>
-                    </div>
-                    <button id="copyBankBtn" onclick="copyBank()" class="text-[9px] bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded transition uppercase font-bold">Copy</button>
-                </div>
-            </div>
-
-            <div class="space-y-3 mb-6">
-                <input type="text" id="custName" placeholder="YOUR NAME" class="w-full bg-black/50 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 transition placeholder-gray-700 text-xs tracking-wide uppercase">
-                <textarea id="custAddress" rows="2" placeholder="DELIVERY COORDINATES" class="w-full bg-black/50 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 transition placeholder-gray-700 text-xs tracking-wide uppercase"></textarea>
-            </div>
-
-            <button onclick="sendOrder()" class="w-full bg-green-600 hover:bg-green-500 text-white font-black uppercase py-4 rounded-xl shadow-lg shadow-green-900/50 active:scale-95 transition flex items-center justify-center gap-2 mb-4 text-xs tracking-[0.2em]">
-                Initialize Order
-            </button>
-        </div>
-    </div>
-
-    <button id="adminSaveBtn" onclick="compileAndSave()" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 bg-red-600 text-white font-bold py-3 px-6 rounded-full shadow-2xl z-[200] border-2 border-white text-xs tracking-wider hover:bg-red-700 transition">
-        SAVE SYSTEM
-    </button>
-
-    <div id="configExportModal" class="hidden fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95">
-        <div class="bg-gray-900 w-full max-w-lg p-6 rounded-2xl border border-red-500">
-            <h2 class="text-xl font-bold text-red-500 mb-2">SYSTEM SNAPSHOT</h2>
-            <textarea id="configOutput" class="w-full h-32 bg-black text-green-400 font-mono text-[10px] p-4 rounded-xl border border-gray-700 select-all focus:outline-none mb-4"></textarea>
-            <button onclick="document.getElementById('configExportModal').style.display='none'" class="w-full bg-gray-800 text-white py-2 rounded-xl text-xs font-bold">CLOSE</button>
-        </div>
-    </div>
-
-    <script>
+<script>
         // --- SUPABASE CONFIGURATION ---
-        // Your decoded credentials
         const SUPABASE_URL = 'https://ghucofpdbicobjnlamvo.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdodWNvZnBkYmljb2JqbmxhbXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxMzU4MTMsImV4cCI6MjA4MTcxMTgxM30.0tslgc8hUQ7NqQ9S45k3m4ez1Rh-cmADmEOv684qQnY';
         
-        const supabase = supa.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // FIX: Access the global 'supabase' object correctly
+        const { createClient } = supabase;
+        const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
         
         const KEYS = { INVESTOR: "iwillinvesT", BUILDER: "AdminEDITGODMODE", COMMANDER: "Admin GODMODE" };
 
@@ -290,7 +48,7 @@
 
         // --- SUPABASE ENGINE ---
         async function loadCloudData() {
-            const { data, error } = await supabase
+            const { data, error } = await sb
                 .from('tasks')
                 .select('*')
                 .order('created_at', { ascending: false });
@@ -303,7 +61,7 @@
 
         function initSupabaseRealtime() {
             loadCloudData();
-            supabase.channel('public:tasks')
+            sb.channel('public:tasks')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, payload => {
                     loadCloudData(); 
                 })
@@ -405,7 +163,7 @@
             document.getElementById('newTaskInput').value = '';
             
             // Send to DB
-            const { error } = await supabase.from('tasks').insert([{ text: txt, role: role, done: false }]);
+            const { error } = await sb.from('tasks').insert([{ id: Date.now(), text: txt, role: role, done: false }]);
             if(error) showToast("DB ERROR", "error");
         }
 
@@ -413,12 +171,12 @@
             const t = tasks.find(x => x.id === id); 
             // Optimistic update
             t.done = !t.done; renderTasks();
-            await supabase.from('tasks').update({ done: t.done }).eq('id', id);
+            await sb.from('tasks').update({ done: t.done }).eq('id', id);
         }
         
         async function deleteTask(id) { 
             tasks = tasks.filter(t => t.id !== id); renderTasks(); 
-            await supabase.from('tasks').delete().eq('id', id);
+            await sb.from('tasks').delete().eq('id', id);
         }
 
         function renderTasks() {
@@ -452,7 +210,7 @@
             let m = `*NEW ORDER* %0A👤 ${name}%0A📍 ${addr}%0A%0A*MANIFEST:*%0A${itemsClean}%0A%0A*TOTAL: ${document.getElementById('totalPrice').innerText}*`;
             
             // Insert Order
-            const { error } = await supabase.from('orders').insert([{ 
+            const { error } = await sb.from('orders').insert([{ 
                 id: 'ORD-' + Math.floor(Math.random() * 10000),
                 customer: name, 
                 items: itemsClean, 
@@ -506,5 +264,3 @@
             document.getElementById('productModal').classList.remove('opacity-0');
         }
     </script>
-</body>
-</html>
