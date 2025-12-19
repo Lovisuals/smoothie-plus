@@ -423,7 +423,29 @@
         async function checkSession() { const { data } = await sb.auth.getSession(); if (data.session) { currentUser = data.session.user; document.getElementById('userEmailDisplay').innerText = currentUser.email; updateAuthUI(true); initRealtimeOps(); } }
         function checkAuth() { currentUser ? openOpsCenter() : document.getElementById('authModal').classList.remove('hidden'); }
         async function handleLogin() { const email = document.getElementById('emailInput').value; const password = document.getElementById('passInput').value; const { data, error } = await sb.auth.signInWithPassword({ email, password }); if (error) { document.getElementById('authError').innerText = error.message; document.getElementById('authError').classList.remove('hidden'); } else { currentUser = data.user; updateAuthUI(true); initRealtimeOps(); openOpsCenter(); } }
-        async function handleLogout() { await sb.auth.signOut(); location.reload(); }
+        
+        // --- IMPROVED LOGOUT (MOBILE FIX) ---
+        async function handleLogout() { 
+            // 1. Immediate UI Feedback
+            const btn = document.activeElement;
+            if(btn) btn.innerText = "Closing...";
+            showToast("DISCONNECTING...");
+
+            // 2. Async Sign Out
+            await sb.auth.signOut(); 
+            
+            // 3. NUCLEAR OPTION: Clear Storage manually to prevent race conditions
+            localStorage.clear(); // Clears any lingering Supabase tokens
+            
+            // 4. Force Update UI State before reload
+            currentUser = null;
+            updateAuthUI(false); 
+            document.getElementById('opsDrawer').classList.remove('active');
+
+            // 5. Reload after delay to ensure browser has processed the clear
+            setTimeout(() => location.reload(), 500); 
+        }
+
         function updateAuthUI(isLoggedIn) { document.getElementById('loginForm').classList.toggle('hidden', isLoggedIn); document.getElementById('loggedInView').classList.toggle('hidden', !isLoggedIn); }
         function openOpsCenter() { document.getElementById('authModal').classList.add('hidden'); document.getElementById('opsDrawer').classList.add('active'); }
         
