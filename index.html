@@ -9,14 +9,18 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: { extend: { fontFamily: { sans: ['Outfit', 'sans-serif'] }, colors: { neon: '#39ff14' } } }
+            theme: { 
+                extend: { 
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] }, 
+                    colors: { neon: '#39ff14' },
+                    screens: { 'xs': '480px' }
+                } 
+            }
         }
     </script>
 
@@ -28,7 +32,7 @@
             --text-muted: #94a3b8;
             --glass-bg: rgba(20, 20, 30, 0.7);
             --glass-border: rgba(255, 255, 255, 0.08);
-            --card-bg: #0f1115; /* Solid dark for contrast against light stream */
+            --card-bg: #0f1115;
             --drawer-bg: #0a0a0c;
             --input-bg: rgba(255, 255, 255, 0.05);
             --ticker-bg: rgba(57, 255, 20, 0.05);
@@ -53,61 +57,25 @@
             background-color: var(--bg-body); 
             color: var(--text-main); 
             transition: background-color 0.4s ease, color 0.4s ease; 
-            overscroll-behavior: none; 
+            overscroll-behavior-y: none; 
             padding-top: 50px;
-            font-weight: 500; /* Outfit looks better slightly bolder */
+            font-weight: 500;
         }
 
-        /* --- THE STREAM ANIMATION (Hyper Upgrade) --- */
-        @property --angle {
-            syntax: '<angle>';
-            initial-value: 0deg;
-            inherits: false;
-        }
-
-        .stream-card {
-            position: relative;
-            background: var(--card-bg);
-            border-radius: 1.5rem;
-            z-index: 1; /* Keep content above */
-            overflow: hidden; /* Mask the spinner */
-            transition: transform 0.2s;
-        }
-
-        /* The Spinning Light */
+        /* --- THE STREAM ANIMATION (PC Optimized) --- */
+        @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+        .stream-card { position: relative; background: var(--card-bg); border-radius: 1.5rem; z-index: 1; overflow: hidden; transition: transform 0.2s; }
         .stream-card::before {
-            content: '';
-            position: absolute;
-            width: 150%;
-            height: 150%;
-            top: 50%;
-            left: 50%;
+            content: ''; position: absolute; width: 150%; height: 150%; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             background-image: conic-gradient(from var(--angle), transparent 70%, var(--stream-color));
-            animation: spin-stream 4s linear infinite;
-            z-index: -2;
-            opacity: 0.6; /* Soften the glow */
+            animation: spin-stream 4s linear infinite; z-index: -2; opacity: 0.6;
         }
-
-        /* The Inner Mask (To create the border look) */
         .stream-card::after {
-            content: '';
-            position: absolute;
-            inset: 1.5px; /* Border thickness */
-            background: var(--card-bg);
-            border-radius: 1.4rem;
-            z-index: -1;
+            content: ''; position: absolute; inset: 1.5px; background: var(--card-bg); border-radius: 1.4rem; z-index: -1;
         }
-
-        @keyframes spin-stream {
-            from { --angle: 0deg; }
-            to { --angle: 360deg; }
-        }
-
-        /* Fallback for browsers not supporting @property (Optional simple border) */
-        @supports not (background: paint(something)) {
-            .stream-card { border: 1px solid var(--glass-border); }
-        }
+        @keyframes spin-stream { from { --angle: 0deg; } to { --angle: 360deg; } }
+        .float-hover:active { transform: scale(0.98); }
 
         /* --- TICKER --- */
         .ticker-wrap {
@@ -123,36 +91,47 @@
         }
         @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
-        /* --- COMPONENTS --- */
-        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--glass-border); }
-        
-        /* Floating Animation (Subtle) */
-        .float-hover:active { transform: scale(0.98); }
-        
+        /* --- UTILS --- */
+        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(20px); border-top: 1px solid var(--glass-border); }
         .pulse-dot { animation: pulse 2s infinite; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 var(--stream-color); } 70% { box-shadow: 0 0 0 10px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
 
-        /* Drawers & Modals */
+        /* --- RESPONSIVE LAYOUT ENGINE --- */
+        /* Drawers stay restricted width for UX, but body expands */
         .drawer-full { position: fixed; inset: 0; background: var(--drawer-bg); transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); z-index: 100; display: flex; flex-direction: column; }
         .drawer-full.active { transform: translateY(0); }
+        
         .drawer-partial { position: fixed; bottom: 0; left: 0; right: 0; background: var(--drawer-bg); border-radius: 30px 30px 0 0; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); z-index: 90; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 -20px 50px rgba(0,0,0,0.3); border-top: 1px solid var(--glass-border); }
         .drawer-partial.active { transform: translateY(0); }
 
-        /* Toast */
         #toast { bottom: 30px; left: 50%; transform: translateX(-50%) translateY(200%) scale(0.9); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .toast-active { transform: translateX(-50%) translateY(0) scale(1) !important; }
 
-        /* Checkbox */
         input[type="checkbox"]:checked + div { background-color: #22c55e; border-color: #22c55e; }
         input[type="checkbox"]:checked ~ p { text-decoration: line-through; opacity: 0.5; }
 
-        /* PC Media Query */
+        /* --- DESKTOP SPECIFIC OVERRIDES --- */
         @media (min-width: 768px) {
-            body { max-width: 480px; margin: 0 auto; border-left: 1px solid var(--glass-border); border-right: 1px solid var(--glass-border); min-height: 100vh; position: relative; }
-            .drawer-full, .drawer-partial, #authModal, #productModal, .ticker-wrap { left: 0; right: 0; margin: auto; max-width: 480px; }
-            ::-webkit-scrollbar { width: 6px; }
+            /* Unlock layout width */
+            body { max-width: 100%; } 
+            
+            /* Center the main content container */
+            .responsive-container { max-width: 1200px; margin: 0 auto; padding-left: 2rem; padding-right: 2rem; }
+            
+            /* Keep drawers looking like mobile apps (centered modal style) */
+            .drawer-full, .drawer-partial, #authModal, #productModal { 
+                max-width: 480px; 
+                left: 0; right: 0; margin: auto; 
+                border-left: 1px solid var(--glass-border); 
+                border-right: 1px solid var(--glass-border);
+            }
+            
+            /* Custom scrollbar */
+            ::-webkit-scrollbar { width: 8px; }
+            ::-webkit-scrollbar-track { background: transparent; }
             ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 4px; }
         }
+        
         .scroll-area { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 100px; }
         .hide-scroll::-webkit-scrollbar { display: none; }
     </style>
@@ -169,28 +148,32 @@
         <span id="toastIcon" class="text-green-400">●</span> <span id="toastMsg">SYSTEM ONLINE</span>
     </div>
 
-    <header class="flex justify-between items-center px-6 pt-6 pb-4 relative z-50">
-        <div>
-            <h1 class="text-2xl font-black tracking-tighter uppercase leading-none italic">
-                smoothie<span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">Plus+</span>
-            </h1>
-            <p class="text-[9px] tracking-[0.3em] uppercase mt-1 ml-1 font-bold" style="color: var(--text-muted)">Organic Fuel</p>
-        </div>
-        
-        <div class="flex items-center gap-4">
-            <button onclick="toggleTheme()" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center transition hover:bg-white/10 active:scale-95">
-                <span id="themeIcon" class="text-lg">☀️</span>
-            </button>
-            <div id="connectionStatus" class="w-2 h-2 rounded-full bg-red-500 transition-all duration-1000 shadow-[0_0_15px_rgba(239,68,68,0.6)]" title="DB Status"></div>
+    <header class="fixed top-0 left-0 right-0 z-50 pt-14 pb-4 bg-gradient-to-b from-[var(--bg-body)] to-transparent pointer-events-none">
+        <div class="responsive-container flex justify-between items-center pointer-events-auto">
+            <div>
+                <h1 class="text-2xl font-black tracking-tighter uppercase leading-none italic">
+                    smoothie<span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">Plus+</span>
+                </h1>
+                <p class="text-[9px] tracking-[0.3em] uppercase mt-1 ml-1 font-bold" style="color: var(--text-muted)">Organic Fuel</p>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <button onclick="toggleTheme()" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center transition hover:bg-white/10 active:scale-95">
+                    <span id="themeIcon" class="text-lg">☀️</span>
+                </button>
+                <div id="connectionStatus" class="w-2 h-2 rounded-full bg-red-500 transition-all duration-1000 shadow-[0_0_15px_rgba(239,68,68,0.6)]" title="DB Status"></div>
+            </div>
         </div>
     </header>
 
-    <main id="menuGrid" class="px-4 grid grid-cols-2 gap-4 max-w-md mx-auto relative z-10 pb-32">
-        <div class="col-span-2 text-center mt-24 opacity-40">
-            <div class="inline-block w-8 h-8 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-[10px] uppercase tracking-widest mt-3 font-bold">Establishing Uplink...</p>
-        </div>
-    </main>
+    <div class="responsive-container w-full pt-28">
+        <main id="menuGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8 relative z-10 pb-32">
+            <div class="col-span-2 md:col-span-3 lg:col-span-4 text-center mt-24 opacity-40">
+                <div class="inline-block w-8 h-8 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-[10px] uppercase tracking-widest mt-3 font-bold">Establishing Uplink...</p>
+            </div>
+        </main>
+    </div>
 
     <footer class="fixed bottom-8 left-0 right-0 flex justify-center z-40 pointer-events-none">
         <div class="pointer-events-auto inline-flex glass-panel rounded-full p-1 shadow-2xl backdrop-blur-xl">
@@ -332,7 +315,7 @@
             grid.innerHTML = items.map(p => {
                 const color = p.color === 'green' ? '#4ade80' : p.color === 'purple' ? '#c084fc' : p.color === 'orange' ? '#fb923c' : '#22d3ee';
                 return `
-                <div onclick="openProduct(${p.id})" class="stream-card float-hover p-5 shadow-2xl cursor-pointer" style="--stream-color: ${color}">
+                <div onclick="openProduct(${p.id})" class="stream-card float-hover p-5 shadow-2xl cursor-pointer flex flex-col justify-between h-full" style="--stream-color: ${color}">
                     <div class="h-36 w-full rounded-2xl bg-black/20 mb-5 overflow-hidden relative">
                         <img src="${p.image_url || 'https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=500'}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition duration-500" alt="${p.name}">
                     </div>
