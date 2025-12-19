@@ -115,7 +115,6 @@
         }
 
         @media (min-width: 768px) {
-            /* PC Layout */
             body { max-width: 100%; } 
             .responsive-container { max-width: 1200px; margin: 0 auto; padding-left: 2rem; padding-right: 2rem; }
             
@@ -221,7 +220,7 @@
     </div>
 
     <div id="opsDrawer" class="drawer">
-        <div class="flex justify-between items-center p-6 border-b sticky top-0 z-10 backdrop-blur-xl bg-inherit">
+        <div class="flex justify-between items-center p-6 border-b sticky top-0 z-50 backdrop-blur-xl bg-inherit">
             <div>
                 <h2 class="text-xl font-black text-blue-500 tracking-tighter">OPS CENTER</h2>
                 <div class="flex items-center gap-2 mt-1">
@@ -230,10 +229,10 @@
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <button onclick="handleLogout()" class="text-[10px] font-bold text-red-500 border border-red-500/20 px-3 py-1.5 rounded hover:bg-red-500/10 transition uppercase tracking-wider">
+                <button onclick="handleLogout()" class="text-[10px] font-bold text-red-500 border border-red-500/20 px-4 py-3 rounded-lg hover:bg-red-500/10 active:bg-red-500/20 transition uppercase tracking-wider">
                     Disconnect
                 </button>
-                <button onclick="toggleSheet('opsDrawer')" class="text-xl hover:text-white transition opacity-50 hover:opacity-100 p-2" title="Minimize">
+                <button onclick="toggleSheet('opsDrawer')" class="text-xl hover:text-white transition opacity-50 hover:opacity-100 p-2 ml-2" title="Minimize">
                     ✕
                 </button>
             </div>
