@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#000000">
-    <title>smoothiePlus+ | PRO</title>
+    <title>smoothiePlus+ | OPS</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
     
     <script>
@@ -17,40 +16,39 @@
     </script>
 
     <style>
+        /* BASE STYLES */
         body { background-color: #050508; color: white; overscroll-behavior: none; }
         input, textarea, select { -webkit-user-select: text; user-select: text; font-size: 16px !important; }
         .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border-top: 1px solid rgba(255, 255, 255, 0.1); }
-        .scroll-area { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 40px; }
+        .scroll-area { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 80px; }
         .hide-scroll::-webkit-scrollbar { display: none; }
         
-        /* LAYOUT & DRAWERS */
+        /* DRAWERS */
         .drawer-full { position: fixed; inset: 0; background: #0f172a; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); z-index: 100; display: flex; flex-direction: column; }
         .drawer-full.active { transform: translateY(0); }
         .drawer-partial { position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; border-radius: 24px 24px 0 0; transform: translateY(100%); transition: transform 0.3s ease-out; z-index: 90; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); }
         .drawer-partial.active { transform: translateY(0); }
 
         /* ANIMATIONS */
-        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
-        .float-card { animation: float 6s ease-in-out infinite; }
         .pulse-glow { animation: pulse 2s infinite; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+        #toast { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .toast-active { transform: translateY(80px) translateX(-50%) !important; }
 
-        /* CHECKBOX LOGIC FIX */
-        .task-checkbox:checked + div { background-color: #22c55e; border-color: #22c55e; }
-        .task-checkbox:checked ~ p { text-decoration: line-through; color: #6b7280; }
-
-        /* PC RESPONSIVENESS */
+        /* PC FIX */
         @media (min-width: 768px) {
             body { max-width: 480px; margin: 0 auto; border-x: 1px solid #333; min-height: 100vh; position: relative; }
-            .drawer-full, .drawer-partial { left: 0; right: 0; margin: auto; max-width: 480px; }
+            .drawer-full, .drawer-partial, #authModal, #productModal { left: 0; right: 0; margin: auto; max-width: 480px; }
             ::-webkit-scrollbar { width: 6px; }
             ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
         }
     </style>
 </head>
-<body class="pb-32 font-sans selection:bg-green-500 selection:text-black">
+<body class="pb-32 font-sans">
 
-    <div id="toast" class="fixed top-[-60px] left-1/2 -translate-x-1/2 bg-green-600 text-white px-6 py-2 rounded-full text-xs font-bold shadow-xl transition-all duration-300 z-[9999]">SYNCED</div>
+    <div id="toast" class="fixed top-[-60px] left-1/2 -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-full text-xs font-bold shadow-2xl z-[9999] flex items-center gap-2">
+        <span id="toastIcon">✓</span> <span id="toastMsg">SYSTEM ONLINE</span>
+    </div>
 
     <header class="flex justify-between items-center px-6 pt-8 pb-4 relative z-50">
         <div>
@@ -59,7 +57,7 @@
             </h1>
             <p class="text-[9px] text-gray-500 tracking-[0.3em] uppercase mt-1 ml-1">Organic Fuel</p>
         </div>
-        <div id="connectionStatus" class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+        <div id="connectionStatus" class="w-2 h-2 rounded-full bg-red-500 transition-colors duration-500" title="DB Status"></div>
     </header>
 
     <main id="menuGrid" class="px-4 grid grid-cols-2 gap-4 max-w-md mx-auto relative z-10 pb-32">
@@ -67,139 +65,184 @@
 
     <footer class="fixed bottom-8 left-0 right-0 flex justify-center z-40 pointer-events-none">
         <div class="pointer-events-auto inline-flex bg-gray-900/90 backdrop-blur-md rounded-full p-1 border border-white/10 shadow-2xl">
-            <button onclick="checkAuth('OPS')" class="text-[10px] text-gray-400 hover:text-white font-bold uppercase tracking-widest px-6 py-3 rounded-full transition">
+            <button onclick="checkAuth()" class="text-[10px] text-gray-400 hover:text-white font-bold uppercase tracking-widest px-6 py-3 rounded-full transition flex items-center gap-2">
                 Staff Ops
             </button>
         </div>
     </footer>
 
-    <button onclick="toggleSheet('orderSheet')" class="fixed bottom-8 right-6 bg-green-500 text-black w-14 h-14 rounded-full shadow-lg z-50 pulse-glow flex items-center justify-center active:scale-90 transition">
+    <button onclick="toggleSheet('orderSheet')" class="fixed bottom-8 right-6 bg-green-500 text-black w-14 h-14 rounded-full shadow-lg z-50 pulse-glow flex items-center justify-center active:scale-90 transition hover:scale-105">
         <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
-        <span id="cartCount" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full hidden border border-black">0</span>
+        <span id="cartCount" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full hidden border border-black transform scale-0 transition-transform duration-200">0</span>
     </button>
 
-    <div id="authModal" class="fixed inset-0 z-[150] bg-black/95 flex items-center justify-center p-4 hidden">
-        <div class="bg-gray-900 border border-gray-800 w-full max-w-sm rounded-2xl p-8 relative">
-            <button onclick="document.getElementById('authModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500">✕</button>
-            <h2 class="text-xl font-black text-white mb-6 uppercase tracking-tighter">Staff Access</h2>
+    <div id="authModal" class="fixed inset-0 z-[150] bg-black/95 flex items-center justify-center p-4 hidden backdrop-blur-sm">
+        <div class="bg-gray-900 border border-gray-800 w-full max-w-sm rounded-3xl p-8 relative shadow-2xl">
+            <button onclick="document.getElementById('authModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500 hover:text-white transition">✕</button>
+            <h2 class="text-2xl font-black text-white mb-1 uppercase tracking-tighter">Staff Portal</h2>
+            <p class="text-xs text-gray-500 mb-6">SECURE ACCESS REQUIRED</p>
             
             <div id="loginForm">
-                <input type="email" id="emailInput" placeholder="STAFF EMAIL" class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded-lg mb-3 text-sm focus:border-green-500 outline-none">
-                <input type="password" id="passInput" placeholder="PASSWORD" class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded-lg mb-6 text-sm focus:border-green-500 outline-none">
-                <button onclick="handleLogin()" class="w-full bg-white text-black font-bold py-3 rounded-lg hover:bg-gray-200 transition text-xs uppercase tracking-widest">Secure Login</button>
-                <p id="authError" class="text-red-500 text-xs mt-3 text-center hidden"></p>
+                <div class="space-y-3">
+                    <input type="email" id="emailInput" placeholder="OPERATOR EMAIL" class="w-full bg-black/50 border border-gray-700 text-white p-4 rounded-xl text-sm focus:border-green-500 outline-none transition font-mono">
+                    <input type="password" id="passInput" placeholder="ACCESS KEY" class="w-full bg-black/50 border border-gray-700 text-white p-4 rounded-xl text-sm focus:border-green-500 outline-none transition font-mono">
+                </div>
+                <button onclick="handleLogin()" class="w-full bg-white text-black font-bold py-4 rounded-xl mt-6 hover:bg-gray-200 transition text-xs uppercase tracking-widest shadow-lg">Authenticate</button>
+                <p id="authError" class="text-red-500 text-xs mt-4 text-center hidden font-bold"></p>
             </div>
             
             <div id="loggedInView" class="hidden text-center">
-                <p class="text-green-500 text-sm mb-4">Authenticated</p>
-                <button onclick="openOpsCenter()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg mb-2">Open Ops Center</button>
-                <button onclick="handleLogout()" class="w-full border border-gray-700 text-gray-400 py-2 rounded-lg text-xs">Sign Out</button>
+                <div class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/50">
+                    <span class="text-2xl">🔓</span>
+                </div>
+                <p class="text-white font-bold text-lg mb-1">Identity Verified</p>
+                <p id="userEmailDisplay" class="text-gray-500 text-xs mb-6 font-mono">user@system</p>
+                <button onclick="openOpsCenter()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl mb-3 transition shadow-lg shadow-blue-900/20">Open Ops Center</button>
+                <button onclick="handleLogout()" class="w-full border border-gray-700 text-gray-400 hover:text-white py-3 rounded-xl text-xs transition">Terminate Session</button>
             </div>
         </div>
     </div>
 
     <div id="opsDrawer" class="drawer-full">
-        <div class="flex justify-between items-center bg-gray-900/95 p-4 border-b border-gray-800 sticky top-0 z-10">
-            <h2 class="text-lg font-black text-blue-500 tracking-tighter">OPS CENTER</h2>
-            <button onclick="toggleSheet('opsDrawer')" class="text-gray-400 text-xl">✕</button>
+        <div class="flex justify-between items-center bg-gray-900/95 p-6 border-b border-gray-800 sticky top-0 z-10 backdrop-blur-md">
+            <div>
+                <h2 class="text-xl font-black text-blue-500 tracking-tighter">OPS CENTER</h2>
+                <p class="text-[10px] text-gray-500 uppercase tracking-widest flex items-center gap-2">
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Live Feed
+                </p>
+            </div>
+            <button onclick="toggleSheet('opsDrawer')" class="text-gray-400 text-2xl hover:text-white transition">✕</button>
         </div>
-        <div class="flex-1 p-4 overflow-hidden flex flex-col">
-            <div class="bg-gray-800/50 p-3 rounded-xl mb-4">
-                <input type="text" id="newTaskInput" placeholder="New Directive..." class="w-full bg-transparent text-white text-sm outline-none mb-2 border-b border-gray-700 pb-1">
-                <div class="flex justify-between">
-                    <select id="taskRole" class="bg-gray-900 text-xs text-gray-400 rounded px-2 py-1 outline-none">
+        <div class="flex-1 p-6 overflow-hidden flex flex-col bg-black">
+            <div class="bg-gray-900 border border-gray-800 p-4 rounded-2xl mb-6 shadow-xl">
+                <input type="text" id="newTaskInput" placeholder="New Directive..." class="w-full bg-transparent text-white text-sm outline-none mb-4 border-b border-gray-700 pb-2 placeholder-gray-600">
+                <div class="flex justify-between items-center">
+                    <select id="taskRole" class="bg-black border border-gray-700 text-[10px] text-gray-400 rounded-lg px-3 py-2 outline-none uppercase tracking-wide">
                         <option value="GENERAL">General</option>
                         <option value="URGENT">Urgent</option>
+                        <option value="KITCHEN">Kitchen</option>
                     </select>
-                    <button onclick="addTask()" class="text-xs bg-blue-600 px-3 py-1 rounded font-bold">ADD</button>
+                    <button onclick="addTask()" class="text-[10px] bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-bold uppercase tracking-widest transition">Add Task</button>
                 </div>
             </div>
-            <div id="taskList" class="scroll-area space-y-2">
+            <div id="taskList" class="scroll-area space-y-3">
+                <div class="text-center mt-10 opacity-50">
+                    <p class="text-xs uppercase tracking-widest">Waiting for Data...</p>
                 </div>
+            </div>
         </div>
     </div>
 
     <div id="orderSheet" class="drawer-partial">
-        <div class="w-12 h-1 bg-gray-600 rounded-full mx-auto mb-6 mt-4 cursor-pointer" onclick="toggleSheet('orderSheet')"></div>
+        <div class="w-12 h-1 bg-gray-600 rounded-full mx-auto mb-6 mt-4 cursor-pointer hover:bg-white transition" onclick="toggleSheet('orderSheet')"></div>
         <div class="px-6 pb-8 scroll-area">
-            <h3 class="text-sm font-bold uppercase tracking-wide text-gray-300 mb-4">Manifest</h3>
-            <div id="cartList" class="space-y-2 mb-6 text-sm text-gray-300"></div>
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-sm font-bold uppercase tracking-wide text-gray-300">Manifest</h3>
+                <button onclick="toggleSheet('orderSheet')" class="text-[10px] text-gray-500 hover:text-white border border-gray-700 px-3 py-1 rounded-full transition">CLOSE</button>
+            </div>
             
-            <div class="border-t border-gray-700 pt-4 mb-4">
+            <div id="cartList" class="space-y-3 mb-6 text-sm text-gray-300"></div>
+            
+            <div class="bg-gray-800/50 rounded-xl p-4 mb-6 border border-white/5">
                 <div class="flex justify-between items-end">
-                    <span class="text-xs text-gray-500 uppercase">Total</span>
-                    <span id="cartTotal" class="text-2xl font-black text-green-400">₦0</span>
+                    <span class="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Total Value</span>
+                    <span id="cartTotal" class="text-2xl font-black text-green-400 font-mono tracking-tighter">₦0</span>
                 </div>
             </div>
 
-            <input type="text" id="custName" placeholder="YOUR NAME" class="w-full bg-black/30 border border-gray-700 text-white rounded-lg p-3 mb-2 text-sm outline-none">
-            <textarea id="custAddr" rows="2" placeholder="ADDRESS" class="w-full bg-black/30 border border-gray-700 text-white rounded-lg p-3 mb-4 text-sm outline-none"></textarea>
+            <div class="space-y-3 mb-6">
+                <input type="text" id="custName" placeholder="YOUR NAME" class="w-full bg-black/30 border border-gray-700 text-white rounded-xl p-4 text-sm outline-none focus:border-green-500 transition">
+                <textarea id="custAddr" rows="2" placeholder="DELIVERY COORDINATES" class="w-full bg-black/30 border border-gray-700 text-white rounded-xl p-4 text-sm outline-none focus:border-green-500 transition"></textarea>
+            </div>
             
-            <button onclick="checkout()" class="w-full bg-green-600 text-white font-black py-4 rounded-xl uppercase tracking-widest shadow-lg active:scale-95 transition">
-                Send Order
+            <button onclick="checkout()" class="w-full bg-green-600 hover:bg-green-500 text-white font-black py-4 rounded-xl uppercase tracking-widest shadow-lg shadow-green-900/20 active:scale-95 transition flex items-center justify-center gap-2">
+                Initialize Order
             </button>
         </div>
     </div>
 
-    <div id="productModal" class="fixed inset-0 z-[110] bg-black/90 flex items-center justify-center p-6 hidden">
-        <div class="bg-gray-900 border border-gray-700 w-full max-w-sm rounded-3xl p-6 relative">
-            <button onclick="document.getElementById('productModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400">✕</button>
+    <div id="productModal" class="fixed inset-0 z-[110] bg-black/90 flex items-end sm:items-center justify-center sm:p-6 hidden backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-gray-900 border border-gray-700 w-full max-w-sm rounded-t-3xl sm:rounded-3xl p-6 relative shadow-2xl">
+            <button onclick="document.getElementById('productModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-white bg-white/5 rounded-full w-8 h-8 flex items-center justify-center">✕</button>
             <div id="modalContent"></div>
         </div>
     </div>
 
     <script>
-        // --- 1. SECURE CONFIGURATION ---
+        // --- 1. CONFIGURATION ---
         const CONFIG = {
-            supabaseUrl: 'https://ghucofpdbicobjnlamvo.supabase.co',
-            supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdodWNvZnBkYmljb2JqbmxhbXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxMzU4MTMsImV4cCI6MjA4MTcxMTgxM30.0tslgc8hUQ7NqQ9S45k3m4ez1Rh-cmADmEOv684qQnY',
+            supabaseUrl: 'https://jkopygadpzkmqrnmzxmc.supabase.co', 
+            supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imprb3B5Z2FkcHprbXFybm16eG1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxNDAxNzcsImV4cCI6MjA4MTcxNjE3N30.hnPxhg8rmvGC-oHt7SWXekyG55EBcV26jPFTC8S5IeU',
+            
             whatsapp: '2347068516779',
             menu: [
-                { id: 1, name: "Diabetes Defense", price: 3500, img: "https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=500", color: "green", desc: "Low-glycemic blend." },
-                { id: 2, "name": "Mood Lifter", price: 4200, img: "https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?w=500", color: "purple", desc: "Antidepressant focus." },
-                { id: 3, "name": "Workaholic", price: 3800, img: "https://images.unsplash.com/photo-1595981267035-7b04ca84a82d?w=500", color: "orange", desc: "Instant energy." },
-                { id: 4, "name": "Pure Hydro", price: 3000, img: "https://images.unsplash.com/photo-1589984662646-e7b2e4962f18?w=500", color: "cyan", desc: "Maximum hydration." }
+                { id: 1, name: "Diabetes Defense", price: 3500, img: "https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=500", color: "green", desc: "Low-glycemic blend designed for steady energy." },
+                { id: 2, "name": "Mood Lifter", price: 4200, img: "https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?w=500", color: "purple", desc: "Antidepressant focus with antioxidant berries." },
+                { id: 3, "name": "Workaholic", price: 3800, img: "https://images.unsplash.com/photo-1595981267035-7b04ca84a82d?w=500", color: "orange", desc: "Instant natural energy spike." },
+                { id: 4, "name": "Pure Hydro", price: 3000, img: "https://images.unsplash.com/photo-1589984662646-e7b2e4962f18?w=500", color: "cyan", desc: "Maximum hydration via single-fruit extraction." }
             ]
         };
 
         // --- 2. INIT SUPABASE ---
-        let sb;
-        try {
-            // Check if global variable exists from UMD script
-            if (window.supabase) {
-                sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
-                document.getElementById('connectionStatus').classList.remove('bg-red-500');
-                document.getElementById('connectionStatus').classList.add('bg-green-500');
-            } else {
-                console.error("Supabase Library Not Loaded");
-            }
-        } catch (err) { console.error(err); }
+        let sb = null;
+        
+        async function initApp() {
+            renderMenu();
+            try {
+                if (window.supabase) {
+                    sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
+                    
+                    // Connection Test
+                    const { error } = await sb.from('orders').select('id').limit(1);
+                    if (!error || error.code === 'PGRST116') {
+                        document.getElementById('connectionStatus').classList.remove('bg-red-500');
+                        document.getElementById('connectionStatus').classList.add('bg-green-500');
+                        checkSession();
+                    } else {
+                        console.error("DB Connection Error:", error);
+                        showToast("DB CONNECTION FAILED", "error");
+                    }
+                }
+            } catch (err) { console.error("Init Error", err); }
+        }
 
-        // --- 3. STATE ---
+        // --- 3. STATE & HELPERS ---
         let cart = {};
         let tasks = [];
         let currentUser = null;
 
-        // --- 4. APP START ---
-        window.addEventListener('load', () => {
-            renderMenu();
-            checkSession(); // Check if already logged in
-        });
+        window.addEventListener('load', initApp);
 
-        // --- 5. CORE FUNCTIONS ---
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            const icon = document.getElementById('toastIcon');
+            const txt = document.getElementById('toastMsg');
+            
+            t.classList.remove('bg-green-600', 'bg-red-600');
+            t.classList.add(type === 'success' ? 'bg-green-600' : 'bg-red-600');
+            icon.innerText = type === 'success' ? '✓' : '⚠';
+            txt.innerText = msg;
+            
+            t.classList.add('toast-active');
+            setTimeout(() => t.classList.remove('toast-active'), 3000);
+        }
+
+        // --- 4. RENDER FUNCTIONS ---
         function renderMenu() {
             const grid = document.getElementById('menuGrid');
             grid.innerHTML = CONFIG.menu.map(p => `
-                <div onclick="openProduct(${p.id})" class="float-card bg-gray-900 border border-white/5 rounded-2xl p-4 shadow-lg active:scale-95 transition">
-                    <div class="h-32 w-full rounded-xl bg-black/50 mb-3 overflow-hidden">
-                        <img src="${p.img}" class="w-full h-full object-cover opacity-80">
+                <div onclick="openProduct(${p.id})" class="float-card bg-gray-900 border border-white/5 rounded-3xl p-4 shadow-lg active:scale-95 transition group cursor-pointer relative overflow-hidden">
+                    <div class="h-32 w-full rounded-2xl bg-black/50 mb-4 overflow-hidden relative">
+                        <img src="${p.img}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition duration-500">
                     </div>
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h3 class="font-bold text-xs uppercase text-white">${p.name}</h3>
-                            <p class="text-[10px] text-gray-400">${p.desc}</p>
+                    <div class="relative z-10">
+                        <h3 class="font-black text-sm uppercase text-white mb-1 tracking-wide">${p.name}</h3>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-${p.color}-400 font-bold text-sm font-mono">₦${p.price.toLocaleString()}</span>
+                            <div class="bg-white/10 p-1.5 rounded-lg text-white">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            </div>
                         </div>
-                        <span class="text-${p.color}-400 font-bold text-xs">₦${p.price.toLocaleString()}</span>
                     </div>
                 </div>
             `).join('');
@@ -210,10 +253,16 @@
             const modal = document.getElementById('productModal');
             document.getElementById('modalContent').innerHTML = `
                 <div class="text-center">
-                    <img src="${p.img}" class="w-24 h-24 rounded-full mx-auto border-2 border-${p.color}-500 mb-4">
-                    <h2 class="text-2xl font-black uppercase mb-1">${p.name}</h2>
-                    <p class="text-xl font-mono text-${p.color}-400 mb-4">₦${p.price.toLocaleString()}</p>
-                    <button onclick="addToCart(${p.id}); document.getElementById('productModal').classList.add('hidden')" class="w-full bg-white text-black font-bold py-3 rounded-xl uppercase">Add to Cart</button>
+                    <div class="relative w-32 h-32 mx-auto mb-6">
+                        <img src="${p.img}" class="w-full h-full rounded-full object-cover relative z-10 border-2 border-${p.color}-500">
+                    </div>
+                    <h2 class="text-3xl font-black uppercase mb-2 tracking-tighter leading-none">${p.name}</h2>
+                    <p class="text-sm text-gray-400 mb-6 px-4">${p.desc}</p>
+                    <div class="flex items-center justify-between bg-black/40 rounded-2xl p-4 border border-white/5 mb-6">
+                        <span class="text-gray-500 text-xs uppercase tracking-widest">Price</span>
+                        <span class="text-2xl font-mono text-${p.color}-400">₦${p.price.toLocaleString()}</span>
+                    </div>
+                    <button onclick="addToCart(${p.id}); document.getElementById('productModal').classList.add('hidden')" class="w-full bg-white text-black font-black py-4 rounded-xl uppercase tracking-widest hover:scale-105 transition shadow-lg">Add to Cart</button>
                 </div>
             `;
             modal.classList.remove('hidden');
@@ -224,7 +273,7 @@
             if(cart[p.name]) cart[p.name].q++;
             else cart[p.name] = { p: p.price, q: 1 };
             updateCartUI();
-            showToast('ADDED TO CART');
+            showToast('ADDED TO MANIFEST');
         }
 
         function updateCartUI() {
@@ -234,13 +283,23 @@
             for(const [name, item] of Object.entries(cart)) {
                 total += item.p * item.q;
                 count += item.q;
-                html += `<div class="flex justify-between border-b border-gray-700 py-2"><span>${name} <span class="text-gray-500">x${item.q}</span></span><span>₦${(item.p * item.q).toLocaleString()}</span></div>`;
+                html += `
+                <div class="flex justify-between items-center bg-gray-800/30 p-3 rounded-lg border border-white/5">
+                    <div>
+                        <p class="font-bold text-white text-sm">${name}</p>
+                        <p class="text-xs text-gray-500">Qty: ${item.q}</p>
+                    </div>
+                    <span class="font-mono text-green-400 text-sm">₦${(item.p * item.q).toLocaleString()}</span>
+                </div>`;
             }
             
-            document.getElementById('cartList').innerHTML = html || '<p class="text-center italic text-gray-500">Empty</p>';
+            document.getElementById('cartList').innerHTML = html || '<div class="text-center py-8 opacity-50"><p class="text-4xl mb-2">🛒</p><p class="text-xs uppercase tracking-widest">System Empty</p></div>';
             document.getElementById('cartTotal').innerText = '₦' + total.toLocaleString();
-            document.getElementById('cartCount').innerText = count;
-            document.getElementById('cartCount').classList.toggle('hidden', count === 0);
+            
+            const badge = document.getElementById('cartCount');
+            badge.innerText = count;
+            if(count > 0) badge.classList.remove('scale-0');
+            else badge.classList.add('scale-0');
         }
 
         function toggleSheet(id) {
@@ -248,24 +307,19 @@
             el.classList.toggle('active');
         }
 
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.style.top = '20px';
-            setTimeout(() => t.style.top = '-60px', 2000);
-        }
-
-        // --- 6. AUTHENTICATION & SECURITY ---
+        // --- 5. AUTHENTICATION (SECURE) ---
         async function checkSession() {
+            if(!sb) return;
             const { data } = await sb.auth.getSession();
             if (data.session) {
                 currentUser = data.session.user;
+                document.getElementById('userEmailDisplay').innerText = currentUser.email;
                 updateAuthUI(true);
-                initRealtime(); // Start listening for tasks
+                initRealtime(); 
             }
         }
 
-        function checkAuth(role) {
+        function checkAuth() {
             if (currentUser) {
                 openOpsCenter();
             } else {
@@ -274,28 +328,34 @@
         }
 
         async function handleLogin() {
+            if(!sb) return showToast("DB OFFLINE", "error");
+            
             const email = document.getElementById('emailInput').value;
             const password = document.getElementById('passInput').value;
             
+            if(!email || !password) return;
+
             const { data, error } = await sb.auth.signInWithPassword({ email, password });
             
             if (error) {
-                document.getElementById('authError').innerText = error.message;
-                document.getElementById('authError').classList.remove('hidden');
+                const errBox = document.getElementById('authError');
+                errBox.innerText = error.message;
+                errBox.classList.remove('hidden');
             } else {
                 currentUser = data.user;
+                document.getElementById('userEmailDisplay').innerText = currentUser.email;
                 updateAuthUI(true);
                 initRealtime();
-                openOpsCenter(); // Auto open on login
+                openOpsCenter();
             }
         }
 
         async function handleLogout() {
-            await sb.auth.signOut();
+            if(sb) await sb.auth.signOut();
             currentUser = null;
             updateAuthUI(false);
             document.getElementById('authModal').classList.add('hidden');
-            location.reload(); // Reset state
+            location.reload(); 
         }
 
         function updateAuthUI(isLoggedIn) {
@@ -313,83 +373,105 @@
             document.getElementById('opsDrawer').classList.add('active');
         }
 
-        // --- 7. BACKEND OPERATIONS (SECURE) ---
+        // --- 6. OPS CENTER (REALTIME TASKS) ---
         function initRealtime() {
-            // Load initial
+            if(!sb) return;
             fetchTasks();
-            // Subscribe to changes
             sb.channel('tasks').on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, payload => {
                 fetchTasks();
             }).subscribe();
         }
 
         async function fetchTasks() {
-            const { data } = await sb.from('tasks').select('*').order('created_at', { ascending: false });
-            if (data) {
-                const list = document.getElementById('taskList');
-                list.innerHTML = data.map(t => `
-                    <div class="flex items-start gap-3 bg-black/40 p-3 rounded-lg border border-white/5">
-                        <input type="checkbox" ${t.done ? 'checked' : ''} 
-                            onchange="toggleTask('${t.id}', this.checked)" 
-                            class="task-checkbox mt-1 cursor-pointer w-4 h-4 accent-green-500">
-                        <div class="flex-1">
-                            <span class="text-[9px] bg-gray-700 px-1 rounded text-white">${t.role}</span>
-                            <p class="text-sm text-gray-300 ${t.done ? 'line-through opacity-50' : ''}">${t.text}</p>
+            const { data, error } = await sb.from('tasks').select('*').order('created_at', { ascending: false });
+            
+            const list = document.getElementById('taskList');
+            list.innerHTML = '';
+
+            if (data && data.length > 0) {
+                data.forEach(t => {
+                    let badgeColor = t.role === 'URGENT' ? 'bg-red-500/20 text-red-400 border-red-500/30' : 
+                                     t.role === 'KITCHEN' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 
+                                     'bg-blue-500/20 text-blue-400 border-blue-500/30';
+                    
+                    list.innerHTML += `
+                        <div class="flex items-start gap-3 bg-white/5 border border-white/5 p-4 rounded-xl transition hover:bg-white/10 group">
+                            <div class="relative flex items-center justify-center w-5 h-5 mt-0.5">
+                                <input type="checkbox" ${t.done ? 'checked' : ''} 
+                                    onchange="toggleTask('${t.id}', this.checked)" 
+                                    class="peer appearance-none w-5 h-5 border-2 border-gray-600 rounded cursor-pointer checked:bg-green-500 checked:border-green-500 transition-colors">
+                                <svg class="w-3 h-3 text-black absolute opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                            <div class="flex-1">
+                                <span class="text-[10px] uppercase font-bold border px-1.5 py-0.5 rounded ${badgeColor} mb-1 inline-block">${t.role}</span>
+                                <p class="text-sm text-gray-300 font-medium ${t.done ? 'line-through opacity-40' : ''}">${t.text}</p>
+                            </div>
+                            <button onclick="deleteTask('${t.id}')" class="text-gray-600 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100 transition">✕</button>
                         </div>
-                        <button onclick="deleteTask('${t.id}')" class="text-red-500 font-bold">×</button>
-                    </div>
-                `).join('');
+                    `;
+                });
+            } else {
+                list.innerHTML = '<div class="text-center text-gray-600 text-xs py-10 uppercase tracking-widest">No Active Directives</div>';
             }
         }
 
         async function addTask() {
-            const text = document.getElementById('newTaskInput').value;
+            if(!sb) return;
+            const text = document.getElementById('newTaskInput').value.trim();
             if(!text) return;
             const role = document.getElementById('taskRole').value;
             
-            // Optimistic UI handled by Realtime, but we can clear input immediately
-            document.getElementById('newTaskInput').value = '';
+            document.getElementById('newTaskInput').value = ''; 
             
             const { error } = await sb.from('tasks').insert([{ text, role }]);
-            if (error) alert("Error: " + error.message);
+            if (error) showToast(error.message, "error");
         }
 
         async function toggleTask(id, status) {
+            if(!sb) return;
             await sb.from('tasks').update({ done: status }).eq('id', id);
         }
 
         async function deleteTask(id) {
+            if(!sb) return;
             await sb.from('tasks').delete().eq('id', id);
         }
 
-        // --- 8. CHECKOUT ---
+        // --- 7. CHECKOUT ENGINE ---
         async function checkout() {
-            const name = document.getElementById('custName').value;
-            const addr = document.getElementById('custAddr').value;
-            if(!name || !addr) return alert("Please fill details");
+            const name = document.getElementById('custName').value.trim();
+            const addr = document.getElementById('custAddr').value.trim();
+            
+            if(!name || !addr) return showToast("MISSING DETAILS", "error");
+            if(document.getElementById('cartCount').innerText === '0') return showToast("MANIFEST EMPTY", "error");
             
             let items = Object.entries(cart).map(([k,v]) => `${k} x${v.q}`).join(', ');
             let total = document.getElementById('cartTotal').innerText;
             
-            // 1. Save to Database (Public Write Allowed)
-            // Note: Generate random ID to avoid collision
-            const orderId = 'ORD-' + Math.floor(Math.random() * 100000);
+            const orderId = `ORD-${Date.now().toString().slice(-4)}-${Math.floor(Math.random()*100)}`;
             
-            const { error } = await sb.from('orders').insert([{ 
-                id: orderId,
-                customer: name, 
-                items: items, 
-                total: total 
-            }]);
-
-            // 2. Send to WhatsApp
-            if (!error) {
-                const msg = `*NEW ORDER (${orderId})* %0A👤 ${name}%0A📍 ${addr}%0A%0A${items}%0A%0A*TOTAL: ${total}*`;
-                window.open(`https://wa.me/${CONFIG.whatsapp}?text=${msg}`, '_blank');
-                cart = {}; updateCartUI(); toggleSheet('orderSheet');
-            } else {
-                alert("Connection Error. Please try again.");
+            if(sb) {
+                const { error } = await sb.from('orders').insert([{ 
+                    id: orderId,
+                    customer: name, 
+                    items: items, 
+                    total: total 
+                }]);
+                
+                if(error) {
+                    console.error(error);
+                    showToast("DB SYNC FAILED", "error");
+                } else {
+                    showToast("ORDER SECURED", "success");
+                }
             }
+
+            const msg = `*NEW ORDER: ${orderId}* %0A👤 ${name}%0A📍 ${addr}%0A%0A*ITEMS:*%0A${items}%0A%0A*TOTAL: ${total}*`;
+            window.open(`https://wa.me/${CONFIG.whatsapp}?text=${msg}`, '_blank');
+            
+            cart = {}; 
+            updateCartUI(); 
+            toggleSheet('orderSheet');
         }
     </script>
 </body>
