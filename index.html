@@ -4,181 +4,136 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#000000">
-    <title>smoothiePlus+ | Pro</title>
+    <title>smoothiePlus+ | OPS</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: { sans: ['Montserrat', 'sans-serif'] },
-                    colors: { darkBg: '#0a0a12', neon: '#39ff14' }
+                    colors: { darkBg: '#0a0a12', neon: '#39ff14', glass: 'rgba(255,255,255,0.05)' }
                 }
             }
         }
     </script>
+
     <style>
+        /* --- CORE VISUALS --- */
         body { background-color: #050508; color: white; overscroll-behavior: none; }
         input, textarea, select { -webkit-user-select: text; user-select: text; font-size: 16px !important; }
         
-        /* DRAWERS */
-        .drawer-full { position: fixed; bottom: 0; left: 0; right: 0; top: 0; background: #0f172a; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); z-index: 100; display: flex; flex-direction: column; height: 100dvh; }
+        /* --- ANIMATIONS --- */
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
+        .float-card { animation: float 6s ease-in-out infinite; }
+        .float-card:active { animation: none; transform: scale(0.98); transition: transform 0.1s; }
+        
+        @keyframes pulse-neon { 0% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(57, 255, 20, 0); } 100% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0); } }
+        .pulse-glow { animation: pulse-neon 2s infinite; }
+
+        /* --- UTILS --- */
+        .glass-panel { background: rgba(20, 20, 30, 0.95); backdrop-filter: blur(20px); border-top: 1px solid rgba(255, 255, 255, 0.1); }
+        .scroll-area { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 30px; }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .admin-editable { border: 1px dashed #ef4444; background: rgba(239, 68, 68, 0.1); padding: 2px; border-radius: 4px; }
+
+        /* --- DRAWERS (Mobile Logic) --- */
+        .drawer-full { position: fixed; bottom: 0; left: 0; right: 0; top: 0; background: #0f172a; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); z-index: 100; display: flex; flex-direction: column; }
         .drawer-full.active { transform: translateY(0); }
-        .drawer-partial { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(20, 20, 30, 0.98); border-top: 1px solid rgba(255,255,255,0.1); border-top-left-radius: 24px; border-top-right-radius: 24px; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1); z-index: 90; max-height: 85vh; display: flex; flex-direction: column; }
+
+        .drawer-partial { position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; border-top: 1px solid rgba(255,255,255,0.1); border-radius: 24px 24px 0 0; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1); z-index: 90; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 -20px 40px rgba(0,0,0,0.5); }
         .drawer-partial.active { transform: translateY(0); }
 
-        /* UTILS */
-        .scroll-area { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 20px; }
-        .admin-editable { border: 1px dashed #ef4444; background: rgba(239, 68, 68, 0.1); cursor: text; padding: 2px; border-radius: 4px; }
-        .glass-panel { background: rgba(20, 20, 30, 0.95); border-top: 1px solid rgba(255, 255, 255, 0.15); }
-        
-        /* ANIMATIONS */
-        @keyframes liquid-float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
-        .float-card { animation: liquid-float 6s ease-in-out infinite; transition: transform 0.2s; }
-        .float-card:active { transform: scale(0.98); }
-        .pulse-glow { animation: pulse-green 2s infinite; }
-        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(57, 255, 20, 0); } 100% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0); } }
-
-        /* SHIMMER & TOAST */
-        .shimmer-card { position: relative; overflow: hidden; background: rgba(20, 20, 30, 0.6); backdrop-filter: blur(10px); }
-        .shimmer-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.05), transparent); transform: skewX(-25deg); animation: shimmer 6s infinite; pointer-events: none; }
-        @keyframes shimmer { 0% { left: -100%; } 20% { left: 200%; } 100% { left: 200%; } }
-        
-        #apiToast { position: fixed; top: -50px; left: 50%; transform: translateX(-50%); background: #22c55e; color: black; padding: 8px 16px; border-radius: 20px; font-size: 10px; font-weight: bold; z-index: 9999; transition: top 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+        /* --- TOAST --- */
+        #apiToast { position: fixed; top: -50px; left: 50%; transform: translateX(-50%); background: #22c55e; color: black; padding: 8px 20px; border-radius: 30px; font-size: 11px; font-weight: 800; z-index: 9999; transition: top 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
         #apiToast.active { top: 20px; }
         #apiToast.error { background: #ef4444; color: white; }
 
-        /* TASK UI */
-        .task-check:checked + label span { background-color: #22c55e; border-color: #22c55e; }
-        .task-check:checked + label p { text-decoration: line-through; color: #6b7280; }
-        
-        /* PC FIX */
+        /* --- PC / DESKTOP FIX (Security & Layout) --- */
         @media (min-width: 768px) {
-            body { max-width: 480px; margin: 0 auto; border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); min-height: 100vh; position: relative; }
-            .drawer-full, .drawer-partial, #loginModal, #productModal, #configExportModal { left: 0; right: 0; margin: auto; max-width: 480px; }
+            body { max-width: 480px; margin: 0 auto; border-left: 1px solid #333; border-right: 1px solid #333; min-height: 100vh; position: relative; }
+            .drawer-full, .drawer-partial, #loginModal, #productModal, #configExportModal, #systemLockdown { left: 0; right: 0; margin: auto; max-width: 480px; }
+            ::-webkit-scrollbar { width: 6px; display: block; }
+            ::-webkit-scrollbar-track { background: transparent; }
+            ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
             button[onclick="toggleSheet()"] { right: auto !important; left: 50% !important; margin-left: 160px; }
             #adminSaveBtn { left: 50%; transform: translateX(-50%); }
-            ::-webkit-scrollbar { width: 6px; display: block; }
-            ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
         }
     </style>
 </head>
-<body class="pb-32 font-sans">
+<body class="pb-32 font-sans selection:bg-green-500 selection:text-black">
 
     <div id="apiToast">SYNCED ✓</div>
-    <div id="statusBadge" class="hidden fixed top-4 left-4 z-[300] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl bg-black border animate-bounce"></div>
-
-    <div id="systemLockdown" class="fixed inset-0 z-[99999] bg-black hidden flex-col items-center justify-center text-center p-6">
-        <h1 id="lockdownTitle" class="text-4xl font-black text-red-600 mb-4">OFFLINE</h1>
-        <p id="lockdownMsg" class="text-gray-500 font-mono text-xs">MAINTENANCE PROTOCOL ACTIVE</p>
+    <div id="statusBadge" class="hidden fixed top-4 left-4 z-[300] px-3 py-1 rounded-full text-[9px] font-black tracking-widest uppercase bg-black border border-green-500 text-green-500 shadow-xl"></div>
+    
+    <div id="systemLockdown" class="fixed inset-0 z-[99999] bg-black/95 hidden flex-col items-center justify-center text-center p-6 backdrop-blur-xl">
+        <h1 class="text-4xl font-black text-red-600 mb-2">OFFLINE</h1>
+        <p class="text-gray-500 font-mono text-xs">MAINTENANCE PROTOCOL ACTIVE</p>
     </div>
 
-    <div class="flex justify-between items-center px-4 pt-8 pb-4 relative z-50">
+    <header class="flex justify-between items-center px-6 pt-8 pb-4 relative z-50">
         <div>
-            <h1 class="text-2xl font-black tracking-tighter uppercase leading-none">
+            <h1 class="text-2xl font-black tracking-tighter uppercase leading-none italic">
                 smoothie<span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">Plus+</span>
             </h1>
-            <p class="text-[9px] text-gray-500 tracking-[0.3em] uppercase mt-1">Bio-Hacked Nutrition</p>
+            <p class="text-[9px] text-gray-500 tracking-[0.3em] uppercase mt-1 ml-1">Organic Fuel</p>
         </div>
-        <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
+        <div class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
             <svg class="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
         </div>
-    </div>
+    </header>
 
-    <main id="menuGrid" class="px-4 grid grid-cols-2 gap-4 max-w-md mx-auto relative z-10 min-h-[50vh]">
+    <main id="menuGrid" class="px-4 grid grid-cols-2 gap-4 max-w-md mx-auto relative z-10 min-h-[60vh]">
         <div id="loadingMsg" class="col-span-2 text-center text-gray-500 mt-20 flex flex-col items-center">
             <div class="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <span class="text-xs tracking-widest">LOADING MENU...</span>
+            <span class="text-[10px] tracking-widest animate-pulse">DECRYPTING MENU...</span>
         </div>
     </main>
 
-    <footer class="mt-20 mb-32 text-center space-y-4">
-        <div class="inline-flex bg-white/5 backdrop-blur-md rounded-full p-1 border border-white/10">
-            <button onclick="openLoginModal()" class="text-[10px] text-gray-400 hover:text-white font-bold uppercase tracking-widest px-4 py-2 rounded-full transition">Employee</button>
-            <button onclick="openLoginModal()" class="text-[10px] text-gray-400 hover:text-green-400 font-bold uppercase tracking-widest px-4 py-2 rounded-full transition">Investor</button>
+    <footer class="mt-16 mb-32 text-center">
+        <div class="inline-flex bg-white/5 backdrop-blur-md rounded-full p-1 border border-white/10 shadow-2xl">
+            <button onclick="openLoginModal()" class="text-[9px] text-gray-400 hover:text-white font-bold uppercase tracking-widest px-5 py-2.5 rounded-full transition flex items-center gap-2">
+                <span class="w-1.5 h-1.5 bg-gray-500 rounded-full"></span> Employee
+            </button>
+            <div class="w-[1px] bg-white/10 my-1"></div>
+            <button onclick="openLoginModal()" class="text-[9px] text-gray-400 hover:text-green-400 font-bold uppercase tracking-widest px-5 py-2.5 rounded-full transition">
+                Investor
+            </button>
         </div>
     </footer>
 
-    <button onclick="toggleSheet()" class="fixed bottom-6 right-6 bg-green-500 text-black w-14 h-14 rounded-full shadow-lg shadow-green-500/20 z-40 pulse-glow flex items-center justify-center active:scale-90 transition">
-        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+    <button onclick="toggleSheet()" class="fixed bottom-8 right-6 bg-green-500 text-black w-14 h-14 rounded-full shadow-lg shadow-green-500/20 z-40 pulse-glow flex items-center justify-center active:scale-90 transition group">
+        <svg class="w-6 h-6 group-hover:rotate-12 transition" fill="currentColor" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
         <span id="cartCount" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full hidden border border-black">0</span>
     </button>
 
-    <button id="adminSaveBtn" onclick="compileAndSave()" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 bg-red-600 text-white font-bold py-3 px-6 rounded-full shadow-2xl z-[200] border-2 border-white text-xs tracking-wider hover:bg-red-700 transition">
-        SAVE FULL SITE
-    </button>
-
-    <div id="productModal" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md hidden">
-        <div class="bg-gray-900 border border-gray-700 w-full max-w-sm rounded-3xl p-6 relative shadow-2xl shimmer-card">
-            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white bg-white/10 rounded-full w-8 h-8 flex items-center justify-center z-20 transition">✕</button>
+    <div id="productModal" class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-gray-900 border border-gray-700 w-full max-w-sm rounded-3xl p-6 relative shadow-2xl">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white bg-white/5 rounded-full w-8 h-8 flex items-center justify-center z-20">✕</button>
             <div id="modalContent"></div>
         </div>
     </div>
 
     <div id="loginModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95 hidden">
-        <div class="w-full max-w-sm text-center bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-2xl relative shimmer-card">
-            <h2 class="text-2xl font-black uppercase text-white mb-2">Access Portal</h2>
+        <div class="w-full max-w-sm text-center bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-2xl relative">
+            <h2 class="text-xl font-black uppercase text-white mb-2 tracking-tighter">Secure Access</h2>
+            
             <div id="authStage">
-                <p class="text-gray-500 text-xs mb-6 tracking-widest">SECURE ENTRY</p>
-                <div class="relative w-full mb-6">
-                    <input type="password" id="accessKey" placeholder="ENTER KEY" class="w-full bg-gray-800 border border-gray-700 text-center text-white text-xl tracking-widest rounded-xl px-4 py-4 focus:outline-none focus:border-green-500 pr-12 transition">
-                    <button onclick="togglePassVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-500 hover:text-white">👁</button>
-                </div>
-                <button onclick="checkAccess()" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition">AUTHENTICATE</button>
+                <p class="text-gray-500 text-[10px] mb-6 tracking-widest uppercase">Identity Verification Required</p>
+                <input type="password" id="accessKey" placeholder="ENTER PASSKEY" class="w-full bg-black/50 border border-gray-700 text-center text-white text-lg tracking-[0.2em] rounded-xl px-4 py-4 focus:outline-none focus:border-green-500 mb-4 transition font-mono">
+                <button onclick="checkAccess()" class="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition text-xs uppercase tracking-widest">Authenticate</button>
             </div>
             
             <div id="createPinStage" class="hidden">
-                <p class="text-green-500 text-xs mb-2 font-bold uppercase tracking-widest">Identify Yourself</p>
-                <input type="text" id="newName" placeholder="CODENAME" class="w-full bg-gray-800 border border-blue-500 text-center text-white text-sm rounded-xl px-4 py-3 focus:outline-none mb-3 uppercase tracking-widest">
-                <input type="password" id="newPin" placeholder="SET PIN" class="w-full bg-gray-800 border border-green-500 text-center text-white text-xl tracking-widest rounded-xl px-4 py-3 focus:outline-none mb-6">
-                <button onclick="saveNewIdentity()" class="w-full bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-500 transition">INITIALIZE</button>
+                <p class="text-blue-500 text-[10px] mb-4 font-bold uppercase tracking-widest">New Operator Setup</p>
+                <input type="text" id="newName" placeholder="CODENAME" class="w-full bg-black/50 border border-blue-900 text-center text-white text-sm rounded-xl px-4 py-3 mb-3 uppercase tracking-wider focus:outline-none focus:border-blue-500">
+                <input type="password" id="newPin" placeholder="SET PIN" class="w-full bg-black/50 border border-green-900 text-center text-white text-lg tracking-[0.2em] rounded-xl px-4 py-3 mb-6 focus:outline-none focus:border-green-500">
+                <button onclick="saveNewIdentity()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-500 transition text-xs uppercase tracking-widest">Initialize Link</button>
             </div>
-            <button onclick="closeLoginModal()" class="mt-6 text-xs text-gray-600 block w-full hover:text-white uppercase tracking-widest">Cancel</button>
-        </div>
-    </div>
-
-    <div id="configExportModal" class="hidden fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95">
-        <div class="bg-gray-900 w-full max-w-lg p-6 rounded-2xl border border-red-500">
-            <h2 class="text-xl font-bold text-red-500 mb-2">SYSTEM SNAPSHOT</h2>
-            <p class="text-gray-500 text-xs mb-4">Copy this code to save your changes permanently.</p>
-            <button onclick="copyToClipboard()" class="w-full bg-green-500 text-black font-bold py-3 rounded-xl mb-4 uppercase text-xs tracking-widest">Copy Code</button>
-            <textarea id="configOutput" class="w-full h-32 bg-black text-green-400 font-mono text-[10px] p-4 rounded-xl border border-gray-700 select-all focus:outline-none"></textarea>
-            <button onclick="document.getElementById('configExportModal').style.display='none'" class="w-full mt-4 bg-gray-800 text-white py-2 rounded-xl hover:bg-gray-700 text-xs font-bold">CLOSE</button>
-        </div>
-    </div>
-
-    <div id="investorVault" class="drawer-full">
-        <div class="max-w-2xl mx-auto w-full h-full flex flex-col bg-gray-900">
-            <div class="flex justify-between items-center px-6 py-4 border-b border-gray-800 bg-gray-900/95 sticky top-0 z-50">
-                <h2 class="text-lg font-black text-green-500 uppercase tracking-tighter">Investor Protocol</h2>
-                <div class="flex gap-4">
-                    <button onclick="minimizeDrawer('investorVault')" class="text-gray-500 hover:text-white text-2xl leading-none">-</button>
-                    <button onclick="closeDrawer('investorVault')" class="text-gray-500 hover:text-red-500 text-xl leading-none">✕</button>
-                </div>
-            </div>
-            <div class="scroll-area p-6 pb-32">
-                <div class="grid grid-cols-2 gap-4 mb-8">
-                    <div class="glass-panel p-4 rounded-xl">
-                        <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Burn Rate</p>
-                        <p class="text-xl font-mono font-bold text-white">Low</p>
-                    </div>
-                    <div class="glass-panel p-4 rounded-xl">
-                        <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Growth</p>
-                        <p class="text-xl font-mono font-bold text-green-500">+12%</p>
-                    </div>
-                </div>
-
-                <section class="mb-10">
-                    <h3 class="text-2xl font-black text-white mb-4">01. VISION</h3>
-                    <p id="plan-vision" class="text-gray-400 text-sm leading-relaxed mb-4">Bio-hacked hydration utilizing unique "Zero-Water" blending processes.</p>
-                </section>
-                
-                <section class="mb-10">
-                    <h3 class="text-2xl font-black text-white mb-4">02. MARGINS</h3>
-                    <div id="investorProductGrid" class="grid grid-cols-1 gap-3"></div>
-                </section>
-            </div>
+            
+            <button onclick="closeLoginModal()" class="mt-6 text-[10px] text-gray-600 hover:text-white uppercase tracking-widest">Cancel Connection</button>
         </div>
     </div>
 
@@ -186,45 +141,52 @@
         <div class="flex justify-between items-center bg-gray-900/95 backdrop-blur-md py-4 px-6 border-b border-gray-800 flex-shrink-0 sticky top-0 z-50">
             <div>
                 <h2 class="text-lg font-black text-blue-500 tracking-tighter flex items-center gap-2">
-                    <span class="relative flex h-2 w-2">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                    </span>
+                    <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span></span>
                     OPS CENTER
                 </h2>
-                <p class="text-[9px] text-gray-500 uppercase tracking-widest">Directives Only</p>
+                <p class="text-[9px] text-gray-500 uppercase tracking-widest">Live Directives</p>
             </div>
-            <div class="flex gap-4">
-                <button onclick="minimizeDrawer('teamPanelVault')" class="text-gray-500 hover:text-white text-2xl leading-none">-</button>
-                <button onclick="closeDrawer('teamPanelVault')" class="text-gray-500 hover:text-red-500 text-xl leading-none">✕</button>
-            </div>
+            <button onclick="closeDrawer('teamPanelVault')" class="text-gray-500 hover:text-red-500 text-xl leading-none">✕</button>
         </div>
 
-        <div class="flex-1 flex flex-col h-full overflow-hidden p-6 pb-24 relative">
-            
-            <div class="bg-white/5 border border-white/10 p-4 rounded-2xl mb-6 shadow-lg">
-                <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-2 font-bold">New Directive</p>
+        <div class="flex-1 flex flex-col h-full overflow-hidden p-6 pb-24 relative bg-gray-900">
+            <div class="bg-black/30 border border-white/5 p-4 rounded-2xl mb-6 shadow-inner">
                 <div class="flex gap-2 mb-2">
-                    <input type="text" id="newTaskInput" placeholder="Enter task details..." class="w-full bg-black/50 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition">
+                    <input type="text" id="newTaskInput" placeholder="New Directive..." class="w-full bg-transparent border-b border-gray-700 text-white px-2 py-2 text-sm focus:outline-none focus:border-blue-500 transition placeholder-gray-600">
                 </div>
-                <div class="flex justify-between items-center">
-                    <select id="taskAssignee" class="bg-black/50 border border-gray-700 text-gray-400 text-xs rounded-lg px-2 py-1.5 focus:outline-none uppercase">
+                <div class="flex justify-between items-center mt-2">
+                    <select id="taskAssignee" class="bg-gray-800 border border-gray-700 text-gray-400 text-[10px] rounded px-2 py-1 focus:outline-none uppercase tracking-wide">
                         <option value="GENERAL">General</option>
                         <option value="URGENT">Urgent</option>
-                        <option value="OPS">Ops</option>
+                        <option value="KITCHEN">Kitchen</option>
                     </select>
-                    <button onclick="addNewTask()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-1.5 rounded-lg transition uppercase tracking-wide">Add</button>
+                    <button onclick="addNewTask()" class="text-blue-400 hover:text-white text-[10px] font-bold border border-blue-500/30 px-3 py-1 rounded transition uppercase">Add</button>
                 </div>
             </div>
 
-            <h3 class="text-xs text-gray-500 font-bold uppercase tracking-widest mb-3">Active Tasks</h3>
-            <div id="taskListContainer" class="scroll-area space-y-3 pb-32"></div>
-            
-            <div class="absolute bottom-6 left-6 right-6">
-                <button onclick="broadcastToTelegram()" class="w-full text-[10px] text-gray-400 border border-gray-700 bg-gray-900/80 backdrop-blur py-3 rounded-xl hover:bg-gray-800 hover:text-white transition flex items-center justify-center gap-2 uppercase tracking-widest">
-                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.361 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.693-1.653-1.124-2.678-1.8-1.185-.781-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.141.119.098.152.228.166.33.016.115.022.242.018.365z"/></svg>
-                    Sync Status
-                </button>
+            <div id="taskListContainer" class="scroll-area space-y-2 pb-32"></div>
+        </div>
+    </div>
+
+    <div id="investorVault" class="drawer-full">
+        <div class="max-w-2xl mx-auto w-full h-full flex flex-col bg-gray-900">
+            <div class="flex justify-between items-center px-6 py-4 border-b border-gray-800 bg-gray-900/95 sticky top-0 z-50">
+                <h2 class="text-lg font-black text-green-500 uppercase tracking-tighter">Investor Protocol</h2>
+                <button onclick="closeDrawer('investorVault')" class="text-gray-500 hover:text-red-500 text-xl">✕</button>
+            </div>
+            <div class="scroll-area p-6 pb-32">
+                <div class="grid grid-cols-2 gap-4 mb-8">
+                    <div class="glass-panel p-4 rounded-xl border-l-2 border-white">
+                        <p class="text-[9px] text-gray-500 uppercase tracking-widest mb-1">Gross Rev</p>
+                        <p class="text-xl font-mono font-bold text-white">₦1.2M</p>
+                    </div>
+                    <div class="glass-panel p-4 rounded-xl border-l-2 border-green-500">
+                        <p class="text-[9px] text-gray-500 uppercase tracking-widest mb-1">Net Margin</p>
+                        <p class="text-xl font-mono font-bold text-green-500">42%</p>
+                    </div>
+                </div>
+                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Unit Economics</h3>
+                <div id="investorProductGrid" class="space-y-3"></div>
             </div>
         </div>
     </div>
@@ -232,46 +194,61 @@
     <div id="orderSheet" class="drawer-partial">
         <div class="w-12 h-1 bg-gray-600 rounded-full mx-auto mb-6 mt-4 cursor-pointer hover:bg-white transition" onclick="toggleSheet()"></div>
         <div class="px-6 pb-6 scroll-area">
-            <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-2">
-                <h3 class="text-sm font-bold uppercase tracking-wide">Current Order</h3>
-                <button onclick="toggleSheet()" class="text-xs text-red-400 hover:text-white font-bold px-2 py-1 transition">CLOSE</button>
+            <div class="flex justify-between items-center mb-4 border-b border-white/5 pb-2">
+                <h3 class="text-sm font-bold uppercase tracking-wide text-gray-300">Order Manifest</h3>
+                <button onclick="toggleSheet()" class="text-[10px] text-red-400 hover:text-white font-bold px-2 py-1 border border-red-500/30 rounded">CLOSE</button>
             </div>
             
             <div id="cartItems" class="space-y-2 mb-6 text-sm font-medium text-gray-200">
-                <p class="text-gray-500 italic text-xs text-center py-4">Your cart is empty.</p>
+                <p class="text-gray-600 italic text-xs text-center py-4">Scanning for items...</p>
             </div>
 
-            <div class="bg-white/5 rounded-2xl p-4 border border-white/5 mb-6">
+            <div class="bg-white/5 rounded-xl p-4 border border-white/5 mb-6">
                 <div class="flex justify-between items-end mb-4">
-                    <span class="text-gray-400 text-xs uppercase tracking-widest">Total Payload</span>
-                    <span id="totalPrice" class="text-2xl font-black text-green-400">₦0</span>
+                    <span class="text-gray-500 text-[10px] uppercase tracking-widest">Total Value</span>
+                    <span id="totalPrice" class="text-2xl font-black text-green-400 font-mono">₦0</span>
                 </div>
-                <div class="bg-black/40 rounded-xl p-3 flex justify-between items-center border border-white/5">
+                <div class="bg-black/40 rounded-lg p-3 flex justify-between items-center border border-white/5">
                     <div>
                         <p class="text-[9px] text-gray-500 uppercase font-bold mb-1">Transfer Destination</p>
-                        <p id="dispBankName" class="text-[10px] text-gray-300"></p>
                         <p id="dispAcctNum" class="font-mono text-white font-bold text-sm tracking-widest select-all"></p>
-                        <p id="dispAcctName" class="text-[9px] text-gray-500 mt-1"></p>
+                        <p id="dispBankName" class="text-[9px] text-gray-400 mt-0.5"></p>
                     </div>
-                    <button id="copyBankBtn" onclick="copyBank()" class="text-[10px] bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded transition uppercase font-bold">Copy</button>
+                    <button id="copyBankBtn" onclick="copyBank()" class="text-[9px] bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded transition uppercase font-bold">Copy</button>
                 </div>
             </div>
 
             <div class="space-y-3 mb-6">
-                <input type="text" id="custName" placeholder="YOUR NAME" class="w-full bg-black/50 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 transition placeholder-gray-600 text-sm">
-                <textarea id="custAddress" rows="2" placeholder="DELIVERY LOCATION" class="w-full bg-black/50 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 transition placeholder-gray-600 text-sm"></textarea>
+                <input type="text" id="custName" placeholder="YOUR NAME" class="w-full bg-black/50 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 transition placeholder-gray-700 text-xs tracking-wide uppercase">
+                <textarea id="custAddress" rows="2" placeholder="DELIVERY COORDINATES" class="w-full bg-black/50 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-green-500 transition placeholder-gray-700 text-xs tracking-wide uppercase"></textarea>
             </div>
 
-            <button onclick="sendOrder()" class="w-full bg-green-500 hover:bg-green-400 text-black font-black uppercase py-4 rounded-xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2 mb-4 tracking-wide">
-                Submit Order via WhatsApp
+            <button onclick="sendOrder()" class="w-full bg-green-600 hover:bg-green-500 text-white font-black uppercase py-4 rounded-xl shadow-lg shadow-green-900/50 active:scale-95 transition flex items-center justify-center gap-2 mb-4 text-xs tracking-[0.2em]">
+                Initialize Order
             </button>
         </div>
     </div>
 
-    <script id="main-script">
-        // CONFIGURATION
-        const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbylW3_w8NdVfE-Ow-2qdaMDJn-b90Nvj-M2bKfz-d_w4IYCLtSFE5kL0i16tKQp906R/exec"; 
-        const SITE_STATE = 'ACTIVE'; // Options: ACTIVE, MAINTENANCE, KILLED
+    <button id="adminSaveBtn" onclick="compileAndSave()" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 bg-red-600 text-white font-bold py-3 px-6 rounded-full shadow-2xl z-[200] border-2 border-white text-xs tracking-wider hover:bg-red-700 transition">
+        SAVE SYSTEM
+    </button>
+
+    <div id="configExportModal" class="hidden fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95">
+        <div class="bg-gray-900 w-full max-w-lg p-6 rounded-2xl border border-red-500">
+            <h2 class="text-xl font-bold text-red-500 mb-2">SYSTEM SNAPSHOT</h2>
+            <textarea id="configOutput" class="w-full h-32 bg-black text-green-400 font-mono text-[10px] p-4 rounded-xl border border-gray-700 select-all focus:outline-none mb-4"></textarea>
+            <button onclick="document.getElementById('configExportModal').style.display='none'" class="w-full bg-gray-800 text-white py-2 rounded-xl text-xs font-bold">CLOSE</button>
+        </div>
+    </div>
+
+    <script>
+        // --- SUPABASE CONFIGURATION ---
+        // Your decoded credentials
+        const SUPABASE_URL = 'https://ghucofpdbicobjnlamvo.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdodWNvZnBkYmljb2JqbmxhbXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxMzU4MTMsImV4cCI6MjA4MTcxMTgxM30.0tslgc8hUQ7NqQ9S45k3m4ez1Rh-cmADmEOv684qQnY';
+        
+        const supabase = supa.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
         const KEYS = { INVESTOR: "iwillinvesT", BUILDER: "AdminEDITGODMODE", COMMANDER: "Admin GODMODE" };
 
         const STORE_CONFIG = {
@@ -289,258 +266,97 @@
             ]
         };
 
-        // STATE
+        // --- STATE ---
         let cart = {}; 
         let adminMode = false;
         let currentName = localStorage.getItem('mySmoothieName') || 'UNKNOWN';
         let localUserPin = localStorage.getItem('mySmoothiePin'); 
-        let tasks = []; 
+        let tasks = [];
 
-        // INITIALIZATION
+        // --- INIT ---
         window.addEventListener('load', () => { 
-            checkSiteHealth(); 
             renderMenu(); 
             renderBankDetails(); 
             restoreSession();
             
-            // Key Listeners for UX
-            document.getElementById('accessKey').addEventListener('keypress', function (e) { if (e.key === 'Enter') checkAccess(); });
-            document.getElementById('newPin').addEventListener('keypress', function (e) { if (e.key === 'Enter') saveNewIdentity(); });
-            document.getElementById('newTaskInput').addEventListener('keypress', function (e) { if (e.key === 'Enter') addNewTask(); });
+            // Key Listeners
+            document.getElementById('accessKey').addEventListener('keypress', (e) => { if (e.key === 'Enter') checkAccess(); });
+            document.getElementById('newPin').addEventListener('keypress', (e) => { if (e.key === 'Enter') saveNewIdentity(); });
+            document.getElementById('newTaskInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') addNewTask(); });
 
             if(window.location.hash === "#employee") openLoginModal();
-            if(localStorage.getItem('smoothieActiveView') === 'teamPanelVault') startNeuralLink();
+            if(localStorage.getItem('smoothieActiveView') === 'teamPanelVault') initSupabaseRealtime();
         });
 
-        // --- SAFE POST (SYNC) ---
-        async function safePost(payload) {
-            try { 
-                await fetch(GOOGLE_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); 
-                showToast("SYNCED ✓", "success"); 
-            } catch (e) { 
-                showToast("OFFLINE MODE", "error"); 
-            }
-        }
-        
-        function showToast(msg, type) { 
-            const t = document.getElementById('apiToast'); 
-            t.innerText = msg; 
-            t.className = type === 'error' ? 'error active' : 'active'; 
-            setTimeout(() => t.classList.remove('active'), 2000); 
-        }
-
-        // --- AUTH SYSTEM ---
-        function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; document.getElementById('accessKey').focus(); }
-        function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
-        function togglePassVisibility() { const i = document.getElementById('accessKey'); i.type = i.type === "password" ? "text" : "password"; }
-
-        function checkAccess() {
-            const val = document.getElementById('accessKey').value.trim();
-            if (val === KEYS.INVESTOR) { 
-                launchApp('investorVault', "green", " INVESTOR ACCESS"); 
-                closeLoginModal(); 
-            } else if (val === KEYS.BUILDER) { 
-                closeLoginModal(); 
-                activateBuilderMode(); 
-            } else if (val === KEYS.COMMANDER) { 
-                document.getElementById('authStage').classList.add('hidden'); 
-                document.getElementById('createPinStage').classList.remove('hidden'); 
-                document.getElementById('newName').focus(); 
-            } else if (localUserPin && val === localUserPin) { 
-                launchApp('teamPanelVault', "blue", " OPS CENTER"); 
-                startNeuralLink(); 
-                closeLoginModal(); 
-            } else { 
-                alert("ACCESS DENIED"); 
-                document.getElementById('accessKey').value = '';
-            }
-        }
-
-        function saveNewIdentity() {
-            const name = document.getElementById('newName').value.trim().toUpperCase(); 
-            const pin = document.getElementById('newPin').value.trim();
-            if(name.length < 2) return alert("Codename required."); 
-            if(pin.length < 4) return alert("PIN too short.");
-            
-            localStorage.setItem('mySmoothieName', name); 
-            localStorage.setItem('mySmoothiePin', pin);
-            localUserPin = pin; 
-            currentName = name; 
-            
-            closeLoginModal(); 
-            launchApp('teamPanelVault', "blue", " OPS CENTER"); 
-            startNeuralLink();
-        }
-
-        function launchApp(viewId, color, badgeText) { 
-            document.getElementById(viewId).classList.add('active'); 
-            localStorage.setItem('smoothieActiveView', viewId); 
-            showStatusBadge(badgeText, color); 
-        }
-
-        // --- SYNC ENGINE ---
-        function startNeuralLink() { 
-            loadCloudData(); 
-            setInterval(loadCloudData, 10000); // Poll every 10s to save battery/data
-        }
-        
+        // --- SUPABASE ENGINE ---
         async function loadCloudData() {
-            if(!GOOGLE_API_URL) return;
-            try {
-                const res = await fetch(GOOGLE_API_URL); 
-                const data = await res.json();
-                tasks = data.tasks; 
-                renderTasks();
-            } catch(e) { console.log("Sync Silent Fail"); }
-        }
-
-        // --- TASK OPS ---
-        function addNewTask() {
-            const txt = document.getElementById('newTaskInput').value.trim(); 
-            const role = document.getElementById('taskAssignee').value; 
-            if(!txt) return;
-            
-            const newId = Date.now(); 
-            document.getElementById('newTaskInput').value = '';
-            
-            tasks.unshift({ id: newId, text: txt, role: role, done: false }); 
-            renderTasks();
-            
-            if(GOOGLE_API_URL) safePost({ type: 'TASK', action: 'ADD', id: newId, role: role, text: txt, pin: KEYS.COMMANDER });
-        }
-        
-        function toggleTask(id) { 
-            const t = tasks.find(x => x.id === id); 
-            if(t) t.done = !t.done; 
-            renderTasks(); 
-            if(GOOGLE_API_URL) safePost({ type: 'TASK', action: 'TOGGLE', id: id, pin: KEYS.COMMANDER }); 
-        }
-        
-        function deleteTask(id) { 
-            tasks = tasks.filter(t => t.id !== id); 
-            renderTasks(); 
-            if(GOOGLE_API_URL) safePost({ type: 'TASK', action: 'DELETE', id: id, pin: KEYS.COMMANDER }); 
-        }
-        
-        function renderTasks() {
-            const l = document.getElementById('taskListContainer'); 
-            l.innerHTML='';
-            if(tasks.length===0) { l.innerHTML='<p class="text-gray-600 text-xs text-center mt-10">NO ACTIVE DIRECTIVES.</p>'; return; }
-            
-            tasks.forEach(t => {
-                let badgeColor = t.role === 'URGENT' ? 'text-red-500 border-red-500/50' : (t.role === 'OPS' ? 'text-blue-500 border-blue-500/50' : 'text-gray-400 border-gray-600');
+            const { data, error } = await supabase
+                .from('tasks')
+                .select('*')
+                .order('created_at', { ascending: false });
                 
-                l.innerHTML += `
-                <div class="flex items-start gap-3 bg-white/5 border border-white/5 p-3 rounded-xl hover:bg-white/10 transition group">
-                    <input type="checkbox" onchange="toggleTask(${t.id})" class="task-check hidden" id="task-${t.id}" ${t.done?'checked':''}>
-                    <label for="task-${t.id}" class="flex-shrink-0 w-5 h-5 border border-gray-600 rounded cursor-pointer flex items-center justify-center mt-0.5 hover:border-green-500 transition">
-                        <span class="w-2.5 h-2.5 rounded-sm"></span>
-                    </label>
-                    <div class="flex-1">
-                        <span class="text-[9px] px-1.5 py-0.5 rounded border ${badgeColor} font-bold mb-1 inline-block bg-black/30">${t.role}</span>
-                        <p class="text-sm text-gray-300 leading-snug ${t.done?'line-through opacity-40':''}">${t.text}</p>
-                    </div>
-                    <button onclick="deleteTask(${t.id})" class="text-gray-600 hover:text-red-500 text-lg leading-none opacity-0 group-hover:opacity-100 transition">✕</button>
-                </div>`;
-            });
-        }
-        
-        function broadcastToTelegram() { 
-            let text = "🚨 *OPS REPORT*\n\n"; 
-            const pending = tasks.filter(t => !t.done); 
-            if(pending.length > 0) { 
-                pending.forEach(t => text += `[${t.role}] ${t.text}\n`); 
-            } else { text += "ALL SYSTEMS CLEAR.\n"; } 
-            window.open(`tg://msg?text=${encodeURIComponent(text)}`, '_blank'); 
+            if (data) {
+                tasks = data;
+                renderTasks();
+            }
         }
 
-        // --- COMPILER (BACKUP TOOL) ---
-        function compileAndSave() {
-            const clone = document.documentElement.cloneNode(true);
-            // Clean up UI for export
-            clone.querySelectorAll('#statusBadge, #adminSaveBtn, #configExportModal, #loginModal, #productModal, #systemLockdown').forEach(e => e.classList.add('hidden'));
-            clone.querySelectorAll('.drawer-full, .drawer-partial').forEach(e => e.classList.remove('active'));
-            clone.querySelectorAll('[contenteditable]').forEach(e => { e.removeAttribute('contenteditable'); e.classList.remove('admin-editable'); });
-            
-            const newConfig = { admin: STORE_CONFIG.admin, products: STORE_CONFIG.products };
-            const script = clone.querySelector('#main-script').innerHTML;
-            clone.querySelector('#main-script').innerHTML = script.replace(/const STORE_CONFIG = \{[\s\S]*?\};/, "const STORE_CONFIG = " + JSON.stringify(newConfig, null, 4) + ";");
-            
-            document.getElementById('configOutput').value = "<!DOCTYPE html>\n" + clone.outerHTML;
-            document.getElementById('configExportModal').style.display = 'flex';
-        }
-        
-        function copyToClipboard() { 
-            navigator.clipboard.writeText(document.getElementById("configOutput").value); 
-            alert("CODE COPIED TO CLIPBOARD"); 
+        function initSupabaseRealtime() {
+            loadCloudData();
+            supabase.channel('public:tasks')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, payload => {
+                    loadCloudData(); 
+                })
+                .subscribe();
         }
 
-        // --- RENDER & CART ---
-        function renderBankDetails() { 
-            document.getElementById('dispBankName').innerText = STORE_CONFIG.admin.bankName; 
-            document.getElementById('dispAcctNum').innerText = STORE_CONFIG.admin.acctNum; 
-            document.getElementById('dispAcctName').innerText = STORE_CONFIG.admin.acctName; 
-        }
-        
+        // --- MENU RENDERER ---
         function renderMenu() {
-            const c = document.getElementById('menuGrid'); let h = '';
+            const c = document.getElementById('menuGrid');
+            let h = '';
             STORE_CONFIG.products.forEach(p => {
                 const edit = adminMode ? 'contenteditable="true" class="admin-editable rounded p-1"' : '';
                 h += `
                 <div onclick="showProductDetails(${p.id})" class="float-card bg-gray-900 border border-${p.color}-500/30 rounded-3xl p-4 shadow-lg flex flex-col justify-between cursor-pointer active:scale-95 transition relative overflow-hidden group">
-                    <div class="absolute -top-10 -right-10 w-20 h-20 bg-${p.color}-500/20 blur-3xl rounded-full"></div>
-                    
-                    <div>
-                        <h3 ${edit} class="font-black text-sm uppercase mb-3 text-white tracking-wide">${p.name}</h3>
-                        <div class="h-32 w-full rounded-2xl mb-3 overflow-hidden bg-black/50 relative">
-                            <img src="${p.img}" class="object-cover w-full h-full opacity-90 group-hover:opacity-100 group-hover:scale-110 transition duration-500" loading="lazy">
-                        </div>
+                    <div class="h-32 w-full rounded-2xl mb-3 overflow-hidden bg-black/50 relative">
+                        <img src="${p.img}" class="object-cover w-full h-full opacity-80 group-hover:opacity-100 transition duration-500">
                     </div>
-                    
-                    <div class="flex justify-between items-center mt-2">
-                        <span class="text-${p.color}-400 font-bold font-mono">₦<span ${edit}>${p.price.toLocaleString()}</span></span>
-                        <button onclick="event.stopPropagation(); addToCart('${p.name}', ${p.price})" class="bg-white text-black text-[10px] font-black px-4 py-2 rounded-lg hover:bg-gray-200 transition z-10 uppercase tracking-wider">+ ADD</button>
+                    <div>
+                        <h3 ${edit} class="font-black text-xs uppercase mb-1 text-white tracking-wide">${p.name}</h3>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-${p.color}-400 font-bold font-mono text-sm">₦<span ${edit}>${p.price.toLocaleString()}</span></span>
+                            <button onclick="event.stopPropagation(); addToCart('${p.name}', ${p.price})" class="bg-white/10 text-white text-[10px] font-bold px-3 py-1.5 rounded hover:bg-white hover:text-black transition uppercase tracking-wider">+ ADD</button>
+                        </div>
                     </div>
                 </div>`;
             });
             document.getElementById('loadingMsg').style.display = 'none'; 
             c.innerHTML = h;
-            
-            // Investor Grid
+            renderInvestorGrid();
+        }
+
+        function renderInvestorGrid() {
             const invGrid = document.getElementById('investorProductGrid');
             if(invGrid) {
                 let invHtml = '';
                 STORE_CONFIG.products.forEach(p => {
                     const margin = Math.round(p.price * 0.6);
                     invHtml += `
-                    <div class="bg-white/5 p-3 rounded-xl border border-white/5 flex items-center gap-4">
-                        <img src="${p.img}" class="w-10 h-10 rounded-full object-cover opacity-70">
-                        <div class="flex-1">
-                            <p class="text-white font-bold text-xs">${p.name}</p>
-                            <div class="flex justify-between mt-1">
-                                <span class="text-gray-500 text-[10px]">Cost: ₦${(p.price-margin).toLocaleString()}</span>
-                                <span class="text-green-400 text-[10px] font-mono">+₦${margin.toLocaleString()}</span>
-                            </div>
-                        </div>
+                    <div class="bg-white/5 p-3 rounded-lg border-l-2 border-green-500 flex justify-between items-center">
+                        <p class="text-white font-bold text-xs uppercase">${p.name}</p>
+                        <span class="text-green-400 text-[10px] font-mono">+₦${margin.toLocaleString()}</span>
                     </div>`;
                 });
                 invGrid.innerHTML = invHtml;
             }
         }
 
+        // --- CART SYSTEM ---
         function addToCart(n, p) { 
             if(cart[n]) cart[n].q++; else cart[n]={p:p, q:1}; 
             updateCart(); 
-            toggleSheet(); 
-        }
-        
-        function toggleSheet() { 
             const sheet = document.getElementById('orderSheet');
-            if(sheet.classList.contains('active')) {
-                sheet.classList.remove('active');
-            } else {
-                sheet.classList.add('active');
-            }
+            if(!sheet.classList.contains('active')) sheet.classList.add('active');
         }
         
         function updateCart() {
@@ -550,115 +366,144 @@
                 t+=v.p*v.q; c+=v.q; 
                 l.innerHTML += `
                 <div class="flex justify-between items-center text-white bg-white/5 p-3 rounded-lg border border-white/5">
-                    <span class="font-bold text-sm">${k} <span class="text-gray-500 text-xs">x${v.q}</span></span>
-                    <span class="font-mono text-green-400">₦${(v.p*v.q).toLocaleString()}</span>
+                    <span class="font-bold text-xs uppercase tracking-wide">${k} <span class="text-gray-500">x${v.q}</span></span>
+                    <span class="font-mono text-green-400 text-xs">₦${(v.p*v.q).toLocaleString()}</span>
                 </div>`; 
             }
             if(c === 0) l.innerHTML = '<p class="text-gray-500 italic text-xs text-center py-4">Your cart is empty.</p>';
-            
             document.getElementById('totalPrice').innerText = '₦'+t.toLocaleString(); 
             document.getElementById('cartCount').innerText = c; 
             document.getElementById('cartCount').classList.toggle('hidden', c===0);
         }
-        
-        function copyBank() { 
-            const num = document.getElementById('dispAcctNum').innerText; 
-            navigator.clipboard.writeText(num).then(() => { 
-                const btn = document.getElementById('copyBankBtn'); 
-                const originalText = btn.innerText; 
-                btn.innerText = "COPIED"; 
-                btn.classList.add('bg-green-500', 'text-black');
-                setTimeout(() => { 
-                    btn.innerText = originalText; 
-                    btn.classList.remove('bg-green-500', 'text-black'); 
-                }, 2000); 
-            }); 
+
+        // --- AUTH & OPS ---
+        function checkAccess() {
+            const val = document.getElementById('accessKey').value.trim();
+            if (val === KEYS.INVESTOR) { launchApp('investorVault', "green", "INVESTOR"); closeLoginModal(); } 
+            else if (val === KEYS.BUILDER) { closeLoginModal(); activateBuilderMode(); } 
+            else if (val === KEYS.COMMANDER) { 
+                document.getElementById('authStage').classList.add('hidden'); 
+                document.getElementById('createPinStage').classList.remove('hidden'); 
+            } else if (localUserPin && val === localUserPin) { launchApp('teamPanelVault', "blue", "OPS"); initSupabaseRealtime(); closeLoginModal(); } 
+            else { alert("INVALID CREDENTIALS"); document.getElementById('accessKey').value = ''; }
+        }
+
+        function saveNewIdentity() {
+            const name = document.getElementById('newName').value.trim().toUpperCase(); 
+            const pin = document.getElementById('newPin').value.trim();
+            if(name.length < 2 || pin.length < 4) return alert("Security Requirement Not Met");
+            localStorage.setItem('mySmoothieName', name); localStorage.setItem('mySmoothiePin', pin);
+            localUserPin = pin; currentName = name; 
+            closeLoginModal(); launchApp('teamPanelVault', "blue", "OPS"); initSupabaseRealtime();
+        }
+
+        // --- TASK ENGINE ---
+        async function addNewTask() {
+            const txt = document.getElementById('newTaskInput').value.trim();
+            if(!txt) return;
+            const role = document.getElementById('taskAssignee').value;
+            document.getElementById('newTaskInput').value = '';
+            
+            // Send to DB
+            const { error } = await supabase.from('tasks').insert([{ text: txt, role: role, done: false }]);
+            if(error) showToast("DB ERROR", "error");
+        }
+
+        async function toggleTask(id) { 
+            const t = tasks.find(x => x.id === id); 
+            // Optimistic update
+            t.done = !t.done; renderTasks();
+            await supabase.from('tasks').update({ done: t.done }).eq('id', id);
         }
         
-        function sendOrder() {
-            if(document.getElementById('cartCount').innerText === '0') return alert("Cart is empty");
+        async function deleteTask(id) { 
+            tasks = tasks.filter(t => t.id !== id); renderTasks(); 
+            await supabase.from('tasks').delete().eq('id', id);
+        }
+
+        function renderTasks() {
+            const l = document.getElementById('taskListContainer'); l.innerHTML='';
+            if(tasks.length===0) { l.innerHTML='<p class="text-gray-600 text-xs text-center mt-10">NO ACTIVE DIRECTIVES.</p>'; return; }
             
-            let m = `*NEW ORDER* %0A👤 ${document.getElementById('custName').value}%0A📍 ${document.getElementById('custAddress').value}%0A%0A*ITEMS:*%0A`;
-            for(const [k,v] of Object.entries(cart)) m+=`• ${k} (x${v.q}) - ₦${v.p*v.q}%0A`;
-            m+=`%0A*TOTAL: ${document.getElementById('totalPrice').innerText}*`;
-            
-            if(GOOGLE_API_URL) safePost({ 
-                type: 'ORDER', 
-                customer: document.getElementById('custName').value, 
-                orderString: m, 
-                total: document.getElementById('totalPrice').innerText, 
-                pin: KEYS.COMMANDER 
+            tasks.forEach(t => {
+                let color = t.role === 'URGENT' ? 'text-red-500 border-red-500' : 'text-blue-400 border-blue-500';
+                l.innerHTML += `
+                <div class="flex items-start gap-3 bg-white/5 border border-white/5 p-3 rounded-lg hover:bg-white/10 transition group">
+                    <input type="checkbox" onchange="toggleTask(${t.id})" class="task-check hidden" id="task-${t.id}" ${t.done?'checked':''}>
+                    <label for="task-${t.id}" class="flex-shrink-0 w-4 h-4 border border-gray-500 rounded cursor-pointer mt-0.5 hover:border-green-500"></label>
+                    <div class="flex-1">
+                        <span class="text-[9px] px-1 rounded border ${color} font-bold mb-1 inline-block bg-black/50">${t.role}</span>
+                        <p class="text-xs text-gray-300 ${t.done?'line-through opacity-40':''}">${t.text}</p>
+                    </div>
+                    <button onclick="deleteTask(${t.id})" class="text-gray-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition">✕</button>
+                </div>`;
             });
+        }
+
+        // --- ORDER ENGINE ---
+        async function sendOrder() {
+            if(document.getElementById('cartCount').innerText === '0') return alert("Cart Empty");
+            const name = document.getElementById('custName').value;
+            const addr = document.getElementById('custAddress').value;
+            if(!name || !addr) return alert("Missing Details");
+
+            let itemsClean = "";
+            for(const [k,v] of Object.entries(cart)) itemsClean += `${k} (x${v.q}), `;
+            let m = `*NEW ORDER* %0A👤 ${name}%0A📍 ${addr}%0A%0A*MANIFEST:*%0A${itemsClean}%0A%0A*TOTAL: ${document.getElementById('totalPrice').innerText}*`;
             
-            window.open(`https://wa.me/${STORE_CONFIG.admin.whatsapp}?text=${m}`, '_blank');
+            // Insert Order
+            const { error } = await supabase.from('orders').insert([{ 
+                id: 'ORD-' + Math.floor(Math.random() * 10000),
+                customer: name, 
+                items: itemsClean, 
+                total: document.getElementById('totalPrice').innerText
+            }]);
+
+            if(!error) {
+                window.open(`https://wa.me/${STORE_CONFIG.admin.whatsapp}?text=${m}`, '_blank');
+                showToast("ORDER LOGGED", "success");
+            } else {
+                showToast("DB ERROR - CHECK CONSOLE", "error");
+            }
         }
-        
-        function checkSiteHealth() { 
-            if(SITE_STATE === 'MAINTENANCE') { 
-                document.getElementById('systemLockdown').style.display = 'flex'; 
-                document.getElementById('lockdownTitle').innerText = "SYSTEM UPGRADING"; 
-            } else if (SITE_STATE === 'KILLED') { 
-                document.getElementById('systemLockdown').style.display = 'flex'; 
-            } 
+
+        // --- UTILS ---
+        function showToast(msg, type) { 
+            const t = document.getElementById('apiToast'); t.innerText = msg; t.className = type === 'error' ? 'error active' : 'active'; 
+            setTimeout(() => t.classList.remove('active'), 2000); 
         }
-        
-        function closeDrawer(id) { 
-            document.getElementById(id).classList.remove('active'); 
-            localStorage.setItem('smoothieActiveView', 'none'); 
-            document.getElementById('statusBadge').classList.add('hidden'); 
+        function renderBankDetails() { 
+            document.getElementById('dispBankName').innerText = STORE_CONFIG.admin.bankName; 
+            document.getElementById('dispAcctNum').innerText = STORE_CONFIG.admin.acctNum; 
         }
-        
+        function toggleSheet() { document.getElementById('orderSheet').classList.toggle('active'); }
+        function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
+        function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
+        function closeModal() { document.getElementById('productModal').classList.add('hidden'); }
         function minimizeDrawer(id) { document.getElementById(id).classList.remove('active'); }
-        
-        function restoreSession() { 
-            const v = localStorage.getItem('smoothieActiveView'); 
-            if(v && v !== 'none') document.getElementById(v).classList.add('active'); 
+        function closeDrawer(id) { document.getElementById(id).classList.remove('active'); localStorage.setItem('smoothieActiveView', 'none'); document.getElementById('statusBadge').classList.add('hidden'); }
+        function showStatusBadge(text, color) { const b = document.getElementById('statusBadge'); b.innerText = text; b.classList.remove('hidden'); b.style.borderColor = color; b.style.color = color; }
+        function launchApp(viewId, color, badgeText) { document.getElementById(viewId).classList.add('active'); localStorage.setItem('smoothieActiveView', viewId); showStatusBadge(badgeText, color); }
+        function restoreSession() { const v = localStorage.getItem('smoothieActiveView'); if(v && v !== 'none') document.getElementById(v).classList.add('active'); }
+        function togglePassVisibility() { const i = document.getElementById('accessKey'); i.type = i.type === "password" ? "text" : "password"; }
+        function copyToClipboard() { navigator.clipboard.writeText(document.getElementById("configOutput").value); alert("System Saved"); }
+        function copyBank() { navigator.clipboard.writeText(document.getElementById('dispAcctNum').innerText); alert("Copied"); }
+        function activateBuilderMode() { adminMode = true; document.getElementById('adminSaveBtn').classList.remove('hidden'); showStatusBadge("BUILDER", "red"); renderMenu(); }
+        function compileAndSave() {
+            const clone = document.documentElement.cloneNode(true);
+            clone.querySelectorAll('#statusBadge, #adminSaveBtn, #configExportModal, #loginModal, #productModal, #systemLockdown').forEach(e => e.classList.add('hidden'));
+            clone.querySelectorAll('.drawer-full, .drawer-partial').forEach(e => e.classList.remove('active'));
+            clone.querySelectorAll('[contenteditable]').forEach(e => { e.removeAttribute('contenteditable'); e.classList.remove('admin-editable'); });
+            const script = clone.querySelector('#main-script').innerHTML;
+            clone.querySelector('#main-script').innerHTML = script.replace(/const STORE_CONFIG = \{[\s\S]*?\};/, "const STORE_CONFIG = " + JSON.stringify({ admin: STORE_CONFIG.admin, products: STORE_CONFIG.products }, null, 4) + ";");
+            document.getElementById('configOutput').value = "<!DOCTYPE html>\n" + clone.outerHTML;
+            document.getElementById('configExportModal').style.display = 'flex';
         }
-        
-        function showStatusBadge(text, color) { 
-            const b = document.getElementById('statusBadge'); 
-            b.innerText = text; 
-            b.className = `fixed top-4 left-4 z-[300] px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl backdrop-blur-md border border-${color}-500 text-${color}-500 animate-pulse bg-black`; 
-            b.classList.remove('hidden'); 
-        }
-        
-        function activateBuilderMode() { 
-            adminMode = true; 
-            document.getElementById('adminSaveBtn').classList.remove('hidden'); 
-            showStatusBadge(" BUILDER MODE", "red"); 
-            document.querySelectorAll('[id^="plan-"]').forEach(el => { el.contentEditable = "true"; el.classList.add('admin-editable'); }); 
-            renderMenu(); 
-        }
-        
         function showProductDetails(id) { 
-            const p = STORE_CONFIG.products.find(x => x.id === id); 
-            if(!p) return; 
-            document.getElementById('modalContent').innerHTML = `
-                <div class="text-center mb-6">
-                    <img src="${p.img}" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-${p.color}-500 mb-4 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-                    <h2 class="text-2xl font-black uppercase text-white leading-none mb-1">${p.name}</h2>
-                    <p class="text-${p.color}-400 font-bold text-xl font-mono">₦${p.price.toLocaleString()}</p>
-                </div>
-                <div class="space-y-3 text-sm text-gray-300">
-                    <div class="bg-white/5 p-4 rounded-xl border border-white/5">
-                        <p class="uppercase text-[10px] text-gray-500 font-bold tracking-widest mb-1">Function</p>
-                        <p>${p.description}</p>
-                    </div>
-                    <div class="bg-white/5 p-4 rounded-xl border border-white/5">
-                        <p class="uppercase text-[10px] text-gray-500 font-bold tracking-widest mb-1">Ingredients</p>
-                        <p class="italic text-gray-400">${p.ingredients}</p>
-                    </div>
-                </div>
-                <button onclick="addToCart('${p.name}', ${p.price}); closeModal()" class="w-full mt-6 bg-white text-black font-black py-4 rounded-xl uppercase hover:scale-105 transition shadow-lg tracking-widest">
-                    Add to Cart
-                </button>`; 
-            document.getElementById('productModal').classList.remove('hidden');
-            document.getElementById('productModal').style.display = 'flex';
-        }
-        
-        function closeModal() { 
-            document.getElementById('productModal').classList.add('hidden');
-            document.getElementById('productModal').style.display = 'none';
+            const p = STORE_CONFIG.products.find(x => x.id === id); if(!p) return; 
+            document.getElementById('modalContent').innerHTML = `<div class="text-center mb-6"><img src="${p.img}" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-${p.color}-500 mb-4 shadow-lg"><h2 class="text-2xl font-black uppercase text-white leading-none mb-1">${p.name}</h2><p class="text-${p.color}-400 font-bold text-xl font-mono">₦${p.price.toLocaleString()}</p></div><div class="space-y-3 text-sm text-gray-300"><div class="bg-white/5 p-4 rounded-xl border border-white/5"><p class="uppercase text-[10px] text-gray-500 font-bold tracking-widest mb-1">Function</p><p>${p.description}</p></div><div class="bg-white/5 p-4 rounded-xl border border-white/5"><p class="uppercase text-[10px] text-gray-500 font-bold tracking-widest mb-1">Ingredients</p><p class="italic text-gray-400">${p.ingredients}</p></div></div><button onclick="addToCart('${p.name}', ${p.price}); closeModal()" class="w-full mt-6 bg-white text-black font-black py-4 rounded-xl uppercase hover:scale-105 transition shadow-lg tracking-widest">Add to Cart</button>`; 
+            document.getElementById('productModal').classList.remove('hidden'); 
+            document.getElementById('productModal').classList.remove('opacity-0');
         }
     </script>
 </body>
