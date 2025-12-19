@@ -1,266 +1,396 @@
-<script>
-        // --- SUPABASE CONFIGURATION ---
-        const SUPABASE_URL = 'https://ghucofpdbicobjnlamvo.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdodWNvZnBkYmljb2JqbmxhbXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxMzU4MTMsImV4cCI6MjA4MTcxMTgxM30.0tslgc8hUQ7NqQ9S45k3m4ez1Rh-cmADmEOv684qQnY';
-        
-        // FIX: Access the global 'supabase' object correctly
-        const { createClient } = supabase;
-        const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
-        
-        const KEYS = { INVESTOR: "iwillinvesT", BUILDER: "AdminEDITGODMODE", COMMANDER: "Admin GODMODE" };
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <title>smoothiePlus+ | PRO</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { darkBg: '#050508', neon: '#39ff14' } } }
+        }
+    </script>
 
-        const STORE_CONFIG = {
-            "admin": { 
-                "whatsapp": "2347068516779", 
-                "bankName": "OPay", 
-                "acctNum": "8083000771", 
-                "acctName": "LAWAL OPEYEMI MICHAEL" 
-            },
-            "products": [
-                { "id": 1, "name": "Diabetes Defense", "price": 3500, "img": "https://images.unsplash.com/photo-1610970881699-44a5587cabec?auto=format&fit=crop&w=500&q=80", "color": "green", "description": "Low-glycemic blend designed for steady energy.", "ingredients": "Green Apple, Cucumber" },
-                { "id": 2, "name": "Mood Lifter", "price": 4200, "img": "https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?auto=format&fit=crop&w=500&q=80", "color": "purple", "description": "Antidepressant focus.", "ingredients": "Banana, Berries" },
-                { "id": 3, "name": "Workaholic Energy", "price": 3800, "img": "https://images.unsplash.com/photo-1595981267035-7b04ca84a82d?auto=format&fit=crop&w=500&q=80", "color": "orange", "description": "Instant natural energy spike.", "ingredients": "Watermelon, Pineapple" },
-                { "id": 4, "name": "Pure Hydration", "price": 3000, "img": "https://images.unsplash.com/photo-1589984662646-e7b2e4962f18?auto=format&fit=crop&w=500&q=80", "color": "cyan", "description": "Single-fruit maximum hydration.", "ingredients": "100% Watermelon" }
+    <style>
+        body { background-color: #050508; color: white; overscroll-behavior: none; }
+        input, textarea, select { -webkit-user-select: text; user-select: text; font-size: 16px !important; }
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border-top: 1px solid rgba(255, 255, 255, 0.1); }
+        .scroll-area { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 40px; }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        
+        /* LAYOUT & DRAWERS */
+        .drawer-full { position: fixed; inset: 0; background: #0f172a; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); z-index: 100; display: flex; flex-direction: column; }
+        .drawer-full.active { transform: translateY(0); }
+        .drawer-partial { position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; border-radius: 24px 24px 0 0; transform: translateY(100%); transition: transform 0.3s ease-out; z-index: 90; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); }
+        .drawer-partial.active { transform: translateY(0); }
+
+        /* ANIMATIONS */
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-5px); } }
+        .float-card { animation: float 6s ease-in-out infinite; }
+        .pulse-glow { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+
+        /* CHECKBOX LOGIC FIX */
+        .task-checkbox:checked + div { background-color: #22c55e; border-color: #22c55e; }
+        .task-checkbox:checked ~ p { text-decoration: line-through; color: #6b7280; }
+
+        /* PC RESPONSIVENESS */
+        @media (min-width: 768px) {
+            body { max-width: 480px; margin: 0 auto; border-x: 1px solid #333; min-height: 100vh; position: relative; }
+            .drawer-full, .drawer-partial { left: 0; right: 0; margin: auto; max-width: 480px; }
+            ::-webkit-scrollbar { width: 6px; }
+            ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        }
+    </style>
+</head>
+<body class="pb-32 font-sans selection:bg-green-500 selection:text-black">
+
+    <div id="toast" class="fixed top-[-60px] left-1/2 -translate-x-1/2 bg-green-600 text-white px-6 py-2 rounded-full text-xs font-bold shadow-xl transition-all duration-300 z-[9999]">SYNCED</div>
+
+    <header class="flex justify-between items-center px-6 pt-8 pb-4 relative z-50">
+        <div>
+            <h1 class="text-2xl font-black tracking-tighter uppercase leading-none italic">
+                smoothie<span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">Plus+</span>
+            </h1>
+            <p class="text-[9px] text-gray-500 tracking-[0.3em] uppercase mt-1 ml-1">Organic Fuel</p>
+        </div>
+        <div id="connectionStatus" class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+    </header>
+
+    <main id="menuGrid" class="px-4 grid grid-cols-2 gap-4 max-w-md mx-auto relative z-10 pb-32">
+        </main>
+
+    <footer class="fixed bottom-8 left-0 right-0 flex justify-center z-40 pointer-events-none">
+        <div class="pointer-events-auto inline-flex bg-gray-900/90 backdrop-blur-md rounded-full p-1 border border-white/10 shadow-2xl">
+            <button onclick="checkAuth('OPS')" class="text-[10px] text-gray-400 hover:text-white font-bold uppercase tracking-widest px-6 py-3 rounded-full transition">
+                Staff Ops
+            </button>
+        </div>
+    </footer>
+
+    <button onclick="toggleSheet('orderSheet')" class="fixed bottom-8 right-6 bg-green-500 text-black w-14 h-14 rounded-full shadow-lg z-50 pulse-glow flex items-center justify-center active:scale-90 transition">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+        <span id="cartCount" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full hidden border border-black">0</span>
+    </button>
+
+    <div id="authModal" class="fixed inset-0 z-[150] bg-black/95 flex items-center justify-center p-4 hidden">
+        <div class="bg-gray-900 border border-gray-800 w-full max-w-sm rounded-2xl p-8 relative">
+            <button onclick="document.getElementById('authModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500">✕</button>
+            <h2 class="text-xl font-black text-white mb-6 uppercase tracking-tighter">Staff Access</h2>
+            
+            <div id="loginForm">
+                <input type="email" id="emailInput" placeholder="STAFF EMAIL" class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded-lg mb-3 text-sm focus:border-green-500 outline-none">
+                <input type="password" id="passInput" placeholder="PASSWORD" class="w-full bg-black/50 border border-gray-700 text-white p-3 rounded-lg mb-6 text-sm focus:border-green-500 outline-none">
+                <button onclick="handleLogin()" class="w-full bg-white text-black font-bold py-3 rounded-lg hover:bg-gray-200 transition text-xs uppercase tracking-widest">Secure Login</button>
+                <p id="authError" class="text-red-500 text-xs mt-3 text-center hidden"></p>
+            </div>
+            
+            <div id="loggedInView" class="hidden text-center">
+                <p class="text-green-500 text-sm mb-4">Authenticated</p>
+                <button onclick="openOpsCenter()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg mb-2">Open Ops Center</button>
+                <button onclick="handleLogout()" class="w-full border border-gray-700 text-gray-400 py-2 rounded-lg text-xs">Sign Out</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="opsDrawer" class="drawer-full">
+        <div class="flex justify-between items-center bg-gray-900/95 p-4 border-b border-gray-800 sticky top-0 z-10">
+            <h2 class="text-lg font-black text-blue-500 tracking-tighter">OPS CENTER</h2>
+            <button onclick="toggleSheet('opsDrawer')" class="text-gray-400 text-xl">✕</button>
+        </div>
+        <div class="flex-1 p-4 overflow-hidden flex flex-col">
+            <div class="bg-gray-800/50 p-3 rounded-xl mb-4">
+                <input type="text" id="newTaskInput" placeholder="New Directive..." class="w-full bg-transparent text-white text-sm outline-none mb-2 border-b border-gray-700 pb-1">
+                <div class="flex justify-between">
+                    <select id="taskRole" class="bg-gray-900 text-xs text-gray-400 rounded px-2 py-1 outline-none">
+                        <option value="GENERAL">General</option>
+                        <option value="URGENT">Urgent</option>
+                    </select>
+                    <button onclick="addTask()" class="text-xs bg-blue-600 px-3 py-1 rounded font-bold">ADD</button>
+                </div>
+            </div>
+            <div id="taskList" class="scroll-area space-y-2">
+                </div>
+        </div>
+    </div>
+
+    <div id="orderSheet" class="drawer-partial">
+        <div class="w-12 h-1 bg-gray-600 rounded-full mx-auto mb-6 mt-4 cursor-pointer" onclick="toggleSheet('orderSheet')"></div>
+        <div class="px-6 pb-8 scroll-area">
+            <h3 class="text-sm font-bold uppercase tracking-wide text-gray-300 mb-4">Manifest</h3>
+            <div id="cartList" class="space-y-2 mb-6 text-sm text-gray-300"></div>
+            
+            <div class="border-t border-gray-700 pt-4 mb-4">
+                <div class="flex justify-between items-end">
+                    <span class="text-xs text-gray-500 uppercase">Total</span>
+                    <span id="cartTotal" class="text-2xl font-black text-green-400">₦0</span>
+                </div>
+            </div>
+
+            <input type="text" id="custName" placeholder="YOUR NAME" class="w-full bg-black/30 border border-gray-700 text-white rounded-lg p-3 mb-2 text-sm outline-none">
+            <textarea id="custAddr" rows="2" placeholder="ADDRESS" class="w-full bg-black/30 border border-gray-700 text-white rounded-lg p-3 mb-4 text-sm outline-none"></textarea>
+            
+            <button onclick="checkout()" class="w-full bg-green-600 text-white font-black py-4 rounded-xl uppercase tracking-widest shadow-lg active:scale-95 transition">
+                Send Order
+            </button>
+        </div>
+    </div>
+
+    <div id="productModal" class="fixed inset-0 z-[110] bg-black/90 flex items-center justify-center p-6 hidden">
+        <div class="bg-gray-900 border border-gray-700 w-full max-w-sm rounded-3xl p-6 relative">
+            <button onclick="document.getElementById('productModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400">✕</button>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. SECURE CONFIGURATION ---
+        const CONFIG = {
+            supabaseUrl: 'https://ghucofpdbicobjnlamvo.supabase.co',
+            supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdodWNvZnBkYmljb2JqbmxhbXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxMzU4MTMsImV4cCI6MjA4MTcxMTgxM30.0tslgc8hUQ7NqQ9S45k3m4ez1Rh-cmADmEOv684qQnY',
+            whatsapp: '2347068516779',
+            menu: [
+                { id: 1, name: "Diabetes Defense", price: 3500, img: "https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=500", color: "green", desc: "Low-glycemic blend." },
+                { id: 2, "name": "Mood Lifter", price: 4200, img: "https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?w=500", color: "purple", desc: "Antidepressant focus." },
+                { id: 3, "name": "Workaholic", price: 3800, img: "https://images.unsplash.com/photo-1595981267035-7b04ca84a82d?w=500", color: "orange", desc: "Instant energy." },
+                { id: 4, "name": "Pure Hydro", price: 3000, img: "https://images.unsplash.com/photo-1589984662646-e7b2e4962f18?w=500", color: "cyan", desc: "Maximum hydration." }
             ]
         };
 
-        // --- STATE ---
-        let cart = {}; 
-        let adminMode = false;
-        let currentName = localStorage.getItem('mySmoothieName') || 'UNKNOWN';
-        let localUserPin = localStorage.getItem('mySmoothiePin'); 
+        // --- 2. INIT SUPABASE ---
+        let sb;
+        try {
+            // Check if global variable exists from UMD script
+            if (window.supabase) {
+                sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
+                document.getElementById('connectionStatus').classList.remove('bg-red-500');
+                document.getElementById('connectionStatus').classList.add('bg-green-500');
+            } else {
+                console.error("Supabase Library Not Loaded");
+            }
+        } catch (err) { console.error(err); }
+
+        // --- 3. STATE ---
+        let cart = {};
         let tasks = [];
+        let currentUser = null;
 
-        // --- INIT ---
-        window.addEventListener('load', () => { 
-            renderMenu(); 
-            renderBankDetails(); 
-            restoreSession();
-            
-            // Key Listeners
-            document.getElementById('accessKey').addEventListener('keypress', (e) => { if (e.key === 'Enter') checkAccess(); });
-            document.getElementById('newPin').addEventListener('keypress', (e) => { if (e.key === 'Enter') saveNewIdentity(); });
-            document.getElementById('newTaskInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') addNewTask(); });
-
-            if(window.location.hash === "#employee") openLoginModal();
-            if(localStorage.getItem('smoothieActiveView') === 'teamPanelVault') initSupabaseRealtime();
+        // --- 4. APP START ---
+        window.addEventListener('load', () => {
+            renderMenu();
+            checkSession(); // Check if already logged in
         });
 
-        // --- SUPABASE ENGINE ---
-        async function loadCloudData() {
-            const { data, error } = await sb
-                .from('tasks')
-                .select('*')
-                .order('created_at', { ascending: false });
-                
-            if (data) {
-                tasks = data;
-                renderTasks();
-            }
-        }
-
-        function initSupabaseRealtime() {
-            loadCloudData();
-            sb.channel('public:tasks')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, payload => {
-                    loadCloudData(); 
-                })
-                .subscribe();
-        }
-
-        // --- MENU RENDERER ---
+        // --- 5. CORE FUNCTIONS ---
         function renderMenu() {
-            const c = document.getElementById('menuGrid');
-            let h = '';
-            STORE_CONFIG.products.forEach(p => {
-                const edit = adminMode ? 'contenteditable="true" class="admin-editable rounded p-1"' : '';
-                h += `
-                <div onclick="showProductDetails(${p.id})" class="float-card bg-gray-900 border border-${p.color}-500/30 rounded-3xl p-4 shadow-lg flex flex-col justify-between cursor-pointer active:scale-95 transition relative overflow-hidden group">
-                    <div class="h-32 w-full rounded-2xl mb-3 overflow-hidden bg-black/50 relative">
-                        <img src="${p.img}" class="object-cover w-full h-full opacity-80 group-hover:opacity-100 transition duration-500">
+            const grid = document.getElementById('menuGrid');
+            grid.innerHTML = CONFIG.menu.map(p => `
+                <div onclick="openProduct(${p.id})" class="float-card bg-gray-900 border border-white/5 rounded-2xl p-4 shadow-lg active:scale-95 transition">
+                    <div class="h-32 w-full rounded-xl bg-black/50 mb-3 overflow-hidden">
+                        <img src="${p.img}" class="w-full h-full object-cover opacity-80">
                     </div>
-                    <div>
-                        <h3 ${edit} class="font-black text-xs uppercase mb-1 text-white tracking-wide">${p.name}</h3>
-                        <div class="flex justify-between items-center mt-2">
-                            <span class="text-${p.color}-400 font-bold font-mono text-sm">₦<span ${edit}>${p.price.toLocaleString()}</span></span>
-                            <button onclick="event.stopPropagation(); addToCart('${p.name}', ${p.price})" class="bg-white/10 text-white text-[10px] font-bold px-3 py-1.5 rounded hover:bg-white hover:text-black transition uppercase tracking-wider">+ ADD</button>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-xs uppercase text-white">${p.name}</h3>
+                            <p class="text-[10px] text-gray-400">${p.desc}</p>
                         </div>
+                        <span class="text-${p.color}-400 font-bold text-xs">₦${p.price.toLocaleString()}</span>
                     </div>
-                </div>`;
-            });
-            document.getElementById('loadingMsg').style.display = 'none'; 
-            c.innerHTML = h;
-            renderInvestorGrid();
+                </div>
+            `).join('');
         }
 
-        function renderInvestorGrid() {
-            const invGrid = document.getElementById('investorProductGrid');
-            if(invGrid) {
-                let invHtml = '';
-                STORE_CONFIG.products.forEach(p => {
-                    const margin = Math.round(p.price * 0.6);
-                    invHtml += `
-                    <div class="bg-white/5 p-3 rounded-lg border-l-2 border-green-500 flex justify-between items-center">
-                        <p class="text-white font-bold text-xs uppercase">${p.name}</p>
-                        <span class="text-green-400 text-[10px] font-mono">+₦${margin.toLocaleString()}</span>
-                    </div>`;
-                });
-                invGrid.innerHTML = invHtml;
+        function openProduct(id) {
+            const p = CONFIG.menu.find(x => x.id === id);
+            const modal = document.getElementById('productModal');
+            document.getElementById('modalContent').innerHTML = `
+                <div class="text-center">
+                    <img src="${p.img}" class="w-24 h-24 rounded-full mx-auto border-2 border-${p.color}-500 mb-4">
+                    <h2 class="text-2xl font-black uppercase mb-1">${p.name}</h2>
+                    <p class="text-xl font-mono text-${p.color}-400 mb-4">₦${p.price.toLocaleString()}</p>
+                    <button onclick="addToCart(${p.id}); document.getElementById('productModal').classList.add('hidden')" class="w-full bg-white text-black font-bold py-3 rounded-xl uppercase">Add to Cart</button>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+        }
+
+        function addToCart(id) {
+            const p = CONFIG.menu.find(x => x.id === id);
+            if(cart[p.name]) cart[p.name].q++;
+            else cart[p.name] = { p: p.price, q: 1 };
+            updateCartUI();
+            showToast('ADDED TO CART');
+        }
+
+        function updateCartUI() {
+            let total = 0;
+            let count = 0;
+            let html = '';
+            for(const [name, item] of Object.entries(cart)) {
+                total += item.p * item.q;
+                count += item.q;
+                html += `<div class="flex justify-between border-b border-gray-700 py-2"><span>${name} <span class="text-gray-500">x${item.q}</span></span><span>₦${(item.p * item.q).toLocaleString()}</span></div>`;
+            }
+            
+            document.getElementById('cartList').innerHTML = html || '<p class="text-center italic text-gray-500">Empty</p>';
+            document.getElementById('cartTotal').innerText = '₦' + total.toLocaleString();
+            document.getElementById('cartCount').innerText = count;
+            document.getElementById('cartCount').classList.toggle('hidden', count === 0);
+        }
+
+        function toggleSheet(id) {
+            const el = document.getElementById(id);
+            el.classList.toggle('active');
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.top = '20px';
+            setTimeout(() => t.style.top = '-60px', 2000);
+        }
+
+        // --- 6. AUTHENTICATION & SECURITY ---
+        async function checkSession() {
+            const { data } = await sb.auth.getSession();
+            if (data.session) {
+                currentUser = data.session.user;
+                updateAuthUI(true);
+                initRealtime(); // Start listening for tasks
             }
         }
 
-        // --- CART SYSTEM ---
-        function addToCart(n, p) { 
-            if(cart[n]) cart[n].q++; else cart[n]={p:p, q:1}; 
-            updateCart(); 
-            const sheet = document.getElementById('orderSheet');
-            if(!sheet.classList.contains('active')) sheet.classList.add('active');
-        }
-        
-        function updateCart() {
-            const l = document.getElementById('cartItems'); l.innerHTML=''; 
-            let t=0, c=0;
-            for(const [k,v] of Object.entries(cart)) { 
-                t+=v.p*v.q; c+=v.q; 
-                l.innerHTML += `
-                <div class="flex justify-between items-center text-white bg-white/5 p-3 rounded-lg border border-white/5">
-                    <span class="font-bold text-xs uppercase tracking-wide">${k} <span class="text-gray-500">x${v.q}</span></span>
-                    <span class="font-mono text-green-400 text-xs">₦${(v.p*v.q).toLocaleString()}</span>
-                </div>`; 
+        function checkAuth(role) {
+            if (currentUser) {
+                openOpsCenter();
+            } else {
+                document.getElementById('authModal').classList.remove('hidden');
             }
-            if(c === 0) l.innerHTML = '<p class="text-gray-500 italic text-xs text-center py-4">Your cart is empty.</p>';
-            document.getElementById('totalPrice').innerText = '₦'+t.toLocaleString(); 
-            document.getElementById('cartCount').innerText = c; 
-            document.getElementById('cartCount').classList.toggle('hidden', c===0);
         }
 
-        // --- AUTH & OPS ---
-        function checkAccess() {
-            const val = document.getElementById('accessKey').value.trim();
-            if (val === KEYS.INVESTOR) { launchApp('investorVault', "green", "INVESTOR"); closeLoginModal(); } 
-            else if (val === KEYS.BUILDER) { closeLoginModal(); activateBuilderMode(); } 
-            else if (val === KEYS.COMMANDER) { 
-                document.getElementById('authStage').classList.add('hidden'); 
-                document.getElementById('createPinStage').classList.remove('hidden'); 
-            } else if (localUserPin && val === localUserPin) { launchApp('teamPanelVault', "blue", "OPS"); initSupabaseRealtime(); closeLoginModal(); } 
-            else { alert("INVALID CREDENTIALS"); document.getElementById('accessKey').value = ''; }
+        async function handleLogin() {
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passInput').value;
+            
+            const { data, error } = await sb.auth.signInWithPassword({ email, password });
+            
+            if (error) {
+                document.getElementById('authError').innerText = error.message;
+                document.getElementById('authError').classList.remove('hidden');
+            } else {
+                currentUser = data.user;
+                updateAuthUI(true);
+                initRealtime();
+                openOpsCenter(); // Auto open on login
+            }
         }
 
-        function saveNewIdentity() {
-            const name = document.getElementById('newName').value.trim().toUpperCase(); 
-            const pin = document.getElementById('newPin').value.trim();
-            if(name.length < 2 || pin.length < 4) return alert("Security Requirement Not Met");
-            localStorage.setItem('mySmoothieName', name); localStorage.setItem('mySmoothiePin', pin);
-            localUserPin = pin; currentName = name; 
-            closeLoginModal(); launchApp('teamPanelVault', "blue", "OPS"); initSupabaseRealtime();
+        async function handleLogout() {
+            await sb.auth.signOut();
+            currentUser = null;
+            updateAuthUI(false);
+            document.getElementById('authModal').classList.add('hidden');
+            location.reload(); // Reset state
         }
 
-        // --- TASK ENGINE ---
-        async function addNewTask() {
-            const txt = document.getElementById('newTaskInput').value.trim();
-            if(!txt) return;
-            const role = document.getElementById('taskAssignee').value;
+        function updateAuthUI(isLoggedIn) {
+            if (isLoggedIn) {
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('loggedInView').classList.remove('hidden');
+            } else {
+                document.getElementById('loginForm').classList.remove('hidden');
+                document.getElementById('loggedInView').classList.add('hidden');
+            }
+        }
+
+        function openOpsCenter() {
+            document.getElementById('authModal').classList.add('hidden');
+            document.getElementById('opsDrawer').classList.add('active');
+        }
+
+        // --- 7. BACKEND OPERATIONS (SECURE) ---
+        function initRealtime() {
+            // Load initial
+            fetchTasks();
+            // Subscribe to changes
+            sb.channel('tasks').on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, payload => {
+                fetchTasks();
+            }).subscribe();
+        }
+
+        async function fetchTasks() {
+            const { data } = await sb.from('tasks').select('*').order('created_at', { ascending: false });
+            if (data) {
+                const list = document.getElementById('taskList');
+                list.innerHTML = data.map(t => `
+                    <div class="flex items-start gap-3 bg-black/40 p-3 rounded-lg border border-white/5">
+                        <input type="checkbox" ${t.done ? 'checked' : ''} 
+                            onchange="toggleTask('${t.id}', this.checked)" 
+                            class="task-checkbox mt-1 cursor-pointer w-4 h-4 accent-green-500">
+                        <div class="flex-1">
+                            <span class="text-[9px] bg-gray-700 px-1 rounded text-white">${t.role}</span>
+                            <p class="text-sm text-gray-300 ${t.done ? 'line-through opacity-50' : ''}">${t.text}</p>
+                        </div>
+                        <button onclick="deleteTask('${t.id}')" class="text-red-500 font-bold">×</button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        async function addTask() {
+            const text = document.getElementById('newTaskInput').value;
+            if(!text) return;
+            const role = document.getElementById('taskRole').value;
+            
+            // Optimistic UI handled by Realtime, but we can clear input immediately
             document.getElementById('newTaskInput').value = '';
             
-            // Send to DB
-            const { error } = await sb.from('tasks').insert([{ id: Date.now(), text: txt, role: role, done: false }]);
-            if(error) showToast("DB ERROR", "error");
+            const { error } = await sb.from('tasks').insert([{ text, role }]);
+            if (error) alert("Error: " + error.message);
         }
 
-        async function toggleTask(id) { 
-            const t = tasks.find(x => x.id === id); 
-            // Optimistic update
-            t.done = !t.done; renderTasks();
-            await sb.from('tasks').update({ done: t.done }).eq('id', id);
+        async function toggleTask(id, status) {
+            await sb.from('tasks').update({ done: status }).eq('id', id);
         }
-        
-        async function deleteTask(id) { 
-            tasks = tasks.filter(t => t.id !== id); renderTasks(); 
+
+        async function deleteTask(id) {
             await sb.from('tasks').delete().eq('id', id);
         }
 
-        function renderTasks() {
-            const l = document.getElementById('taskListContainer'); l.innerHTML='';
-            if(tasks.length===0) { l.innerHTML='<p class="text-gray-600 text-xs text-center mt-10">NO ACTIVE DIRECTIVES.</p>'; return; }
-            
-            tasks.forEach(t => {
-                let color = t.role === 'URGENT' ? 'text-red-500 border-red-500' : 'text-blue-400 border-blue-500';
-                l.innerHTML += `
-                <div class="flex items-start gap-3 bg-white/5 border border-white/5 p-3 rounded-lg hover:bg-white/10 transition group">
-                    <input type="checkbox" onchange="toggleTask(${t.id})" class="task-check hidden" id="task-${t.id}" ${t.done?'checked':''}>
-                    <label for="task-${t.id}" class="flex-shrink-0 w-4 h-4 border border-gray-500 rounded cursor-pointer mt-0.5 hover:border-green-500"></label>
-                    <div class="flex-1">
-                        <span class="text-[9px] px-1 rounded border ${color} font-bold mb-1 inline-block bg-black/50">${t.role}</span>
-                        <p class="text-xs text-gray-300 ${t.done?'line-through opacity-40':''}">${t.text}</p>
-                    </div>
-                    <button onclick="deleteTask(${t.id})" class="text-gray-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition">✕</button>
-                </div>`;
-            });
-        }
-
-        // --- ORDER ENGINE ---
-        async function sendOrder() {
-            if(document.getElementById('cartCount').innerText === '0') return alert("Cart Empty");
+        // --- 8. CHECKOUT ---
+        async function checkout() {
             const name = document.getElementById('custName').value;
-            const addr = document.getElementById('custAddress').value;
-            if(!name || !addr) return alert("Missing Details");
-
-            let itemsClean = "";
-            for(const [k,v] of Object.entries(cart)) itemsClean += `${k} (x${v.q}), `;
-            let m = `*NEW ORDER* %0A👤 ${name}%0A📍 ${addr}%0A%0A*MANIFEST:*%0A${itemsClean}%0A%0A*TOTAL: ${document.getElementById('totalPrice').innerText}*`;
+            const addr = document.getElementById('custAddr').value;
+            if(!name || !addr) return alert("Please fill details");
             
-            // Insert Order
+            let items = Object.entries(cart).map(([k,v]) => `${k} x${v.q}`).join(', ');
+            let total = document.getElementById('cartTotal').innerText;
+            
+            // 1. Save to Database (Public Write Allowed)
+            // Note: Generate random ID to avoid collision
+            const orderId = 'ORD-' + Math.floor(Math.random() * 100000);
+            
             const { error } = await sb.from('orders').insert([{ 
-                id: 'ORD-' + Math.floor(Math.random() * 10000),
+                id: orderId,
                 customer: name, 
-                items: itemsClean, 
-                total: document.getElementById('totalPrice').innerText
+                items: items, 
+                total: total 
             }]);
 
-            if(!error) {
-                window.open(`https://wa.me/${STORE_CONFIG.admin.whatsapp}?text=${m}`, '_blank');
-                showToast("ORDER LOGGED", "success");
+            // 2. Send to WhatsApp
+            if (!error) {
+                const msg = `*NEW ORDER (${orderId})* %0A👤 ${name}%0A📍 ${addr}%0A%0A${items}%0A%0A*TOTAL: ${total}*`;
+                window.open(`https://wa.me/${CONFIG.whatsapp}?text=${msg}`, '_blank');
+                cart = {}; updateCartUI(); toggleSheet('orderSheet');
             } else {
-                showToast("DB ERROR - CHECK CONSOLE", "error");
+                alert("Connection Error. Please try again.");
             }
         }
-
-        // --- UTILS ---
-        function showToast(msg, type) { 
-            const t = document.getElementById('apiToast'); t.innerText = msg; t.className = type === 'error' ? 'error active' : 'active'; 
-            setTimeout(() => t.classList.remove('active'), 2000); 
-        }
-        function renderBankDetails() { 
-            document.getElementById('dispBankName').innerText = STORE_CONFIG.admin.bankName; 
-            document.getElementById('dispAcctNum').innerText = STORE_CONFIG.admin.acctNum; 
-        }
-        function toggleSheet() { document.getElementById('orderSheet').classList.toggle('active'); }
-        function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
-        function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
-        function closeModal() { document.getElementById('productModal').classList.add('hidden'); }
-        function minimizeDrawer(id) { document.getElementById(id).classList.remove('active'); }
-        function closeDrawer(id) { document.getElementById(id).classList.remove('active'); localStorage.setItem('smoothieActiveView', 'none'); document.getElementById('statusBadge').classList.add('hidden'); }
-        function showStatusBadge(text, color) { const b = document.getElementById('statusBadge'); b.innerText = text; b.classList.remove('hidden'); b.style.borderColor = color; b.style.color = color; }
-        function launchApp(viewId, color, badgeText) { document.getElementById(viewId).classList.add('active'); localStorage.setItem('smoothieActiveView', viewId); showStatusBadge(badgeText, color); }
-        function restoreSession() { const v = localStorage.getItem('smoothieActiveView'); if(v && v !== 'none') document.getElementById(v).classList.add('active'); }
-        function togglePassVisibility() { const i = document.getElementById('accessKey'); i.type = i.type === "password" ? "text" : "password"; }
-        function copyToClipboard() { navigator.clipboard.writeText(document.getElementById("configOutput").value); alert("System Saved"); }
-        function copyBank() { navigator.clipboard.writeText(document.getElementById('dispAcctNum').innerText); alert("Copied"); }
-        function activateBuilderMode() { adminMode = true; document.getElementById('adminSaveBtn').classList.remove('hidden'); showStatusBadge("BUILDER", "red"); renderMenu(); }
-        function compileAndSave() {
-            const clone = document.documentElement.cloneNode(true);
-            clone.querySelectorAll('#statusBadge, #adminSaveBtn, #configExportModal, #loginModal, #productModal, #systemLockdown').forEach(e => e.classList.add('hidden'));
-            clone.querySelectorAll('.drawer-full, .drawer-partial').forEach(e => e.classList.remove('active'));
-            clone.querySelectorAll('[contenteditable]').forEach(e => { e.removeAttribute('contenteditable'); e.classList.remove('admin-editable'); });
-            const script = clone.querySelector('#main-script').innerHTML;
-            clone.querySelector('#main-script').innerHTML = script.replace(/const STORE_CONFIG = \{[\s\S]*?\};/, "const STORE_CONFIG = " + JSON.stringify({ admin: STORE_CONFIG.admin, products: STORE_CONFIG.products }, null, 4) + ";");
-            document.getElementById('configOutput').value = "<!DOCTYPE html>\n" + clone.outerHTML;
-            document.getElementById('configExportModal').style.display = 'flex';
-        }
-        function showProductDetails(id) { 
-            const p = STORE_CONFIG.products.find(x => x.id === id); if(!p) return; 
-            document.getElementById('modalContent').innerHTML = `<div class="text-center mb-6"><img src="${p.img}" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-${p.color}-500 mb-4 shadow-lg"><h2 class="text-2xl font-black uppercase text-white leading-none mb-1">${p.name}</h2><p class="text-${p.color}-400 font-bold text-xl font-mono">₦${p.price.toLocaleString()}</p></div><div class="space-y-3 text-sm text-gray-300"><div class="bg-white/5 p-4 rounded-xl border border-white/5"><p class="uppercase text-[10px] text-gray-500 font-bold tracking-widest mb-1">Function</p><p>${p.description}</p></div><div class="bg-white/5 p-4 rounded-xl border border-white/5"><p class="uppercase text-[10px] text-gray-500 font-bold tracking-widest mb-1">Ingredients</p><p class="italic text-gray-400">${p.ingredients}</p></div></div><button onclick="addToCart('${p.name}', ${p.price}); closeModal()" class="w-full mt-6 bg-white text-black font-black py-4 rounded-xl uppercase hover:scale-105 transition shadow-lg tracking-widest">Add to Cart</button>`; 
-            document.getElementById('productModal').classList.remove('hidden'); 
-            document.getElementById('productModal').classList.remove('opacity-0');
-        }
     </script>
+</body>
+</html>
