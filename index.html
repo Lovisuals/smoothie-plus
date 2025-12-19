@@ -62,7 +62,7 @@
             font-weight: 500;
         }
 
-        /* --- THE STREAM ANIMATION --- */
+        /* --- STREAM ANIMATION --- */
         @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
         .stream-card { position: relative; background: var(--card-bg); border-radius: 1.5rem; z-index: 1; overflow: hidden; transition: transform 0.2s; }
         .stream-card::before {
@@ -117,7 +117,6 @@
         @media (min-width: 768px) {
             body { max-width: 100%; } 
             .responsive-container { max-width: 1200px; margin: 0 auto; padding-left: 2rem; padding-right: 2rem; }
-            
             .drawer {
                 top: 0; bottom: 0; right: 0; left: auto;
                 width: 400px; max-width: 100%;
@@ -128,7 +127,6 @@
                 padding-top: 50px; 
             }
             .drawer.active { transform: translateX(0); }
-            
             #authModal, #productModal { max-width: 480px; left: 0; right: 0; margin: auto; }
             ::-webkit-scrollbar { width: 8px; }
             ::-webkit-scrollbar-track { background: transparent; }
@@ -229,12 +227,8 @@
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <button onclick="handleLogout()" class="text-[10px] font-bold text-red-500 border border-red-500/20 px-4 py-3 rounded-lg hover:bg-red-500/10 active:bg-red-500/20 transition uppercase tracking-wider">
-                    Disconnect
-                </button>
-                <button onclick="toggleSheet('opsDrawer')" class="text-xl hover:text-white transition opacity-50 hover:opacity-100 p-2 ml-2" title="Minimize">
-                    ✕
-                </button>
+                <button onclick="handleLogout()" class="text-[10px] font-bold text-red-500 border border-red-500/20 px-4 py-3 rounded-lg hover:bg-red-500/10 active:bg-red-500/20 transition uppercase tracking-wider">Disconnect</button>
+                <button onclick="toggleSheet('opsDrawer')" class="text-xl hover:text-white transition opacity-50 hover:opacity-100 p-2 ml-2">✕</button>
             </div>
         </div>
         <div class="flex-1 p-6 overflow-hidden flex flex-col">
@@ -424,26 +418,24 @@
         function checkAuth() { currentUser ? openOpsCenter() : document.getElementById('authModal').classList.remove('hidden'); }
         async function handleLogin() { const email = document.getElementById('emailInput').value; const password = document.getElementById('passInput').value; const { data, error } = await sb.auth.signInWithPassword({ email, password }); if (error) { document.getElementById('authError').innerText = error.message; document.getElementById('authError').classList.remove('hidden'); } else { currentUser = data.user; updateAuthUI(true); initRealtimeOps(); openOpsCenter(); } }
         
-        // --- IMPROVED LOGOUT (MOBILE FIX) ---
-        async function handleLogout() { 
-            // 1. Immediate UI Feedback
-            const btn = document.activeElement;
-            if(btn) btn.innerText = "Closing...";
-            showToast("DISCONNECTING...");
+        // --- MOBILE OPTIMIZED LOGOUT ---
+        async function handleLogout() {
+            showToast("DISCONNECTED"); // Instant Feedback
+            
+            // 1. Force Clear Local Storage (Nuclear Option)
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // 2. Fire & Forget Network Request (Don't await)
+            if(sb) sb.auth.signOut();
 
-            // 2. Async Sign Out
-            await sb.auth.signOut(); 
-            
-            // 3. NUCLEAR OPTION: Clear Storage manually to prevent race conditions
-            localStorage.clear(); // Clears any lingering Supabase tokens
-            
-            // 4. Force Update UI State before reload
+            // 3. Instant UI Reset
             currentUser = null;
-            updateAuthUI(false); 
+            updateAuthUI(false);
             document.getElementById('opsDrawer').classList.remove('active');
 
-            // 5. Reload after delay to ensure browser has processed the clear
-            setTimeout(() => location.reload(), 500); 
+            // 4. Fast Reload
+            setTimeout(() => location.reload(), 50); 
         }
 
         function updateAuthUI(isLoggedIn) { document.getElementById('loginForm').classList.toggle('hidden', isLoggedIn); document.getElementById('loggedInView').classList.toggle('hidden', !isLoggedIn); }
