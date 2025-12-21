@@ -148,7 +148,7 @@
 
     <div class="ticker-wrap">
         <div class="ticker" id="alertTicker">
-            <div class="ticker-item">CONNECTING TO GLOBAL STREAM...</div>
+            <div class="ticker-item">INITIALIZING STREAM...</div>
         </div>
     </div>
 
@@ -250,6 +250,15 @@
                 <h3 class="text-lg font-black uppercase tracking-tighter" style="color: var(--text-main)">Manifest</h3>
                 <button onclick="toggleSheet('orderSheet')" class="text-[10px] font-bold opacity-50 hover:opacity-100 transition">CLOSE</button>
             </div>
+            
+            <div id="rankDisplay" class="hidden mb-6 bg-gradient-to-r from-blue-500/10 to-transparent p-4 rounded-xl border border-blue-500/20 flex items-center gap-3">
+                <div class="text-2xl">👨‍🚀</div>
+                <div>
+                    <p class="text-[9px] uppercase tracking-widest text-blue-400 font-bold">Identity Detected</p>
+                    <p id="rankName" class="text-sm font-bold text-white"></p>
+                </div>
+            </div>
+
             <div id="cartList" class="space-y-4 mb-8 text-sm" style="color: var(--text-muted)"></div>
             <div class="rounded-2xl p-6 mb-6 border border-gray-500/10" style="background: var(--input-bg)">
                 <div class="flex justify-between items-end"><span class="text-[10px] uppercase tracking-widest font-bold opacity-60">Total</span><span id="cartTotal" class="text-3xl font-black text-green-500 font-mono tracking-tighter">₦0</span></div>
@@ -282,12 +291,48 @@
         };
 
         let sb = null, menuItems = [], cart = {}, currentUser = null;
-        
+        let callsign = { name: '', addr: '', rank: 'GUEST', xp: 0 };
+
         if (window.CSS && CSS.registerProperty) {
             CSS.registerProperty({ name: '--angle', syntax: '<angle>', inherits: false, initialValue: '0deg' });
         }
 
-        window.addEventListener('load', () => { initApp(); renderBankDetails(); loadTheme(); });
+        window.addEventListener('load', () => { 
+            initApp(); 
+            renderBankDetails(); 
+            loadTheme();
+            loadIdentity(); // LOAD THE PILOT
+        });
+
+        // --- CALLSIGN MEMORY ---
+        function loadIdentity() {
+            const saved = localStorage.getItem('smoothieIdentity');
+            if(saved) {
+                callsign = JSON.parse(saved);
+                document.getElementById('custName').value = callsign.name;
+                document.getElementById('custAddr').value = callsign.addr;
+                
+                // Show Rank in Cart
+                if(callsign.xp > 0) {
+                    document.getElementById('rankDisplay').classList.remove('hidden');
+                    document.getElementById('rankName').innerText = `${callsign.rank} ${callsign.name.toUpperCase()}`;
+                }
+                showToast(`WELCOME BACK, ${callsign.rank}`);
+            }
+        }
+
+        function saveIdentity(name, addr) {
+            callsign.name = name;
+            callsign.addr = addr;
+            callsign.xp += 1;
+            
+            // Calc Rank
+            if(callsign.xp > 10) callsign.rank = "COMMANDER";
+            else if(callsign.xp > 4) callsign.rank = "PILOT";
+            else if(callsign.xp > 0) callsign.rank = "CADET";
+            
+            localStorage.setItem('smoothieIdentity', JSON.stringify(callsign));
+        }
 
         function toggleTheme() {
             document.body.classList.toggle('light-mode');
@@ -302,11 +347,14 @@
                 if (window.supabase) {
                     sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
                     
-                    // START THE GLOBAL PULSE
+                    // Start Global Pulse
                     updateGlobalPulse();
-                    // Listen for BOTH alerts and orders to update the pulse
+                    // NOTE: Ensure you ran the SQL View script to make 'public_feed' accessible!
+                    // If you didn't, this part might just show alerts but no orders. 
+                    // To be safe, we will try fetching from the new View if it exists, fallback to filtering manually.
+                    
                     sb.channel('public:pulse')
-                        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, () => updateGlobalPulse())
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => updateGlobalPulse())
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'alerts' }, () => updateGlobalPulse())
                         .subscribe();
                     
@@ -323,38 +371,40 @@
             } catch (err) { console.error("Init Error", err); }
         }
 
-        // --- THE GLOBAL PULSE ENGINE ---
+        // --- HYBRID PULSE ENGINE (View-Aware) ---
         async function updateGlobalPulse() {
-            // 1. Fetch Admin Alerts
+            // 1. Alerts
             const { data: alerts } = await sb.from('alerts').select('message').eq('is_active', true).order('id', { ascending: false });
             
-            // 2. Fetch Recent Orders (Limit 5, just the items)
-            const { data: recentOrders } = await sb.from('orders').select('items').order('created_at', { ascending: false }).limit(5);
-            
+            // 2. Orders (Try the Safe View first, otherwise raw table - be careful with RLS!)
+            // We use a simple select. The RLS or View determines what we get back.
+            let recentOrders = [];
+            try {
+                // Try fetching from public_feed view first (The Secure Way)
+                const { data, error } = await sb.from('public_feed').select('items').limit(5);
+                if(!error) recentOrders = data;
+                else {
+                    // Fallback to orders table (Only works if RLS allows it)
+                    const { data: rawData } = await sb.from('orders').select('items').order('created_at', { ascending: false }).limit(5);
+                    recentOrders = rawData || [];
+                }
+            } catch(e) { console.log("Pulse fetch error", e); }
+
             let combinedTicker = [];
 
-            // Add Orders first (The "Pulse")
             if (recentOrders && recentOrders.length > 0) {
                 recentOrders.forEach(o => {
-                    // Clean up string: "Mood Lifter x1" -> "NEW ORDER: MOOD LIFTER"
-                    const cleanItems = o.items.split(',')[0].split(' x')[0].toUpperCase();
+                    const cleanItems = o.items ? o.items.split(',')[0].split(' x')[0].toUpperCase() : "SMOOTHIE";
                     combinedTicker.push(`<span class="text-green-400">⚡</span> SOMEONE JUST ORDERED ${cleanItems}`);
                 });
             }
 
-            // Add Admin Alerts
             if (alerts && alerts.length > 0) {
-                alerts.forEach(a => {
-                    combinedTicker.push(`<span class="text-blue-400">◆</span> ${a.message}`);
-                });
+                alerts.forEach(a => combinedTicker.push(`<span class="text-blue-400">◆</span> ${a.message}`));
             }
 
-            // Fallback
-            if (combinedTicker.length === 0) {
-                combinedTicker.push("WATCH THIS SPACE • UPCOMING DEALS • SMOOTHIEPLUS+");
-            }
+            if (combinedTicker.length === 0) combinedTicker.push("WATCH THIS SPACE • UPCOMING DEALS • SMOOTHIEPLUS+");
 
-            // Render (Triple it for smooth infinite loop)
             const tickerHtml = combinedTicker.map(msg => `<div class="ticker-item">${msg}</div>`).join('');
             document.getElementById('alertTicker').innerHTML = tickerHtml + tickerHtml + tickerHtml;
         }
@@ -425,11 +475,20 @@
             const name = document.getElementById('custName').value.trim();
             const addr = document.getElementById('custAddr').value.trim();
             if(!name || !addr) return showToast("MISSING IDENTITY", "error");
+            
+            // SAVE IDENTITY
+            saveIdentity(name, addr);
+
             let items = Object.entries(cart).map(([k,v]) => `${k} x${v.q}`).join(', ');
             let total = document.getElementById('cartTotal').innerText;
             const orderId = `ORD-${Date.now().toString().slice(-4)}-${Math.floor(Math.random()*100)}`;
+            
             if(sb) await sb.from('orders').insert([{ id: orderId, customer: name, items: items, total: total }]);
-            window.open(`https://wa.me/${CONFIG.whatsapp}?text=*NEW ORDER: ${orderId}* %0A👤 ${name}%0A📍 ${addr}%0A%0A*ITEMS:*%0A${items}%0A%0A*TOTAL: ${total}*`, '_blank');
+            
+            const rankEmoji = callsign.rank === 'COMMANDER' ? '👑' : callsign.rank === 'PILOT' ? '🚀' : '👤';
+            
+            const msg = `*NEW ORDER: ${orderId}* %0A${rankEmoji} ${callsign.rank} ${name}%0A📍 ${addr}%0A%0A*ITEMS:*%0A${items}%0A%0A*TOTAL: ${total}*`;
+            window.open(`https://wa.me/${CONFIG.whatsapp}?text=${msg}`, '_blank');
             cart = {}; updateCartUI(); toggleSheet('orderSheet');
         }
 
@@ -458,7 +517,7 @@
             currentUser = null;
             updateAuthUI(false);
             document.getElementById('opsDrawer').classList.remove('active');
-            setTimeout(() => location.reload(), 50); // FAST REFRESH
+            setTimeout(() => location.reload(), 50); 
         }
 
         function updateAuthUI(isLoggedIn) { document.getElementById('loginForm').classList.toggle('hidden', isLoggedIn); document.getElementById('loggedInView').classList.toggle('hidden', !isLoggedIn); }
