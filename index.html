@@ -36,7 +36,9 @@
 <body class="pb-32 antialiased">
 
     <div class="noise-overlay"></div>
-    <div class="scanlines"></div> <div class="ticker-wrap" aria-hidden="true">
+    <div class="scanlines"></div>
+
+    <div class="ticker-wrap" aria-hidden="true">
         <div class="ticker-track" id="tickerTrack"></div>
     </div>
 
@@ -82,7 +84,7 @@
         </main>
         
         <div id="systemLog" class="text-[10px] font-mono opacity-40 mt-12 uppercase leading-relaxed select-none pointer-events-none text-center" style="color: var(--text-muted)">
-            System Active • v5.1.0 (Hologram)
+            System Active • v6.0.0 (Phantom)
         </div>
     </div>
 
@@ -243,9 +245,7 @@
         function openModal(id) {
             const backdrop = document.getElementById('modalBackdrop');
             const target = document.getElementById(id);
-            // Hide all first
             document.querySelectorAll('.modal-content').forEach(el => el.classList.add('hidden'));
-            // Show target
             backdrop.classList.add('active');
             target.classList.remove('hidden');
             if(id === 'quizModal') initQuiz();
@@ -318,11 +318,13 @@
             document.getElementById('tickerTrack').innerHTML = html + html + html + html;
         }
 
-        // --- MENU RENDERER WITH 3D TILT ---
+        // --- MENU RENDERER (PHANTOM CARD UPGRADE) ---
         function renderMenu(items) {
             const grid = document.getElementById('menuGrid');
             grid.innerHTML = items.map(p => {
                 const color = p.color === 'green' ? '#10b981' : p.color === 'purple' ? '#a855f7' : p.color === 'orange' ? '#f97316' : '#06b6d4';
+                
+                // Note: We use the same image for back, but the CSS filter creates the "phantom" effect.
                 return `
                 <div onclick="openProductDetail(${p.id})" 
                      class="premium-card p-5 cursor-pointer flex flex-col justify-between h-full group" 
@@ -331,9 +333,16 @@
                      onmouseleave="resetTilt(this)">
                     
                     <div class="h-44 w-full rounded-2xl bg-black/20 mb-5 overflow-hidden relative pointer-events-none">
-                        <img src="${p.image_url || 'https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=500'}" 
-                             class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition duration-500" 
-                             alt="${p.name}" loading="lazy">
+                        <div class="card-image-wrapper">
+                            <img src="${p.image_url}" class="img-front" alt="${p.name}" loading="lazy">
+                            <img src="${p.image_url}" class="img-back" alt="${p.name}" loading="lazy">
+                            
+                            <div class="card-marquee">
+                                <div class="marquee-content">
+                                    ⚡ LIMITED BATCH ⚡ HIGH VOLTAGE ⚡ PREMIUM FUEL ⚡ LIMITED BATCH ⚡ HIGH VOLTAGE ⚡
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="pointer-events-none">
@@ -353,12 +362,8 @@
             const rect = card.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-            
-            // Calculate rotation (max 10 degrees)
-            const xRot = ((y - rect.height / 2) / rect.height) * -10;
-            const yRot = ((x - rect.width / 2) / rect.width) * 10;
-            
-            // Apply transform
+            const xRot = ((y - rect.height / 2) / rect.height) * -8;
+            const yRot = ((x - rect.width / 2) / rect.width) * 8;
             card.style.transform = `perspective(1000px) rotateX(${xRot}deg) rotateY(${yRot}deg) scale3d(1.02, 1.02, 1.02)`;
         }
 
@@ -411,7 +416,7 @@
             badge.innerText = count; 
             if(count > 0) {
                 badge.classList.remove('hidden', 'scale-0');
-                badge.classList.add('scale-100'); // Pop animation
+                badge.classList.add('scale-100'); 
             } else {
                 badge.classList.add('scale-0');
             }
