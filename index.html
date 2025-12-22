@@ -3,115 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>smoothiePlus+ | OPS</title>
+    <title>smoothiePlus+ | Premium</title>
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥤</text></svg>">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;900&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: { 
                 extend: { 
-                    fontFamily: { sans: ['Outfit', 'sans-serif'] }, 
-                    colors: { neon: '#39ff14' },
-                    screens: { 'xs': '480px' },
-                    animation: { 'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite' }
+                    fontFamily: { 
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif']
+                    }, 
+                    colors: { 
+                        brand: '#10b981', // Emerald 500 - High Contrast Green
+                        dark: '#050508'
+                    },
+                    screens: { 'xs': '480px' }
                 } 
             }
         }
     </script>
 
     <style>
-        /* --- THEME VARIABLES --- */
+        /* --- THEME VARIABLES (ACCESSIBILITY FOCUSED) --- */
         :root {
             --bg-body: #050508;
             --text-main: #ffffff;
-            --text-muted: #94a3b8;
-            --glass-bg: rgba(20, 20, 30, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-muted: #cbd5e1; /* Lightened from #94a3b8 for better contrast */
+            --glass-bg: rgba(15, 23, 42, 0.85); /* Darker, less transparent for readability */
+            --glass-border: rgba(255, 255, 255, 0.12); /* Stronger border definition */
             --card-bg: #0f1115;
             --drawer-bg: #0a0a0c;
-            --input-bg: rgba(255, 255, 255, 0.05);
-            --ticker-bg: rgba(57, 255, 20, 0.05);
-            --ticker-text: #4ade80;
+            --input-bg: rgba(255, 255, 255, 0.08);
+            --ticker-bg: rgba(16, 185, 129, 0.05);
+            --ticker-text: #34d399;
         }
 
         body.light-mode {
-            --bg-body: #f0f2f5;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --glass-bg: rgba(255, 255, 255, 0.85);
-            --glass-border: rgba(0, 0, 0, 0.05);
+            --bg-body: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #475569; /* Darker gray for light mode contrast */
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --glass-border: rgba(0, 0, 0, 0.08);
             --card-bg: #ffffff;
             --drawer-bg: #ffffff;
             --input-bg: #f1f5f9;
-            --ticker-bg: rgba(0, 0, 0, 0.03);
-            --ticker-text: #059669;
+            --ticker-bg: #f0fdf4;
+            --ticker-text: #15803d;
         }
 
         /* --- BASE --- */
         body { 
             background-color: var(--bg-body); 
             color: var(--text-main); 
-            transition: background-color 0.4s ease, color 0.4s ease; 
+            transition: background-color 0.3s ease, color 0.3s ease; 
             overscroll-behavior-y: none; 
-            padding-top: 50px;
-            font-weight: 500;
+            padding-top: 60px;
+            font-weight: 400;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- ACCESSIBILITY FOCUS RING --- */
+        *:focus-visible {
+            outline: 2px solid var(--ticker-text);
+            outline-offset: 2px;
         }
 
         /* --- EDIT MODE HIGHLIGHTS --- */
-        [contenteditable="true"] { border: 1px dashed #4ade80; padding: 2px; border-radius: 4px; }
-        [contenteditable="true"]:focus { outline: none; background: rgba(74, 222, 128, 0.1); }
+        [contenteditable="true"] { border: 1px dashed var(--ticker-text); padding: 4px; border-radius: 4px; }
 
-        /* --- STREAM ANIMATION --- */
+        /* --- STREAM ANIMATION (REDUCED MOTION SUPPORT) --- */
         @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
-        .stream-card { position: relative; background: var(--card-bg); border-radius: 1.5rem; z-index: 1; overflow: hidden; transition: transform 0.2s; }
-        .stream-card::before {
-            content: ''; position: absolute; width: 150%; height: 150%; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background-image: conic-gradient(from var(--angle), transparent 70%, var(--stream-color));
-            animation: spin-stream 4s linear infinite; z-index: -2; opacity: 0.6;
+        .stream-card { position: relative; background: var(--card-bg); border-radius: 1.5rem; z-index: 1; overflow: hidden; transition: transform 0.2s; border: 1px solid var(--glass-border); }
+        
+        /* Only animate background if user hasn't requested reduced motion */
+        @media (prefers-reduced-motion: no-preference) {
+            .stream-card::before {
+                content: ''; position: absolute; width: 150%; height: 150%; top: 50%; left: 50%;
+                transform: translate(-50%, -50%);
+                background-image: conic-gradient(from var(--angle), transparent 70%, var(--stream-color));
+                animation: spin-stream 4s linear infinite; z-index: -2; opacity: 0.5;
+            }
+            @keyframes spin-stream { from { --angle: 0deg; } to { --angle: 360deg; } }
         }
+
         .stream-card::after {
             content: ''; position: absolute; inset: 1.5px; background: var(--card-bg); border-radius: 1.4rem; z-index: -1;
         }
-        @keyframes spin-stream { from { --angle: 0deg; } to { --angle: 360deg; } }
         .float-hover:active { transform: scale(0.98); }
 
         /* --- TICKER --- */
         .ticker-wrap {
-            position: fixed; top: 0; left: 0; width: 100%; height: 44px; overflow: hidden;
-            background: var(--ticker-bg); backdrop-filter: blur(10px); border-bottom: 1px solid var(--glass-border);
+            position: fixed; top: 0; left: 0; width: 100%; height: 48px; overflow: hidden;
+            background: var(--ticker-bg); border-bottom: 1px solid var(--glass-border);
             z-index: 999; display: flex; align-items: center;
         }
         .ticker { display: flex; white-space: nowrap; animation: ticker 80s linear infinite; }
-        .ticker-wrap:hover .ticker { animation-play-state: paused; }
         .ticker-item {
-            padding: 0 2rem; font-size: 10px; font-weight: 900; text-transform: uppercase;
-            letter-spacing: 0.15em; color: var(--ticker-text); display: flex; align-items: center; gap: 8px;
+            padding: 0 2rem; font-size: 11px; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.1em; color: var(--ticker-text); display: flex; align-items: center; gap: 10px;
         }
         @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
         /* --- UTILS --- */
         .glass-panel { background: var(--glass-bg); backdrop-filter: blur(20px); border-top: 1px solid var(--glass-border); }
-        .geo-pulse { animation: geoPulse 1.5s infinite; color: #4ade80 !important; }
+        .geo-pulse { animation: geoPulse 1.5s infinite; color: #10b981 !important; }
         @keyframes geoPulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-        /* --- RESPONSIVE DRAWERS --- */
+        /* --- DRAWERS --- */
         .drawer {
-            position: fixed; z-index: 100; transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            position: fixed; z-index: 100; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
             background: var(--drawer-bg); border: 1px solid var(--glass-border); display: flex; flex-direction: column;
         }
         
         @media (max-width: 767px) {
             .drawer {
                 bottom: 0; left: 0; right: 0; transform: translateY(105%); 
-                border-radius: 24px 24px 0 0; max-height: 85vh; border-bottom: none;
-                box-shadow: 0 -20px 40px rgba(0,0,0,0.3);
+                border-radius: 24px 24px 0 0; max-height: 90vh; border-bottom: none;
+                box-shadow: 0 -20px 50px rgba(0,0,0,0.5);
             }
             .drawer.active { transform: translateY(0); }
         }
@@ -120,121 +136,119 @@
             body { max-width: 100%; } 
             .responsive-container { max-width: 1200px; margin: 0 auto; padding-left: 2rem; padding-right: 2rem; }
             .drawer {
-                top: 0; bottom: 0; right: 0; left: auto; width: 400px; max-width: 100%;
+                top: 0; bottom: 0; right: 0; left: auto; width: 450px; max-width: 100%;
                 transform: translateX(105%); border-radius: 20px 0 0 20px; border-right: none;
-                box-shadow: -20px 0 40px rgba(0,0,0,0.3); padding-top: 50px; 
+                box-shadow: -20px 0 50px rgba(0,0,0,0.3); padding-top: 60px; 
             }
             .drawer.active { transform: translateX(0); }
-            #authModal, #productModal, #quizModal { max-width: 480px; left: 0; right: 0; margin: auto; }
-            ::-webkit-scrollbar { width: 8px; }
-            ::-webkit-scrollbar-track { background: transparent; }
-            ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 4px; }
+            #authModal, #productModal, #quizModal { max-width: 500px; left: 0; right: 0; margin: auto; }
         }
 
         /* Toast */
-        #toast { bottom: 30px; left: 50%; transform: translateX(-50%) translateY(200%) scale(0.9); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .toast-active { transform: translateX(-50%) translateY(0) scale(1) !important; }
+        #toast { bottom: 30px; left: 50%; transform: translateX(-50%) translateY(200%); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .toast-active { transform: translateX(-50%) translateY(0) !important; }
 
-        .scroll-area { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 100px; }
+        .scroll-area { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 120px; }
     </style>
 </head>
-<body class="pb-32 font-sans">
+<body class="pb-32 font-sans text-base antialiased">
 
     <div class="ticker-wrap">
         <div class="ticker" id="alertTicker">
-            <div class="ticker-item">INITIALIZING STREAM...</div>
+            <div class="ticker-item">Connecting...</div>
         </div>
     </div>
 
-    <div id="toast" class="fixed bg-gray-900 text-white px-6 py-3 rounded-full text-xs font-bold shadow-2xl z-[9999] flex items-center gap-3 border border-white/10 backdrop-blur-md">
-        <span id="toastIcon" class="text-green-400">●</span> <span id="toastMsg">SYSTEM ONLINE</span>
+    <div id="toast" class="fixed bg-gray-900 text-white px-6 py-4 rounded-full text-sm font-semibold shadow-2xl z-[9999] flex items-center gap-3 border border-white/10 backdrop-blur-md">
+        <span id="toastIcon" class="text-emerald-400 text-lg">●</span> <span id="toastMsg">Ready</span>
     </div>
 
-    <header class="fixed top-0 left-0 right-0 z-50 pt-14 pb-4 bg-gradient-to-b from-[var(--bg-body)] to-transparent pointer-events-none">
+    <header class="fixed top-0 left-0 right-0 z-50 pt-16 pb-4 bg-gradient-to-b from-[var(--bg-body)] to-transparent pointer-events-none">
         <div class="responsive-container flex justify-between items-center pointer-events-auto px-6 md:px-0">
             <div>
-                <h1 class="text-2xl font-black tracking-tighter uppercase leading-none italic editable-text">
-                    smoothie<span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">Plus+</span>
+                <h1 class="text-3xl font-display font-black tracking-tight leading-none italic editable-text">
+                    smoothie<span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-600">Plus+</span>
                 </h1>
-                <p class="text-[9px] tracking-[0.3em] uppercase mt-1 ml-1 font-bold editable-text" style="color: var(--text-muted)">Organic Fuel</p>
+                <p class="text-[10px] tracking-[0.2em] uppercase mt-1.5 font-bold editable-text" style="color: var(--text-muted)">Organic Fuel System</p>
             </div>
             
             <div class="flex items-center gap-3">
-                <button onclick="openFuelAnalyst()" class="hidden md:flex bg-blue-600/10 border border-blue-500/20 text-blue-400 px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-blue-600/20 transition items-center gap-2">
-                    <span>🧬</span> Fuel Analyst
+                <button onclick="openFuelMatch()" class="hidden md:flex bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 px-5 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-wide hover:bg-emerald-500/20 transition items-center gap-2">
+                    <span>⚡</span> Find Your Match
                 </button>
 
-                <button onclick="toggleTheme()" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center transition hover:bg-white/10 active:scale-95">
-                    <span id="themeIcon" class="text-lg">☀️</span>
+                <button onclick="toggleTheme()" class="w-11 h-11 rounded-full bg-white/5 border border-white/10 flex items-center justify-center transition hover:bg-white/10 active:scale-95" aria-label="Toggle Theme">
+                    <span id="themeIcon" class="text-xl">☀️</span>
                 </button>
-                <div id="connectionStatus" class="w-2 h-2 rounded-full bg-red-500 transition-all duration-1000 shadow-[0_0_15px_rgba(239,68,68,0.6)]" title="DB Status"></div>
+                <div id="connectionStatus" class="w-2.5 h-2.5 rounded-full bg-red-500 transition-all duration-1000" title="System Status"></div>
             </div>
         </div>
     </header>
 
-    <div class="responsive-container w-full pt-28">
+    <div class="responsive-container w-full pt-32">
         
-        <div class="px-6 mb-6 md:hidden">
-            <button onclick="openFuelAnalyst()" class="w-full bg-blue-600/10 border border-blue-500/20 text-blue-400 py-4 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-600/20 transition flex items-center justify-center gap-2">
-                <span class="animate-pulse">🧬</span> Launch Fuel Analyst
+        <div class="px-6 mb-8 md:hidden">
+            <button onclick="openFuelMatch()" class="w-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 py-4 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-emerald-500/20 transition flex items-center justify-center gap-2">
+                <span class="animate-pulse">⚡</span> Find Your Perfect Smoothie
             </button>
         </div>
 
-        <main id="menuGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8 relative z-10 pb-32">
-            <div class="col-span-2 md:col-span-3 lg:col-span-4 text-center mt-24 opacity-40">
+        <main id="menuGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-8 relative z-10 pb-32 px-4 md:px-0">
+            <div class="col-span-2 md:col-span-3 lg:col-span-4 text-center mt-24 opacity-60">
                 <div class="inline-block w-8 h-8 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                <p class="text-[10px] uppercase tracking-widest mt-3 font-bold">Establishing Uplink...</p>
+                <p class="text-xs uppercase tracking-widest mt-4 font-bold">Syncing Menu...</p>
             </div>
         </main>
         
-        <div id="systemLog" class="text-[8px] font-mono opacity-40 mt-10 px-6 uppercase leading-tight select-none pointer-events-none" style="color: var(--text-muted)">
-            > Terminal Active...
+        <div id="systemLog" class="text-[10px] font-mono opacity-50 mt-12 px-6 uppercase leading-relaxed select-none pointer-events-none text-center" style="color: var(--text-muted)">
+            System Active • v4.0.1
         </div>
     </div>
 
     <footer class="fixed bottom-8 left-0 right-0 flex justify-center z-40 pointer-events-none">
-        <div class="pointer-events-auto inline-flex glass-panel rounded-full p-1 shadow-2xl backdrop-blur-xl">
-            <button onclick="checkAuth()" class="text-[10px] font-bold uppercase tracking-widest px-8 py-3 rounded-full transition flex items-center gap-2 hover:bg-white/5" style="color: var(--text-muted)">
-                Staff Ops
+        <div class="pointer-events-auto inline-flex glass-panel rounded-full p-1.5 shadow-2xl backdrop-blur-xl">
+            <button onclick="checkAuth()" class="text-[11px] font-bold uppercase tracking-widest px-8 py-3.5 rounded-full transition flex items-center gap-2 hover:bg-white/5" style="color: var(--text-muted)">
+                Staff Portal
             </button>
         </div>
     </footer>
 
-    <button onclick="toggleSheet('orderSheet')" class="fixed bottom-8 right-6 bg-white text-black w-14 h-14 rounded-full shadow-2xl shadow-green-500/20 z-50 flex items-center justify-center active:scale-90 transition hover:scale-105 hover:rotate-12 group">
-        <svg class="w-6 h-6 group-hover:text-green-600 transition" fill="currentColor" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
-        <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-black w-5 h-5 flex items-center justify-center rounded-full hidden border-2 border-[#050508] transform scale-0 transition-transform duration-300">0</span>
+    <button onclick="toggleSheet('orderSheet')" class="fixed bottom-8 right-6 bg-white text-black w-16 h-16 rounded-full shadow-2xl shadow-emerald-500/20 z-50 flex items-center justify-center active:scale-95 transition hover:scale-105 hover:rotate-12 group" aria-label="Open Cart">
+        <svg class="w-7 h-7 group-hover:text-emerald-600 transition" fill="currentColor" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+        <span id="cartCount" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-6 h-6 flex items-center justify-center rounded-full hidden border-2 border-[#050508] transform scale-0 transition-transform duration-300">0</span>
     </button>
 
-    <button id="adminSaveBtn" onclick="exportHtml()" class="fixed top-24 right-6 bg-blue-600 text-white p-3 rounded-xl shadow-2xl z-[9999] hidden text-xs font-black uppercase tracking-widest">
-        💾 SAVE CODE
+    <button id="adminSaveBtn" onclick="exportHtml()" class="fixed top-24 right-6 bg-blue-600 text-white p-3 rounded-xl shadow-2xl z-[9999] hidden text-xs font-bold uppercase tracking-widest">
+        💾 Save Code
     </button>
 
     <div id="authModal" class="fixed inset-0 z-[150] bg-black/90 flex items-center justify-center p-6 hidden backdrop-blur-md">
         <div class="glass-panel w-full max-w-sm rounded-3xl p-8 relative shadow-2xl" style="background: var(--card-bg)">
-            <button onclick="document.getElementById('authModal').classList.add('hidden')" class="absolute top-5 right-5 text-gray-500 hover:text-white transition">✕</button>
-            <h2 class="text-3xl font-black mb-1 uppercase tracking-tighter" style="color: var(--text-main)">Portal</h2>
+            <button onclick="document.getElementById('authModal').classList.add('hidden')" class="absolute top-5 right-5 text-gray-400 hover:text-white transition p-2">✕</button>
+            <h2 class="text-3xl font-display font-black mb-1 tracking-tight" style="color: var(--text-main)">Portal</h2>
+            <p class="text-xs mb-8 opacity-60">Staff Access Only</p>
             <div id="loginForm" class="space-y-4">
-                <input type="email" id="emailInput" placeholder="ID" class="w-full bg-transparent border-b border-gray-500/30 p-3 text-lg outline-none font-mono" style="color: var(--text-main)">
-                <input type="password" id="passInput" placeholder="KEY" class="w-full bg-transparent border-b border-gray-500/30 p-3 text-lg outline-none font-mono" style="color: var(--text-main)">
-                <button onclick="handleLogin()" class="w-full bg-white text-black font-black py-4 rounded-xl mt-4 hover:scale-[1.02] transition uppercase tracking-widest text-xs">Enter System</button>
-                <p id="authError" class="text-red-500 text-xs text-center hidden font-bold"></p>
+                <input type="email" id="emailInput" placeholder="Staff ID" class="w-full bg-transparent border-b border-gray-500/30 p-4 text-base outline-none font-mono focus:border-emerald-500 transition" style="color: var(--text-main)">
+                <input type="password" id="passInput" placeholder="Access Key" class="w-full bg-transparent border-b border-gray-500/30 p-4 text-base outline-none font-mono focus:border-emerald-500 transition" style="color: var(--text-main)">
+                <button onclick="handleLogin()" class="w-full bg-white text-black font-bold py-4 rounded-xl mt-4 hover:bg-gray-200 transition text-sm uppercase tracking-wide">Enter System</button>
+                <p id="authError" class="text-red-500 text-xs text-center hidden font-bold mt-2"></p>
             </div>
             <div id="loggedInView" class="hidden text-center">
-                <div class="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/30 animate-pulse"><span class="text-3xl">🔓</span></div>
+                <div class="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/30"><span class="text-3xl">🔓</span></div>
                 <p class="font-bold text-xl mb-1" style="color: var(--text-main)">Access Granted</p>
                 <p id="userEmailDisplay" class="text-xs mb-8 font-mono opacity-50">user@system</p>
                 <button onclick="openOpsCenter()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl mb-3 shadow-lg shadow-blue-500/20">Launch Ops</button>
-                <button onclick="handleLogout()" class="text-xs opacity-50 hover:opacity-100 transition mt-4">Disconnect</button>
+                <button onclick="handleLogout()" class="text-xs opacity-50 hover:opacity-100 transition mt-4">Log Out</button>
             </div>
         </div>
     </div>
 
     <div id="quizModal" class="fixed inset-0 z-[120] bg-black/95 flex items-center justify-center p-6 hidden backdrop-blur-xl">
-        <div class="glass-panel w-full max-w-sm rounded-3xl p-8 relative shadow-2xl border-t border-blue-500/30" style="background: var(--card-bg)">
-            <button onclick="document.getElementById('quizModal').classList.add('hidden')" class="absolute top-5 right-5 text-gray-500 hover:text-white transition">✕</button>
-            <div class="text-center mb-6">
-                <h2 class="text-2xl font-black uppercase tracking-tighter text-blue-400">Fuel Analyst</h2>
-                <p class="text-[10px] uppercase tracking-widest opacity-60">Optimize Your Intake</p>
+        <div class="glass-panel w-full max-w-sm rounded-3xl p-8 relative shadow-2xl border-t border-emerald-500/30" style="background: var(--card-bg)">
+            <button onclick="document.getElementById('quizModal').classList.add('hidden')" class="absolute top-5 right-5 text-gray-500 hover:text-white transition p-2">✕</button>
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-display font-bold text-emerald-400">Smoothie Match</h2>
+                <p class="text-xs uppercase tracking-wide opacity-60 mt-1">Personalized Recommendation</p>
             </div>
             <div id="quizContent" class="space-y-4">
                 </div>
@@ -242,25 +256,25 @@
     </div>
 
     <div id="opsDrawer" class="drawer">
-        <div class="flex justify-between items-center p-6 border-b sticky top-0 z-50 backdrop-blur-xl bg-inherit">
+        <div class="flex justify-between items-center p-6 border-b sticky top-0 z-50 backdrop-blur-xl bg-inherit border-white/10">
             <div>
-                <h2 class="text-xl font-black text-blue-500 tracking-tighter">OPS CENTER</h2>
+                <h2 class="text-xl font-display font-bold text-blue-500">Staff Portal</h2>
                 <div class="flex items-center gap-2 mt-1">
-                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                    <p class="text-[9px] uppercase tracking-widest" style="color: var(--text-muted)">Live Stream</p>
+                    <span class="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                    <p class="text-[10px] uppercase tracking-widest" style="color: var(--text-muted)">Live</p>
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <button onclick="handleLogout()" class="text-[10px] font-bold text-red-500 border border-red-500/20 px-4 py-3 rounded-lg hover:bg-red-500/10 active:bg-red-500/20 transition uppercase tracking-wider">Disconnect</button>
+                <button onclick="handleLogout()" class="text-[10px] font-bold text-red-400 border border-red-500/20 px-4 py-2 rounded-lg hover:bg-red-500/10 transition uppercase tracking-wider">Log Out</button>
                 <button onclick="toggleSheet('opsDrawer')" class="text-xl hover:text-white transition opacity-50 hover:opacity-100 p-2 ml-2">✕</button>
             </div>
         </div>
         <div class="flex-1 p-6 overflow-hidden flex flex-col">
-            <div class="border border-gray-500/10 p-5 rounded-3xl mb-6 shadow-xl" style="background: var(--card-bg)">
-                <input type="text" id="newTaskInput" placeholder="New Directive..." class="w-full bg-transparent text-sm outline-none mb-4 border-b border-gray-500/20 pb-2" style="color: var(--text-main)">
+            <div class="border border-white/10 p-5 rounded-2xl mb-6 shadow-lg" style="background: var(--card-bg)">
+                <input type="text" id="newTaskInput" placeholder="New Task..." class="w-full bg-transparent text-sm outline-none mb-4 border-b border-white/10 pb-3 font-medium" style="color: var(--text-main)">
                 <div class="flex justify-between items-center">
-                    <select id="taskRole" class="bg-transparent border border-gray-500/20 text-[10px] rounded-lg px-3 py-2 outline-none uppercase tracking-wide font-bold" style="color: var(--text-muted)"><option value="GENERAL">General</option><option value="URGENT">Urgent</option><option value="KITCHEN">Kitchen</option></select>
-                    <button onclick="addTask()" class="text-[10px] bg-blue-600 text-white px-5 py-2 rounded-lg font-black uppercase tracking-widest">Add</button>
+                    <select id="taskRole" class="bg-transparent border border-white/10 text-xs rounded-lg px-3 py-2 outline-none font-bold" style="color: var(--text-muted)"><option value="GENERAL">General</option><option value="URGENT">Urgent</option><option value="KITCHEN">Kitchen</option></select>
+                    <button onclick="addTask()" class="text-[10px] bg-blue-600 text-white px-5 py-2 rounded-lg font-bold uppercase tracking-widest hover:bg-blue-500">Add</button>
                 </div>
             </div>
             <div id="taskList" class="scroll-area space-y-3"></div>
@@ -271,44 +285,50 @@
         <div class="w-12 h-1.5 bg-gray-500/30 rounded-full mx-auto mb-8 mt-4 md:hidden"></div>
         <div class="px-8 pb-8 scroll-area">
             <div class="flex justify-between items-center mb-8 border-b border-gray-500/10 pb-4">
-                <h3 class="text-lg font-black uppercase tracking-tighter" style="color: var(--text-main)">Manifest</h3>
-                <button onclick="toggleSheet('orderSheet')" class="text-[10px] font-bold opacity-50 hover:opacity-100 transition">CLOSE</button>
+                <h3 class="text-xl font-display font-bold" style="color: var(--text-main)">Your Order</h3>
+                <button onclick="toggleSheet('orderSheet')" class="text-xs font-bold opacity-60 hover:opacity-100 transition">CLOSE</button>
             </div>
             
-            <div id="rankDisplay" class="hidden mb-6 bg-gradient-to-r from-blue-600/20 to-purple-600/20 p-4 rounded-xl border border-blue-500/30 flex items-center gap-3">
-                <div class="text-2xl animate-pulse">⚡</div>
+            <div id="rankDisplay" class="hidden mb-6 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 p-5 rounded-2xl border border-emerald-500/20 flex items-center gap-4">
+                <div class="text-3xl">✨</div>
                 <div>
-                    <p class="text-[9px] uppercase tracking-widest text-blue-400 font-bold">Fast Track Active</p>
-                    <p id="rankName" class="text-sm font-bold" style="color: var(--text-main)"></p>
+                    <p class="text-[10px] uppercase tracking-widest text-emerald-400 font-bold mb-0.5">Membership Status</p>
+                    <p id="rankName" class="text-base font-bold" style="color: var(--text-main)"></p>
                 </div>
             </div>
 
             <div id="cartList" class="space-y-4 mb-8 text-sm" style="color: var(--text-muted)"></div>
-            <div class="rounded-2xl p-6 mb-6 border border-gray-500/10" style="background: var(--input-bg)">
-                <div class="flex justify-between items-end"><span class="text-[10px] uppercase tracking-widest font-bold opacity-60">Total</span><span id="cartTotal" class="text-3xl font-black text-green-500 font-mono tracking-tighter">₦0</span></div>
+            
+            <div class="rounded-2xl p-6 mb-6 border border-white/10" style="background: var(--input-bg)">
+                <div class="flex justify-between items-end"><span class="text-xs uppercase tracking-widest font-bold opacity-60">Total Amount</span><span id="cartTotal" class="text-3xl font-mono font-bold text-emerald-500 tracking-tight">₦0</span></div>
             </div>
-            <div class="rounded-2xl p-5 mb-8 border border-gray-500/10 flex justify-between items-center" style="background: var(--input-bg)">
-                <div><p class="text-[9px] uppercase font-bold mb-1 opacity-60">Pay To</p><p id="dispAcctNum" class="font-mono font-bold text-xl tracking-widest select-all" style="color: var(--text-main)"></p><p id="dispBankName" class="text-[10px] uppercase opacity-60 mt-1"></p></div>
+
+            <div class="rounded-2xl p-5 mb-8 border border-white/10 flex justify-between items-center" style="background: var(--input-bg)">
+                <div><p class="text-[10px] uppercase font-bold mb-1 opacity-60">Transfer To</p><p id="dispAcctNum" class="font-mono font-bold text-xl tracking-widest select-all" style="color: var(--text-main)"></p><p id="dispBankName" class="text-[10px] uppercase opacity-60 mt-1"></p></div>
                 <button onclick="copyBank()" class="text-[10px] bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition uppercase font-bold tracking-wider">Copy</button>
             </div>
             
-            <div class="space-y-4 mb-6">
-                <input type="text" id="custName" placeholder="YOUR NAME" class="w-full bg-transparent border-b border-gray-500/20 p-3 text-sm outline-none focus:border-green-500 transition" style="color: var(--text-main)">
+            <div class="space-y-5 mb-8">
+                <div>
+                    <label class="text-[10px] uppercase font-bold opacity-60 ml-1 mb-1 block">Full Name</label>
+                    <input type="text" id="custName" placeholder="Enter your name" class="w-full bg-transparent border border-white/10 rounded-xl p-4 text-base outline-none focus:border-emerald-500 transition" style="color: var(--text-main)">
+                </div>
                 <div class="relative">
-                    <textarea id="custAddr" rows="1" placeholder="LOCATION" class="w-full bg-transparent border-b border-gray-500/20 p-3 text-sm outline-none focus:border-green-500 transition pr-10" style="color: var(--text-main)"></textarea>
-                    <button onclick="getLocation()" id="geoBtn" class="absolute right-0 top-2 text-gray-500 hover:text-green-500 transition p-2">
+                    <label class="text-[10px] uppercase font-bold opacity-60 ml-1 mb-1 block">Delivery Address</label>
+                    <textarea id="custAddr" rows="2" placeholder="Street address or Landmark" class="w-full bg-transparent border border-white/10 rounded-xl p-4 text-base outline-none focus:border-emerald-500 transition pr-12" style="color: var(--text-main)"></textarea>
+                    <button onclick="getLocation()" id="geoBtn" class="absolute right-3 bottom-3 text-gray-500 hover:text-emerald-500 transition p-2" aria-label="Use GPS">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     </button>
                 </div>
             </div>
             
-            <button id="checkoutBtn" onclick="checkout()" disabled class="w-full bg-green-600 hover:bg-green-500 text-white font-black py-5 rounded-2xl uppercase tracking-widest shadow-xl shadow-green-900/20 active:scale-95 transition flex items-center justify-center gap-2 opacity-50 grayscale cursor-not-allowed">SELECT ITEMS FIRST</button>
+            <button id="checkoutBtn" onclick="checkout()" disabled class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-5 rounded-2xl text-sm uppercase tracking-widest shadow-xl shadow-emerald-900/20 active:scale-95 transition flex items-center justify-center gap-2 opacity-50 grayscale cursor-not-allowed">Add Items to Continue</button>
         </div>
     </div>
 
     <div id="productModal" class="fixed inset-0 z-[110] bg-black/90 flex items-end sm:items-center justify-center sm:p-6 hidden backdrop-blur-md transition-opacity duration-300">
         <div class="glass-panel w-full max-w-sm rounded-t-3xl sm:rounded-3xl p-8 relative shadow-2xl border-t border-white/20" style="background: var(--card-bg)">
-            <button onclick="document.getElementById('productModal').classList.add('hidden')" class="absolute top-6 right-6 text-gray-500 hover:text-white transition">✕</button>
+            <button onclick="document.getElementById('productModal').classList.add('hidden')" class="absolute top-6 right-6 text-gray-500 hover:text-white transition p-2">✕</button>
             <div id="modalContent"></div>
         </div>
     </div>
@@ -323,15 +343,15 @@
         };
 
         let sb = null, menuItems = [], cart = {}, currentUser = null;
-        let callsign = { name: '', addr: '', rank: 'GUEST', xp: 0 };
+        let identity = { name: '', addr: '', status: 'Standard', orders: 0 };
 
         if (window.CSS && CSS.registerProperty) {
             CSS.registerProperty({ name: '--angle', syntax: '<angle>', inherits: false, initialValue: '0deg' });
         }
 
         window.addEventListener('load', () => { 
-            logToSystem("INITIALIZING CORE...");
-            checkSocialHandshake();
+            // logToSystem("System Initializing...");
+            checkSocialLink();
             checkAdminMode(); 
             initApp(); 
             renderBankDetails(); 
@@ -339,15 +359,15 @@
             loadIdentity(); 
         });
 
-        // --- FUEL ANALYST (PACT COFFEE FEATURE) ---
+        // --- MATCH QUIZ (PREVIOUSLY FUEL ANALYST) ---
         const QUIZ_STEPS = [
-            { q: "Energy Status?", options: ["Low Battery", "Maintain", "Maximum"] },
-            { q: "Flavor Profile?", options: ["Sweet/Fruity", "Creamy/Rich", "Green/Raw"] },
-            { q: "Goal Today?", options: ["Detox", "Muscle", "Focus"] }
+            { q: "How are you feeling?", options: ["Tired / Drained", "Need Focus", "Post-Workout"] },
+            { q: "Flavor preference?", options: ["Sweet & Fruity", "Creamy & Rich", "Fresh & Green"] },
+            { q: "Health Goal?", options: ["Immunity", "Energy", "Detox"] }
         ];
         let quizAnswers = [];
 
-        function openFuelAnalyst() {
+        function openFuelMatch() {
             quizAnswers = [];
             renderQuizStep(0);
             document.getElementById('quizModal').classList.remove('hidden');
@@ -358,10 +378,10 @@
             if (stepIdx >= QUIZ_STEPS.length) {
                 // Finish Quiz
                 container.innerHTML = `
-                    <div class="text-center py-4">
-                        <div class="text-4xl mb-4 animate-bounce">🧪</div>
-                        <h3 class="text-lg font-bold mb-2 text-white">Calculating...</h3>
-                        <p class="text-xs text-gray-400">Comparing biometrics against menu...</p>
+                    <div class="text-center py-6">
+                        <div class="text-5xl mb-4 animate-pulse">🥗</div>
+                        <h3 class="text-lg font-bold mb-2" style="color: var(--text-main)">Finding Best Match...</h3>
+                        <p class="text-sm opacity-60">Analyzing menu options</p>
                     </div>`;
                 setTimeout(calculateFuelMatch, 1500);
                 return;
@@ -369,39 +389,38 @@
 
             const step = QUIZ_STEPS[stepIdx];
             container.innerHTML = `
-                <h3 class="text-lg font-bold mb-4 text-center text-white">${step.q}</h3>
+                <h3 class="text-lg font-bold mb-6 text-center" style="color: var(--text-main)">${step.q}</h3>
                 <div class="grid gap-3">
                     ${step.options.map(opt => `
                         <button onclick="quizAnswers.push('${opt}'); renderQuizStep(${stepIdx + 1})" 
-                        class="bg-white/5 border border-white/10 hover:bg-white/10 hover:border-green-500 py-4 rounded-xl text-sm font-bold uppercase transition">
+                        class="bg-white/5 border border-white/10 hover:bg-emerald-500/10 hover:border-emerald-500 py-4 rounded-xl text-sm font-semibold transition text-left px-6">
                         ${opt}
                         </button>
                     `).join('')}
                 </div>
-                <div class="flex justify-center gap-1 mt-6">
-                    ${QUIZ_STEPS.map((_, i) => `<div class="w-2 h-2 rounded-full ${i === stepIdx ? 'bg-blue-500' : 'bg-white/10'}"></div>`).join('')}
+                <div class="flex justify-center gap-1.5 mt-8">
+                    ${QUIZ_STEPS.map((_, i) => `<div class="w-2 h-2 rounded-full ${i === stepIdx ? 'bg-emerald-500' : 'bg-white/10'}"></div>`).join('')}
                 </div>
             `;
         }
 
         function calculateFuelMatch() {
-            // Simple logic: Pick a random item for now, in real production map tags
             const randomItem = menuItems[Math.floor(Math.random() * menuItems.length)];
             document.getElementById('quizModal').classList.add('hidden');
             openProduct(randomItem.id);
-            showToast("OPTIMAL FUEL DETECTED");
+            showToast("Best Match Found");
         }
 
 
-        // --- ADMIN GHOST WRITER ---
+        // --- ADMIN MODE ---
         function checkAdminMode() {
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('edit') === 'true') {
-                const pass = prompt("ENTER ADMIN ACCESS KEY:");
+                const pass = prompt("Admin Key:");
                 if(pass === "1234") { 
                     document.body.contentEditable = "true";
                     document.getElementById('adminSaveBtn').classList.remove('hidden');
-                    showToast("ADMIN WRITE MODE ACTIVE");
+                    showToast("Edit Mode Active");
                 }
             }
         }
@@ -411,15 +430,14 @@
             document.getElementById('adminSaveBtn').classList.add('hidden');
             const code = document.documentElement.outerHTML;
             await navigator.clipboard.writeText(code);
-            showToast("CODE COPIED TO CLIPBOARD");
-            alert("Paste this into your index.html file in GitHub!");
+            showToast("Code Copied");
+            alert("Paste into GitHub index.html");
         }
 
-        // --- AI ANALYST ---
-        async function askBioAnalyst(productName) {
+        // --- INFO POPUP ---
+        async function askHealthInfo(productName) {
             const p = menuItems.find(x => x.name === productName);
-            logToSystem("CONNECTING TO NEURAL CORE...");
-            showToast("ANALYZING BIOMETRICS...");
+            showToast("Fetching Info...");
             
             try {
                 if (window.location.hostname.includes('vercel.app')) {
@@ -429,17 +447,15 @@
                         body: JSON.stringify({ question: `What are the health benefits of ${productName}?`, context: p })
                     });
                     const data = await res.json();
-                    logToSystem(`ANALYST: ${data.answer}`);
-                    alert(`BIO-REPORT:\n${data.answer}`);
+                    alert(`HEALTH FACTS:\n\n${data.answer}`);
                 } else {
                     setTimeout(() => {
-                        const responses = ["OPTIMIZED FOR CELLULAR REGENERATION.", "HIGH VITAMIN DENSITY DETECTED.", "GLUCOSE LEVELS WITHIN SAFE PARAMETERS."];
+                        const responses = ["Rich in vitamins and antioxidants.", "Great for post-workout recovery.", "Supports immune system health."];
                         const randomMsg = responses[Math.floor(Math.random() * responses.length)];
-                        logToSystem(`ANALYST: ${randomMsg}`);
-                        alert(`BIO-REPORT:\n${randomMsg}`);
-                    }, 1000);
+                        alert(`HEALTH FACTS:\n\n${randomMsg}`);
+                    }, 800);
                 }
-            } catch (err) { logToSystem("NEURAL UPLINK FAILED"); }
+            } catch (err) { alert("Info unavailable offline."); }
         }
 
         // --- GEOLOCATION ---
@@ -447,7 +463,6 @@
             if (navigator.geolocation) {
                 const btn = document.getElementById('geoBtn');
                 btn.classList.add('geo-pulse');
-                logToSystem("SATELLITE TRIANGULATION INITIATED...");
                 navigator.geolocation.getCurrentPosition(async (position) => {
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
@@ -456,59 +471,48 @@
                         const data = await response.json();
                         if(data && data.display_name) {
                             document.getElementById('custAddr').value = data.display_name;
-                            logToSystem("LOCATION LOCKED");
-                            showToast("ADDRESS ACQUIRED");
+                            showToast("Address Found");
                         }
-                    } catch(err) { logToSystem("MAP SERVER ERROR"); showToast("MANUAL INPUT REQUIRED", "error"); }
+                    } catch(err) { showToast("Could not fetch address", "error"); }
                     btn.classList.remove('geo-pulse');
-                }, () => { logToSystem("GPS PERMISSION DENIED"); showToast("GPS DENIED", "error"); btn.classList.remove('geo-pulse'); });
-            } else { showToast("DEVICE NOT COMPATIBLE", "error"); }
-        }
-
-        // --- SYSTEM LOGGER ---
-        function logToSystem(msg) {
-            const log = document.getElementById('systemLog');
-            log.innerHTML += `<br>> ${msg}`;
-            if(log.innerHTML.split('<br>').length > 5) log.innerHTML = log.innerHTML.split('<br>').slice(1).join('<br>');
+                }, () => { showToast("GPS permission denied", "error"); btn.classList.remove('geo-pulse'); });
+            } else { showToast("GPS not supported", "error"); }
         }
 
         // --- SOCIAL HANDSHAKE ---
-        function checkSocialHandshake() {
+        function checkSocialLink() {
             const urlParams = new URLSearchParams(window.location.search);
             const incomingUser = urlParams.get('user'); 
-            const incomingRank = urlParams.get('rank');
             if (incomingUser) {
-                logToSystem(`HANDSHAKE RECEIVED: ${incomingUser.toUpperCase()}`);
-                callsign.name = incomingUser;
-                callsign.rank = incomingRank || 'PILOT';
-                localStorage.setItem('smoothieIdentity', JSON.stringify(callsign));
+                identity.name = incomingUser;
+                identity.status = 'Member';
+                localStorage.setItem('smoothieIdentity', JSON.stringify(identity));
                 window.history.replaceState({}, document.title, "/");
-                setTimeout(() => showToast(`🔗 LINK VERIFIED: WELCOME, ${callsign.rank}`), 1000);
+                setTimeout(() => showToast(`Welcome back, ${identity.name}`), 1000);
             }
         }
 
         function loadIdentity() {
             const saved = localStorage.getItem('smoothieIdentity');
             if(saved) {
-                callsign = JSON.parse(saved);
-                document.getElementById('custName').value = callsign.name;
-                document.getElementById('custAddr').value = callsign.addr;
-                if(callsign.xp > 0 || callsign.rank !== 'GUEST') {
+                identity = JSON.parse(saved);
+                document.getElementById('custName').value = identity.name;
+                document.getElementById('custAddr').value = identity.addr;
+                if(identity.orders > 0) {
                     document.getElementById('rankDisplay').classList.remove('hidden');
-                    document.getElementById('rankName').innerText = `${callsign.rank} ${callsign.name.toUpperCase()}`;
-                    logToSystem(`IDENTITY LOADED: ${callsign.rank}`);
+                    document.getElementById('rankName').innerText = `${identity.status}`;
                 }
             }
         }
 
         function saveIdentity(name, addr) {
-            callsign.name = name;
-            callsign.addr = addr;
-            callsign.xp += 1;
-            if(callsign.xp > 10) callsign.rank = "COMMANDER";
-            else if(callsign.xp > 4) callsign.rank = "PILOT";
-            else if(callsign.xp > 0 && callsign.rank === 'GUEST') callsign.rank = "CADET";
-            localStorage.setItem('smoothieIdentity', JSON.stringify(callsign));
+            identity.name = name;
+            identity.addr = addr;
+            identity.orders += 1;
+            if(identity.orders > 10) identity.status = "Gold Member";
+            else if(identity.orders > 5) identity.status = "Silver Member";
+            else identity.status = "Standard Member";
+            localStorage.setItem('smoothieIdentity', JSON.stringify(identity));
         }
 
         function toggleTheme() {
@@ -523,11 +527,10 @@
             try {
                 if (window.supabase) {
                     sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
-                    logToSystem("CLOUD UPLINK: ACTIVE");
-                    updateGlobalPulse();
+                    updateGlobalFeed();
                     sb.channel('public:pulse')
-                        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => updateGlobalPulse())
-                        .on('postgres_changes', { event: '*', schema: 'public', table: 'alerts' }, () => updateGlobalPulse())
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => updateGlobalFeed())
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'alerts' }, () => updateGlobalFeed())
                         .subscribe();
                     
                     const { data: products } = await sb.from('products').select('*').eq('active', true).order('id');
@@ -535,16 +538,14 @@
                         menuItems = products; renderMenu(menuItems);
                         sb.channel('public:products').on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => initApp()).subscribe();
                         document.getElementById('connectionStatus').classList.remove('bg-red-500'); 
-                        document.getElementById('connectionStatus').classList.add('bg-green-500'); 
-                        document.getElementById('connectionStatus').classList.add('shadow-[0_0_15px_rgba(74,222,128,0.8)]');
+                        document.getElementById('connectionStatus').classList.add('bg-emerald-500'); 
                         checkSession();
-                        logToSystem("MENU SYNC: COMPLETE");
-                    } else { document.getElementById('menuGrid').innerHTML = '<div class="col-span-2 md:col-span-4 text-center mt-20 opacity-50">Offline</div>'; }
+                    } else { document.getElementById('menuGrid').innerHTML = '<div class="col-span-4 text-center mt-20 opacity-50 text-sm">Service Offline</div>'; }
                 }
-            } catch (err) { console.error("Init Error", err); logToSystem("CRITICAL: CLOUD ERROR"); }
+            } catch (err) { console.error("Init Error", err); }
         }
 
-        async function updateGlobalPulse() {
+        async function updateGlobalFeed() {
             const { data: alerts } = await sb.from('alerts').select('message').eq('is_active', true).order('id', { ascending: false });
             let recentOrders = [];
             try {
@@ -557,18 +558,18 @@
             } catch(e) { }
 
             let combinedTicker = [];
-            // TRANSPARENCY LOGS (PACT FEATURE)
-            const transparencyLogs = ["SOURCING: ORGANIC KALE [SECTOR 7]", "WATER PURITY: 99.9% [VERIFIED]", "BATCH #4401: FRESH ARRIVAL"];
+            // TRANSPARENCY LOGS
+            const transparencyLogs = ["Organic Kale Sourced: Sector 7", "Water Purity Verified: 99.9%", "New Harvest: Berries"];
             combinedTicker.push(`<span class="text-blue-400">ℹ</span> ${transparencyLogs[Math.floor(Math.random() * transparencyLogs.length)]}`);
 
             if (recentOrders && recentOrders.length > 0) {
                 recentOrders.forEach(o => {
-                    const cleanItems = o.items ? o.items.split(',')[0].split(' x')[0].toUpperCase() : "SMOOTHIE";
-                    combinedTicker.push(`<span class="text-green-400">⚡</span> SOMEONE JUST ORDERED ${cleanItems}`);
+                    const cleanItems = o.items ? o.items.split(',')[0].split(' x')[0] : "Order";
+                    combinedTicker.push(`⚡ Just Ordered: ${cleanItems}`);
                 });
             }
-            if (alerts && alerts.length > 0) alerts.forEach(a => combinedTicker.push(`<span class="text-blue-400">◆</span> ${a.message}`));
-            if (combinedTicker.length === 0) combinedTicker.push("WATCH THIS SPACE • UPCOMING DEALS • SMOOTHIEPLUS+");
+            if (alerts && alerts.length > 0) alerts.forEach(a => combinedTicker.push(`◆ ${a.message}`));
+            if (combinedTicker.length === 0) combinedTicker.push("Welcome to SmoothiePlus+ Premium Organic Fuel");
 
             const tickerHtml = combinedTicker.map(msg => `<div class="ticker-item">${msg}</div>`).join('');
             document.getElementById('alertTicker').innerHTML = tickerHtml + tickerHtml + tickerHtml;
@@ -577,17 +578,18 @@
         function renderMenu(items) {
             const grid = document.getElementById('menuGrid');
             grid.innerHTML = items.map(p => {
-                const color = p.color === 'green' ? '#4ade80' : p.color === 'purple' ? '#c084fc' : p.color === 'orange' ? '#fb923c' : '#22d3ee';
+                const color = p.color === 'green' ? '#10b981' : p.color === 'purple' ? '#a855f7' : p.color === 'orange' ? '#f97316' : '#06b6d4';
                 return `
                 <div onclick="openProduct(${p.id})" class="stream-card float-hover p-5 shadow-2xl cursor-pointer flex flex-col justify-between h-full" style="--stream-color: ${color}">
-                    <div class="h-36 w-full rounded-2xl bg-black/20 mb-5 overflow-hidden relative">
+                    <div class="h-40 w-full rounded-2xl bg-black/20 mb-5 overflow-hidden relative">
                         <img src="${p.image_url || 'https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=500'}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition duration-500" alt="${p.name}">
                     </div>
                     <div class="relative z-10">
-                        <h3 class="font-black text-sm uppercase mb-1 tracking-wide leading-tight editable-text" style="color: var(--text-main)">${p.name}</h3>
-                        <div class="flex justify-between items-center mt-3">
-                            <span class="font-bold text-sm font-mono" style="color: ${color}">₦${p.price.toLocaleString()}</span>
-                            <div class="bg-white/10 p-2 rounded-full"><svg class="w-3 h-3 text-current" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--text-main)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg></div>
+                        <h3 class="font-display font-bold text-lg mb-1 tracking-tight leading-tight editable-text" style="color: var(--text-main)">${p.name}</h3>
+                        <p class="text-xs opacity-60 line-clamp-2 mb-3 h-8 leading-relaxed">${p.description}</p>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="font-bold text-base" style="color: ${color}">₦${p.price.toLocaleString()}</span>
+                            <div class="bg-white/5 border border-white/10 p-2 rounded-full hover:bg-white/10 transition"><svg class="w-4 h-4 text-current" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--text-main)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg></div>
                         </div>
                     </div>
                 </div>`;
@@ -597,22 +599,22 @@
         function openProduct(id) {
             const p = menuItems.find(x => x.id === id);
             const modal = document.getElementById('productModal');
-            const colorHex = p.color === 'green' ? '#4ade80' : p.color === 'purple' ? '#c084fc' : p.color === 'orange' ? '#fb923c' : '#22d3ee';
+            const colorHex = p.color === 'green' ? '#10b981' : p.color === 'purple' ? '#a855f7' : p.color === 'orange' ? '#f97316' : '#06b6d4';
             document.getElementById('modalContent').innerHTML = `
                 <div class="text-center">
-                    <div class="relative w-40 h-40 mx-auto mb-8">
-                        <div class="absolute inset-0 rounded-full blur-2xl opacity-30 animate-pulse" style="background: ${colorHex}"></div>
-                        <img src="${p.image_url || 'https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=500'}" class="w-full h-full rounded-full object-cover relative z-10 border-4" style="border-color: ${colorHex}">
+                    <div class="relative w-32 h-32 mx-auto mb-6">
+                        <div class="absolute inset-0 rounded-full blur-xl opacity-20" style="background: ${colorHex}"></div>
+                        <img src="${p.image_url || 'https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=500'}" class="w-full h-full rounded-full object-cover relative z-10 border-2 border-white/10">
                     </div>
-                    <h2 class="text-3xl font-black uppercase mb-3 tracking-tighter leading-none" style="color: var(--text-main)">${p.name}</h2>
-                    <p class="text-sm mb-8 px-4 opacity-80 leading-relaxed" style="color: var(--text-muted)">${p.description}</p>
-                    <div class="flex items-center justify-between p-5 rounded-2xl mb-8 border border-white/5" style="background: var(--input-bg)">
-                        <span class="text-xs uppercase tracking-widest opacity-60" style="color: var(--text-main)">Price</span>
-                        <span class="text-2xl font-mono font-bold" style="color: ${colorHex}">₦${p.price.toLocaleString()}</span>
+                    <h2 class="text-2xl font-display font-black mb-2 tracking-tight" style="color: var(--text-main)">${p.name}</h2>
+                    <p class="text-sm mb-6 px-2 opacity-80 leading-relaxed" style="color: var(--text-muted)">${p.description}</p>
+                    <div class="flex items-center justify-between p-4 rounded-xl mb-6 border border-white/10" style="background: var(--input-bg)">
+                        <span class="text-xs uppercase tracking-widest opacity-60 font-bold" style="color: var(--text-main)">Price</span>
+                        <span class="text-xl font-bold" style="color: ${colorHex}">₦${p.price.toLocaleString()}</span>
                     </div>
-                    <div class="flex gap-2">
-                        <button onclick="askBioAnalyst('${p.name}')" class="flex-1 bg-blue-500/20 text-blue-400 font-bold py-5 rounded-2xl uppercase text-xs hover:bg-blue-500/30 transition">Bio-Scan</button>
-                        <button onclick="addToCart(${p.id}); document.getElementById('productModal').classList.add('hidden')" class="flex-[2] bg-white text-black font-black py-5 rounded-2xl uppercase tracking-widest hover:scale-[1.02] transition shadow-xl">Add to Order</button>
+                    <div class="flex gap-3">
+                        <button onclick="askHealthInfo('${p.name}')" class="flex-1 bg-white/5 border border-white/10 text-xs font-bold py-4 rounded-xl hover:bg-white/10 transition">Info</button>
+                        <button onclick="addToCart(${p.id}); document.getElementById('productModal').classList.add('hidden')" class="flex-[2] bg-white text-black font-bold py-4 rounded-xl uppercase tracking-wide hover:scale-[1.02] transition shadow-lg text-xs">Add to Order</button>
                     </div>
                 </div>`;
             modal.classList.remove('hidden');
@@ -621,42 +623,39 @@
         function addToCart(id) {
             const p = menuItems.find(x => x.id === id);
             if(cart[p.name]) cart[p.name].q++; else cart[p.name] = { p: p.price, q: 1 };
-            updateCartUI(); showToast('ADDED TO MANIFEST');
+            updateCartUI(); showToast('Item Added');
         }
 
         function updateCartUI() {
             let total = 0, count = 0, html = '';
             for(const [name, item] of Object.entries(cart)) {
                 total += item.p * item.q; count += item.q;
-                html += `<div class="flex justify-between items-center p-4 rounded-xl border border-white/5 mb-3" style="background: var(--input-bg)"><div><p class="font-bold text-sm" style="color: var(--text-main)">${name}</p><p class="text-[10px] uppercase opacity-60" style="color: var(--text-muted)">Qty: ${item.q}</p></div><span class="font-mono text-green-500 text-sm">₦${(item.p * item.q).toLocaleString()}</span></div>`;
+                html += `<div class="flex justify-between items-center p-4 rounded-xl border border-white/5 mb-3" style="background: var(--input-bg)"><div><p class="font-bold text-sm" style="color: var(--text-main)">${name}</p><p class="text-xs opacity-60 mt-0.5" style="color: var(--text-muted)">Qty: ${item.q}</p></div><span class="font-mono text-emerald-500 text-sm">₦${(item.p * item.q).toLocaleString()}</span></div>`;
             }
-            document.getElementById('cartList').innerHTML = html || '<div class="text-center py-10 opacity-30"><p class="text-5xl mb-4">🛒</p><p class="text-[10px] uppercase tracking-widest">System Empty</p></div>';
+            document.getElementById('cartList').innerHTML = html || '<div class="text-center py-8 opacity-40"><p class="text-4xl mb-3">🛍️</p><p class="text-xs uppercase tracking-widest font-bold">Cart is Empty</p></div>';
             document.getElementById('cartTotal').innerText = '₦' + total.toLocaleString();
             const badge = document.getElementById('cartCount');
             badge.innerText = count; badge.classList.toggle('scale-0', count === 0);
             const btn = document.getElementById('checkoutBtn');
-            if (count === 0) { btn.disabled = true; btn.classList.add('opacity-50', 'grayscale', 'cursor-not-allowed'); btn.innerText = "SELECT ITEMS FIRST"; } 
-            else { btn.disabled = false; btn.classList.remove('opacity-50', 'grayscale', 'cursor-not-allowed'); btn.innerText = "INITIALIZE ORDER"; }
+            if (count === 0) { btn.disabled = true; btn.classList.add('opacity-50', 'grayscale', 'cursor-not-allowed'); btn.innerText = "Select Items First"; } 
+            else { btn.disabled = false; btn.classList.remove('opacity-50', 'grayscale', 'cursor-not-allowed'); btn.innerText = "Complete Order"; }
         }
 
         async function checkout() {
             const name = document.getElementById('custName').value.trim();
             const addr = document.getElementById('custAddr').value.trim();
-            if(!name || !addr) return showToast("MISSING IDENTITY", "error");
+            if(!name || !addr) return showToast("Please enter details", "error");
             
             saveIdentity(name, addr);
             let items = Object.entries(cart).map(([k,v]) => `${k} x${v.q}`).join(', ');
             let total = document.getElementById('cartTotal').innerText;
-            const orderId = `ORD-${Date.now().toString().slice(-4)}-${Math.floor(Math.random()*100)}`;
+            const orderId = `ORD-${Date.now().toString().slice(-4)}`;
             
-            logToSystem("TRANSMITTING ORDER...");
             if(sb) await sb.from('orders').insert([{ id: orderId, customer: name, items: items, total: total, status: 'PENDING' }]);
             
-            const rankEmoji = callsign.rank === 'COMMANDER' ? '👑' : callsign.rank === 'PILOT' ? '🚀' : '👤';
-            const msg = `*NEW ORDER: ${orderId}* %0A${rankEmoji} ${callsign.rank} ${name}%0A📍 ${addr}%0A%0A*ITEMS:*%0A${items}%0A%0A*TOTAL: ${total}*`;
+            const msg = `*ORDER REQUEST ${orderId}* %0A👤 ${name} (${identity.status})%0A📍 ${addr}%0A%0A*ITEMS:*%0A${items}%0A%0A*TOTAL: ${total}*`;
             
             window.open(`https://wa.me/${CONFIG.whatsapp}?text=${msg}`, '_blank');
-            logToSystem("ORDER SENT: HYBRID MODE");
             cart = {}; updateCartUI(); toggleSheet('orderSheet');
         }
 
@@ -664,21 +663,21 @@
         function showToast(msg, type='success') { 
             const t = document.getElementById('toast'); 
             const icon = document.getElementById('toastIcon');
-            icon.innerText = type === 'success' ? '✓' : '⚠';
-            icon.className = type === 'success' ? 'text-green-400' : 'text-red-400';
+            icon.innerText = type === 'success' ? '●' : '⚠';
+            icon.className = type === 'success' ? 'text-emerald-400 text-lg' : 'text-red-400 text-lg';
             document.getElementById('toastMsg').innerText = msg; 
             t.classList.add('toast-active'); 
             setTimeout(() => t.classList.remove('toast-active'), 3000); 
         }
         function renderBankDetails() { document.getElementById('dispBankName').innerText = CONFIG.bank.name; document.getElementById('dispAcctNum').innerText = CONFIG.bank.acct; document.getElementById('dispAcctName').innerText = CONFIG.bank.holder; }
-        function copyBank() { navigator.clipboard.writeText(CONFIG.bank.acct).then(() => showToast("COPIED")); }
+        function copyBank() { navigator.clipboard.writeText(CONFIG.bank.acct).then(() => showToast("Copied")); }
         
         async function checkSession() { const { data } = await sb.auth.getSession(); if (data.session) { currentUser = data.session.user; document.getElementById('userEmailDisplay').innerText = currentUser.email; updateAuthUI(true); initRealtimeOps(); } }
         function checkAuth() { currentUser ? openOpsCenter() : document.getElementById('authModal').classList.remove('hidden'); }
         async function handleLogin() { const email = document.getElementById('emailInput').value; const password = document.getElementById('passInput').value; const { data, error } = await sb.auth.signInWithPassword({ email, password }); if (error) { document.getElementById('authError').innerText = error.message; document.getElementById('authError').classList.remove('hidden'); } else { currentUser = data.user; updateAuthUI(true); initRealtimeOps(); openOpsCenter(); } }
         
         async function handleLogout() {
-            showToast("DISCONNECTED");
+            showToast("Logged Out");
             localStorage.clear();
             sessionStorage.clear();
             if(sb) sb.auth.signOut();
@@ -692,7 +691,7 @@
         function openOpsCenter() { document.getElementById('authModal').classList.add('hidden'); document.getElementById('opsDrawer').classList.add('active'); }
         
         function initRealtimeOps() { fetchTasks(); sb.channel('tasks').on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => fetchTasks()).subscribe(); }
-        async function fetchTasks() { const { data } = await sb.from('tasks').select('*').order('created_at', { ascending: false }); const list = document.getElementById('taskList'); list.innerHTML = data.map(t => `<div class="flex items-start gap-3 p-4 rounded-xl transition hover:bg-white/5 border border-white/5" style="background: var(--input-bg)"><input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask('${t.id}', this.checked)" class="mt-1 peer appearance-none w-5 h-5 border-2 border-gray-500 rounded checked:bg-green-500 checked:border-green-500"><div class="flex-1"><span class="text-[9px] uppercase font-bold border px-1.5 py-0.5 rounded text-blue-400 border-blue-500/30">${t.role}</span><p class="text-sm mt-1" style="color: var(--text-main)">${t.text}</p></div><button onclick="deleteTask('${t.id}')" class="text-red-500">✕</button></div>`).join(''); }
+        async function fetchTasks() { const { data } = await sb.from('tasks').select('*').order('created_at', { ascending: false }); const list = document.getElementById('taskList'); list.innerHTML = data.map(t => `<div class="flex items-start gap-3 p-4 rounded-xl transition hover:bg-white/5 border border-white/5" style="background: var(--input-bg)"><input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask('${t.id}', this.checked)" class="mt-1 peer appearance-none w-5 h-5 border-2 border-gray-500 rounded checked:bg-emerald-500 checked:border-emerald-500"><div class="flex-1"><span class="text-[9px] uppercase font-bold border px-1.5 py-0.5 rounded text-blue-400 border-blue-500/30">${t.role}</span><p class="text-sm mt-1" style="color: var(--text-main)">${t.text}</p></div><button onclick="deleteTask('${t.id}')" class="text-red-500">✕</button></div>`).join(''); }
         async function addTask() { const text = document.getElementById('newTaskInput').value.trim(); if(text) { await sb.from('tasks').insert([{ text, role: document.getElementById('taskRole').value }]); document.getElementById('newTaskInput').value = ''; } }
         async function toggleTask(id, status) { await sb.from('tasks').update({ done: status }).eq('id', id); }
         async function deleteTask(id) { await sb.from('tasks').delete().eq('id', id); }
