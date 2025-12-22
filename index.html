@@ -36,8 +36,7 @@
 <body class="pb-32 antialiased">
 
     <div class="noise-overlay"></div>
-
-    <div class="ticker-wrap" aria-hidden="true">
+    <div class="scanlines"></div> <div class="ticker-wrap" aria-hidden="true">
         <div class="ticker-track" id="tickerTrack"></div>
     </div>
 
@@ -83,7 +82,7 @@
         </main>
         
         <div id="systemLog" class="text-[10px] font-mono opacity-40 mt-12 uppercase leading-relaxed select-none pointer-events-none text-center" style="color: var(--text-muted)">
-            System Active • v5.0.0
+            System Active • v5.1.0 (Hologram)
         </div>
     </div>
 
@@ -230,7 +229,7 @@
             setupKeyboardListeners();
         });
 
-        // --- KEYBOARD & MODAL HANDLERS (Accessiblity) ---
+        // --- KEYBOARD & MODAL HANDLERS ---
         function setupKeyboardListeners() {
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
@@ -293,7 +292,7 @@
             } catch (err) { console.error("Init Error", err); }
         }
 
-        // --- TICKER LOGIC (Seamless Loop) ---
+        // --- TICKER LOGIC ---
         async function updateGlobalFeed() {
             const { data: alerts } = await sb.from('alerts').select('message').eq('is_active', true).order('id', { ascending: false });
             let recentOrders = [];
@@ -303,7 +302,6 @@
             } catch(e) {}
 
             let msgs = [];
-            // Transparency Logs
             const transparencyLogs = ["Organic Kale: Sector 7", "Water Purity: 99.9%", "New Harvest: Berries"];
             msgs.push(`ℹ ${transparencyLogs[Math.floor(Math.random() * transparencyLogs.length)]}`);
 
@@ -316,32 +314,56 @@
             if (alerts && alerts.length > 0) alerts.forEach(a => msgs.push(`◆ ${a.message}`));
             if (msgs.length === 0) msgs.push("Welcome to SmoothiePlus+ Premium Organic Fuel");
 
-            // Duplicate content for seamless infinite scroll (A + A)
             const html = msgs.map(m => `<div class="ticker-item">${m}</div>`).join('');
-            // Inject enough copies to cover wide screens
             document.getElementById('tickerTrack').innerHTML = html + html + html + html;
         }
 
-        // --- MENU RENDERER (High Performance) ---
+        // --- MENU RENDERER WITH 3D TILT ---
         function renderMenu(items) {
             const grid = document.getElementById('menuGrid');
             grid.innerHTML = items.map(p => {
                 const color = p.color === 'green' ? '#10b981' : p.color === 'purple' ? '#a855f7' : p.color === 'orange' ? '#f97316' : '#06b6d4';
                 return `
-                <div onclick="openProductDetail(${p.id})" class="premium-card p-5 cursor-pointer flex flex-col justify-between h-full group" role="button" tabindex="0">
-                    <div class="h-44 w-full rounded-2xl bg-black/20 mb-5 overflow-hidden relative">
-                        <img src="${p.image_url || 'https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=500'}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition duration-500" alt="${p.name}" loading="lazy">
+                <div onclick="openProductDetail(${p.id})" 
+                     class="premium-card p-5 cursor-pointer flex flex-col justify-between h-full group" 
+                     role="button" tabindex="0"
+                     onmousemove="handleTilt(event, this)" 
+                     onmouseleave="resetTilt(this)">
+                    
+                    <div class="h-44 w-full rounded-2xl bg-black/20 mb-5 overflow-hidden relative pointer-events-none">
+                        <img src="${p.image_url || 'https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=500'}" 
+                             class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition duration-500" 
+                             alt="${p.name}" loading="lazy">
                     </div>
-                    <div>
+                    
+                    <div class="pointer-events-none">
                         <h3 class="font-display font-bold text-lg mb-1 tracking-tight leading-tight editable-text" style="color: var(--text-main)">${p.name}</h3>
                         <p class="text-xs opacity-60 line-clamp-2 mb-3 h-8 leading-relaxed">${p.description}</p>
-                        <div class="flex justify-between items-center mt-2">
+                        <div class="flex justify-between items-center mt-2 price-tag">
                             <span class="font-bold text-base" style="color: ${color}">₦${p.price.toLocaleString()}</span>
                             <div class="bg-white/5 border border-white/10 p-2 rounded-full group-hover:bg-emerald-500 group-hover:text-white transition"><svg class="w-4 h-4 text-current" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg></div>
                         </div>
                     </div>
                 </div>`;
             }).join('');
+        }
+
+        // --- 3D TILT PHYSICS ---
+        function handleTilt(e, card) {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Calculate rotation (max 10 degrees)
+            const xRot = ((y - rect.height / 2) / rect.height) * -10;
+            const yRot = ((x - rect.width / 2) / rect.width) * 10;
+            
+            // Apply transform
+            card.style.transform = `perspective(1000px) rotateX(${xRot}deg) rotateY(${yRot}deg) scale3d(1.02, 1.02, 1.02)`;
+        }
+
+        function resetTilt(card) {
+            card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
         }
 
         // --- PRODUCT MODAL ---
