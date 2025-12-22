@@ -1,177 +1,153 @@
-/* --- THEME ENGINE --- */
+/* --- HOSTILE TAKEOVER: FLOWER SHOP DNA x CYBERPUNK SOUL --- */
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Raleway:wght@400;500;600;800&display=swap');
+
 :root {
     --bg-body: #050508;
     --text-main: #ffffff;
-    --text-muted: #94a3b8;
-    --glass-bg: rgba(15, 23, 42, 0.9);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --card-bg: #0f1115;
-    --drawer-bg: #0a0a0c;
-    --input-bg: rgba(255, 255, 255, 0.05);
-    --ticker-bg: #022c22;
-    --ticker-text: #34d399;
+    --text-muted: #9ca3af;
+    --glass-bg: rgba(10, 10, 15, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --card-bg: #0a0a0f;
+    --brand: #10b981; /* Neon Emerald */
+    --accent: #3b82f6; /* Cyber Blue */
+    --font-display: 'Oswald', sans-serif; /* Hijacked from Flower Shop */
+    --font-body: 'Raleway', sans-serif;   /* Hijacked from Flower Shop */
 }
 
-body.light-mode {
-    --bg-body: #f1f5f9;
-    --text-main: #0f172a;
-    --text-muted: #64748b;
-    --glass-bg: rgba(255, 255, 255, 0.95);
-    --glass-border: rgba(0, 0, 0, 0.06);
-    --card-bg: #ffffff;
-    --drawer-bg: #ffffff;
-    --input-bg: #f8fafc;
-    --ticker-bg: #ecfdf5;
-    --ticker-text: #059669;
-}
-
-/* --- CORE VISUALS --- */
+/* --- BASE --- */
 body { 
     background-color: var(--bg-body); 
     color: var(--text-main); 
-    transition: background-color 0.3s ease, color 0.3s ease; 
-    padding-top: 56px;
-    -webkit-tap-highlight-color: transparent;
+    font-family: var(--font-body);
+    padding-top: 50px;
+    transition: background-color 0.3s ease;
+    overflow-x: hidden; /* Critical for ticker fix */
 }
 
-/* --- TEXTURES (Hologram Effect) --- */
+/* --- TEXTURES --- */
 .scanlines {
-    position: fixed; inset: 0; pointer-events: none; z-index: 40;
-    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+    position: fixed; inset: 0; pointer-events: none; z-index: 90;
+    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.05) 50%, rgba(0,0,0,0.05));
     background-size: 100% 4px;
-    opacity: 0.15;
 }
-
 .noise-overlay {
-    position: fixed; inset: 0; pointer-events: none; z-index: 39;
+    position: fixed; inset: 0; pointer-events: none; z-index: 89;
     background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAJElEQVQoU2NkYGD4z0AEYKAQYGBgYGBgYGBgYGBgYGBgYGBgYGBgAAAiAgB1J5r0AAAAAElFTkSuQmCC");
-    opacity: 0.05; background-size: 64px;
+    opacity: 0.03; background-size: 128px;
 }
 
-/* --- SCROLLBARS --- */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-body); }
-::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #10b981; }
+/* --- FIXED TICKER (MATHEMATICALLY PERFECT LOOP) --- */
+.ticker-wrap {
+    position: fixed; top: 0; left: 0; width: 100%; height: 46px; 
+    background: #022c22; border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+    z-index: 1000; overflow: hidden; display: flex; align-items: center;
+}
 
-/* --- ACCESSIBILITY --- */
-*:focus-visible { outline: 2px solid var(--ticker-text); outline-offset: 2px; }
-[contenteditable="true"] { border: 1px dashed var(--ticker-text); padding: 4px; border-radius: 4px; cursor: text; }
-
-/* --- PHANTOM CARDS (The Upgrade) --- */
-.premium-card {
-    background: var(--card-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: 1.5rem;
-    position: relative; overflow: hidden;
-    transition: transform 0.1s ease-out, box-shadow 0.3s ease, border-color 0.3s ease;
-    transform-style: preserve-3d;
+.ticker-track {
+    display: flex;
+    white-space: nowrap;
+    /* The logic: We create a track that is infinitely long */
+    animation: scroll-left 40s linear infinite; 
     will-change: transform;
 }
 
-.premium-card:hover {
-    border-color: rgba(16, 185, 129, 0.5);
-    box-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.2);
-    z-index: 10;
+.ticker-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 4vw; /* Dynamic spacing based on screen width */
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--brand);
 }
 
-/* 1. Image Swapping Logic */
-.card-image-wrapper {
-    position: relative; width: 100%; height: 100%;
+@keyframes scroll-left {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); } /* We move exactly 50% because we duplicate content x2 */
+}
+
+/* --- HIJACKED CARD DESIGN --- */
+.premium-card {
+    background: transparent; /* Flower shop uses transparent bg for cards */
+    position: relative; 
+    overflow: visible; /* Allows hover effects to pop out */
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border: 1px solid transparent;
+}
+
+/* The Image Container */
+.card-media {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1.1; /* Taller aspect ratio like fashion sites */
+    background: #111;
+    border-radius: 4px; /* Sharp edges like the reference */
+    overflow: hidden;
+    border: 1px solid var(--glass-border);
 }
 
 .img-front, .img-back {
     position: absolute; inset: 0; width: 100%; height: 100%;
     object-fit: cover;
-    transition: opacity 0.4s ease, transform 0.4s ease;
-    transform: translateZ(20px); /* 3D pop */
+    transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
-.img-back { opacity: 0; transform: translateZ(20px) scale(1.1); filter: hue-rotate(30deg) brightness(1.2); }
-
+/* Phantom Logic */
+.img-back { opacity: 0; transform: scale(1.1); filter: contrast(1.2); }
 .premium-card:hover .img-front { opacity: 0; }
-.premium-card:hover .img-back { opacity: 1; transform: translateZ(30px) scale(1.15); }
+.premium-card:hover .img-back { opacity: 1; transform: scale(1); }
 
-/* 2. Scrolling Marquee Logic */
-.card-marquee {
-    position: absolute;
-    bottom: 10px; left: 0; right: 0;
-    background: #10b981;
-    color: #000;
-    font-size: 10px; font-weight: 900; letter-spacing: 1px;
-    padding: 6px 0;
-    transform: translateY(150%);
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    z-index: 30;
-    overflow: hidden;
-    white-space: nowrap;
+/* The Marquee INSIDE the card */
+.mini-marquee {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: var(--brand); color: #000;
+    font-family: var(--font-display); font-size: 10px; font-weight: 700;
+    padding: 8px 0;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    z-index: 10;
+    white-space: nowrap; overflow: hidden;
 }
+.premium-card:hover .mini-marquee { transform: translateY(0); }
 
-.premium-card:hover .card-marquee { transform: translateY(0); }
-
-.marquee-content {
-    display: inline-block;
-    animation: scroll-left 4s linear infinite;
+/* Typography Hierarchy */
+.card-info { padding-top: 15px; text-align: left; }
+.card-title {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    color: var(--text-main);
 }
+.card-desc { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; line-height: 1.4; }
+.card-price { font-family: var(--font-display); font-size: 1rem; color: var(--brand); font-weight: 700; }
 
-@keyframes scroll-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+/* Hover Border Glow */
+.premium-card:hover .card-media { border-color: var(--brand); box-shadow: 0 10px 40px -10px rgba(16, 185, 129, 0.3); }
 
-/* --- SEAMLESS TICKER --- */
-.ticker-wrap {
-    position: fixed; top: 0; left: 0; width: 100%; height: 44px; overflow: hidden;
-    background: var(--ticker-bg); border-bottom: 1px solid var(--glass-border);
-    z-index: 100; display: flex; align-items: center;
-}
-.ticker-track {
-    display: flex; width: max-content;
-    animation: tickerSlide 60s linear infinite;
-    will-change: transform;
-}
-.ticker-item {
-    padding: 0 2rem; font-size: 11px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.1em; color: var(--ticker-text); display: flex; align-items: center; gap: 8px;
-}
-@keyframes tickerSlide { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-
-/* --- UTILS --- */
-.glass-panel { background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--glass-border); }
-.geo-pulse { animation: geoPulse 1.5s infinite; color: #10b981 !important; }
-@keyframes geoPulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-/* --- DRAWERS & MODALS --- */
+/* --- DRAWERS & UI --- */
 .drawer {
-    position: fixed; z-index: 100; transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    background: var(--drawer-bg); border: 1px solid var(--glass-border); display: flex; flex-direction: column;
+    position: fixed; z-index: 2000; background: #080808; 
+    border-left: 1px solid var(--glass-border);
+    transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
 }
-.modal-backdrop {
-    position: fixed; inset: 0; z-index: 110; background: rgba(0,0,0,0.8);
-    backdrop-filter: blur(8px); opacity: 0; pointer-events: none; transition: opacity 0.3s;
-}
+.modal-backdrop { position: fixed; inset: 0; z-index: 3000; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
 .modal-backdrop.active { opacity: 1; pointer-events: auto; }
+.glass-panel { background: #111; border: 1px solid var(--glass-border); }
 
-@media (max-width: 767px) {
-    .drawer {
-        bottom: 0; left: 0; right: 0; transform: translateY(105%); 
-        border-radius: 24px 24px 0 0; max-height: 90vh; border-bottom: none;
-        box-shadow: 0 -10px 40px rgba(0,0,0,0.4);
-    }
+/* Mobile/Desktop Queries */
+@media (max-width: 768px) {
+    .ticker-item { font-size: 9px; padding: 0 15px; }
+    .drawer { bottom: 0; left: 0; right: 0; transform: translateY(105%); border-radius: 20px 20px 0 0; max-height: 85vh; border-left: none; border-top: 1px solid var(--glass-border); }
     .drawer.active { transform: translateY(0); }
 }
-
-@media (min-width: 768px) {
-    .drawer {
-        top: 0; bottom: 0; right: 0; width: 420px;
-        transform: translateX(105%); border-left: 1px solid var(--glass-border);
-        box-shadow: -10px 0 40px rgba(0,0,0,0.2); padding-top: 50px; 
-    }
+@media (min-width: 769px) {
+    .drawer { top: 0; bottom: 0; right: 0; width: 450px; transform: translateX(100%); }
     .drawer.active { transform: translateX(0); }
-    .modal-content { max-width: 480px; width: 100%; margin: auto; }
 }
 
 /* Toast */
-#toast { 
-    bottom: 30px; left: 50%; transform: translateX(-50%) translateY(200%); 
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-}
+#toast { bottom: 30px; left: 50%; transform: translateX(-50%) translateY(200%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 .toast-active { transform: translateX(-50%) translateY(0) !important; }
-.scroll-area { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 120px; }
