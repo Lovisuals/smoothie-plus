@@ -7,6 +7,8 @@
     <meta name="description" content="High-performance organic fuel system.">
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥤</text></svg>">
+    
+    <link rel="stylesheet" href="style.css">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -30,142 +32,13 @@
             }
         }
     </script>
-
-    <style>
-        /* --- THEME ENGINE --- */
-        :root {
-            --bg-body: #050508;
-            --text-main: #ffffff;
-            --text-muted: #94a3b8;
-            --glass-bg: rgba(15, 23, 42, 0.9);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --card-bg: #0f1115;
-            --drawer-bg: #0a0a0c;
-            --input-bg: rgba(255, 255, 255, 0.05);
-            --ticker-bg: #022c22;
-            --ticker-text: #34d399;
-        }
-
-        body.light-mode {
-            --bg-body: #f1f5f9;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --glass-bg: rgba(255, 255, 255, 0.95);
-            --glass-border: rgba(0, 0, 0, 0.06);
-            --card-bg: #ffffff;
-            --drawer-bg: #ffffff;
-            --input-bg: #f8fafc;
-            --ticker-bg: #ecfdf5;
-            --ticker-text: #059669;
-        }
-
-        /* --- CORE VISUALS --- */
-        body { 
-            background-color: var(--bg-body); 
-            color: var(--text-main); 
-            transition: background-color 0.3s ease, color 0.3s ease; 
-            padding-top: 56px;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* PREMIUM NOISE GRAIN (Base64 for Performance) */
-        .noise-overlay {
-            position: fixed; inset: 0; pointer-events: none; z-index: 50;
-            background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAJElEQVQoU2NkYGD4z0AEYKAQYGBgYGBgYGBgYGBgYGBgYGBgYGBgAAAiAgB1J5r0AAAAAElFTkSuQmCC");
-            opacity: 0.04; background-size: 64px;
-        }
-
-        /* --- ACCESSIBILITY --- */
-        *:focus-visible { outline: 2px solid var(--ticker-text); outline-offset: 2px; }
-        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
-
-        /* --- EDIT MODE --- */
-        [contenteditable="true"] { border: 1px dashed var(--ticker-text); padding: 4px; border-radius: 4px; cursor: text; }
-
-        /* --- PERFORMANCE CARDS (No Heavy Gradients) --- */
-        .premium-card {
-            background: var(--card-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 1.5rem;
-            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
-            position: relative; overflow: hidden;
-            will-change: transform; /* Hint to GPU */
-        }
-        
-        .premium-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(16, 185, 129, 0.4);
-            box-shadow: 0 12px 30px -10px rgba(0,0,0,0.5);
-        }
-
-        /* --- SEAMLESS TICKER (The 50% Translate Method) --- */
-        .ticker-wrap {
-            position: fixed; top: 0; left: 0; width: 100%; height: 44px; overflow: hidden;
-            background: var(--ticker-bg); border-bottom: 1px solid var(--glass-border);
-            z-index: 100; display: flex; align-items: center;
-        }
-        .ticker-track {
-            display: flex; width: max-content;
-            animation: tickerSlide 60s linear infinite;
-            will-change: transform;
-        }
-        .ticker-item {
-            padding: 0 2rem; font-size: 11px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 0.1em; color: var(--ticker-text); display: flex; align-items: center; gap: 8px;
-        }
-        @keyframes tickerSlide { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-
-        /* --- UTILS --- */
-        .glass-panel { background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--glass-border); }
-        .geo-pulse { animation: geoPulse 1.5s infinite; color: #10b981 !important; }
-        @keyframes geoPulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-        /* --- DRAWERS & MODALS --- */
-        .drawer {
-            position: fixed; z-index: 100; transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-            background: var(--drawer-bg); border: 1px solid var(--glass-border); display: flex; flex-direction: column;
-        }
-        .modal-backdrop {
-            position: fixed; inset: 0; z-index: 110; background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(8px); opacity: 0; pointer-events: none; transition: opacity 0.3s;
-        }
-        .modal-backdrop.active { opacity: 1; pointer-events: auto; }
-        
-        @media (max-width: 767px) {
-            .drawer {
-                bottom: 0; left: 0; right: 0; transform: translateY(105%); 
-                border-radius: 24px 24px 0 0; max-height: 90vh; border-bottom: none;
-                box-shadow: 0 -10px 40px rgba(0,0,0,0.4);
-            }
-            .drawer.active { transform: translateY(0); }
-        }
-
-        @media (min-width: 768px) {
-            .drawer {
-                top: 0; bottom: 0; right: 0; width: 420px;
-                transform: translateX(105%); border-left: 1px solid var(--glass-border);
-                box-shadow: -10px 0 40px rgba(0,0,0,0.2); padding-top: 50px; 
-            }
-            .drawer.active { transform: translateX(0); }
-            .modal-content { max-width: 480px; width: 100%; margin: auto; }
-        }
-
-        /* Toast */
-        #toast { 
-            bottom: 30px; left: 50%; transform: translateX(-50%) translateY(200%); 
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-        }
-        .toast-active { transform: translateX(-50%) translateY(0) !important; }
-        .scroll-area { flex-grow: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 120px; }
-    </style>
 </head>
 <body class="pb-32 antialiased">
 
     <div class="noise-overlay"></div>
 
     <div class="ticker-wrap" aria-hidden="true">
-        <div class="ticker-track" id="tickerTrack">
-            </div>
+        <div class="ticker-track" id="tickerTrack"></div>
     </div>
 
     <div id="toast" role="status" aria-live="polite" class="fixed bg-slate-900 text-white px-6 py-3.5 rounded-full text-sm font-semibold shadow-2xl z-[9999] flex items-center gap-3 border border-white/10 backdrop-blur-md">
