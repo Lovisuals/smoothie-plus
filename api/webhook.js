@@ -45,9 +45,11 @@ export default async function handler(req, res) {
     return res.status(405).send('Method Not Allowed');
 }
 
+// HELPER FUNCTION TO SEND MESSAGES
 async function sendWhatsApp(to, text) {
     const token = process.env.WHATSAPP_TOKEN;
-    const url = `https://graph.facebook.com/v17.0/me/messages`;
+    // FIXED: Using your specific Phone Number ID instead of 'me'
+    const url = `https://graph.facebook.com/v17.0/913990835136832/messages`;
 
     const payload = {
         messaging_product: "whatsapp",
@@ -65,7 +67,7 @@ async function sendWhatsApp(to, text) {
             body: JSON.stringify(payload)
         });
         const data = await response.json();
-        console.log("Message Sent:", data);
+        console.log("Message Sent Response:", data);
     } catch (e) {
         console.error("Send Error:", e);
     }
