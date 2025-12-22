@@ -62,6 +62,10 @@
             font-weight: 500;
         }
 
+        /* --- EDIT MODE HIGHLIGHTS --- */
+        [contenteditable="true"] { border: 1px dashed #4ade80; padding: 2px; border-radius: 4px; }
+        [contenteditable="true"]:focus { outline: none; background: rgba(74, 222, 128, 0.1); }
+
         /* --- STREAM ANIMATION --- */
         @property --angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
         .stream-card { position: relative; background: var(--card-bg); border-radius: 1.5rem; z-index: 1; overflow: hidden; transition: transform 0.2s; }
@@ -93,8 +97,11 @@
 
         /* --- UTILS --- */
         .glass-panel { background: var(--glass-bg); backdrop-filter: blur(20px); border-top: 1px solid var(--glass-border); }
-        .pulse-dot { animation: pulse 2s infinite; }
+        .pulse-glow { animation: pulse 2s infinite; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 var(--stream-color); } 70% { box-shadow: 0 0 0 10px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+        
+        .geo-pulse { animation: geoPulse 1.5s infinite; color: #4ade80 !important; }
+        @keyframes geoPulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
         /* --- RESPONSIVE DRAWERS --- */
         .drawer {
@@ -104,11 +111,8 @@
         
         @media (max-width: 767px) {
             .drawer {
-                bottom: 0; left: 0; right: 0; 
-                transform: translateY(105%); 
-                border-radius: 24px 24px 0 0;
-                max-height: 85vh;
-                border-bottom: none;
+                bottom: 0; left: 0; right: 0; transform: translateY(105%); 
+                border-radius: 24px 24px 0 0; max-height: 85vh; border-bottom: none;
                 box-shadow: 0 -20px 40px rgba(0,0,0,0.3);
             }
             .drawer.active { transform: translateY(0); }
@@ -118,13 +122,9 @@
             body { max-width: 100%; } 
             .responsive-container { max-width: 1200px; margin: 0 auto; padding-left: 2rem; padding-right: 2rem; }
             .drawer {
-                top: 0; bottom: 0; right: 0; left: auto;
-                width: 400px; max-width: 100%;
-                transform: translateX(105%); 
-                border-radius: 20px 0 0 20px;
-                border-right: none;
-                box-shadow: -20px 0 40px rgba(0,0,0,0.3);
-                padding-top: 50px; 
+                top: 0; bottom: 0; right: 0; left: auto; width: 400px; max-width: 100%;
+                transform: translateX(105%); border-radius: 20px 0 0 20px; border-right: none;
+                box-shadow: -20px 0 40px rgba(0,0,0,0.3); padding-top: 50px; 
             }
             .drawer.active { transform: translateX(0); }
             #authModal, #productModal { max-width: 480px; left: 0; right: 0; margin: auto; }
@@ -159,10 +159,10 @@
     <header class="fixed top-0 left-0 right-0 z-50 pt-14 pb-4 bg-gradient-to-b from-[var(--bg-body)] to-transparent pointer-events-none">
         <div class="responsive-container flex justify-between items-center pointer-events-auto px-6 md:px-0">
             <div>
-                <h1 class="text-2xl font-black tracking-tighter uppercase leading-none italic">
+                <h1 class="text-2xl font-black tracking-tighter uppercase leading-none italic editable-text">
                     smoothie<span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">Plus+</span>
                 </h1>
-                <p class="text-[9px] tracking-[0.3em] uppercase mt-1 ml-1 font-bold" style="color: var(--text-muted)">Organic Fuel</p>
+                <p class="text-[9px] tracking-[0.3em] uppercase mt-1 ml-1 font-bold editable-text" style="color: var(--text-muted)">Organic Fuel</p>
             </div>
             
             <div class="flex items-center gap-4">
@@ -181,6 +181,10 @@
                 <p class="text-[10px] uppercase tracking-widest mt-3 font-bold">Establishing Uplink...</p>
             </div>
         </main>
+        
+        <div id="systemLog" class="text-[8px] font-mono opacity-40 mt-10 px-6 uppercase leading-tight select-none pointer-events-none" style="color: var(--text-muted)">
+            > Terminal Active...
+        </div>
     </div>
 
     <footer class="fixed bottom-8 left-0 right-0 flex justify-center z-40 pointer-events-none">
@@ -194,6 +198,10 @@
     <button onclick="toggleSheet('orderSheet')" class="fixed bottom-8 right-6 bg-white text-black w-14 h-14 rounded-full shadow-2xl shadow-green-500/20 z-50 flex items-center justify-center active:scale-90 transition hover:scale-105 hover:rotate-12 group">
         <svg class="w-6 h-6 group-hover:text-green-600 transition" fill="currentColor" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
         <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-black w-5 h-5 flex items-center justify-center rounded-full hidden border-2 border-[#050508] transform scale-0 transition-transform duration-300">0</span>
+    </button>
+
+    <button id="adminSaveBtn" onclick="exportHtml()" class="fixed top-24 right-6 bg-blue-600 text-white p-3 rounded-xl shadow-2xl z-[9999] hidden text-xs font-black uppercase tracking-widest">
+        💾 SAVE CODE
     </button>
 
     <div id="authModal" class="fixed inset-0 z-[150] bg-black/90 flex items-center justify-center p-6 hidden backdrop-blur-md">
@@ -251,11 +259,11 @@
                 <button onclick="toggleSheet('orderSheet')" class="text-[10px] font-bold opacity-50 hover:opacity-100 transition">CLOSE</button>
             </div>
             
-            <div id="rankDisplay" class="hidden mb-6 bg-gradient-to-r from-blue-500/10 to-transparent p-4 rounded-xl border border-blue-500/20 flex items-center gap-3">
+            <div id="rankDisplay" class="hidden mb-6 bg-blue-500/10 p-4 rounded-xl border border-blue-500/20 flex items-center gap-3">
                 <div class="text-2xl">👨‍🚀</div>
                 <div>
                     <p class="text-[9px] uppercase tracking-widest text-blue-400 font-bold">Identity Detected</p>
-                    <p id="rankName" class="text-sm font-bold text-white"></p>
+                    <p id="rankName" class="text-sm font-bold" style="color: var(--text-main)"></p>
                 </div>
             </div>
 
@@ -267,10 +275,17 @@
                 <div><p class="text-[9px] uppercase font-bold mb-1 opacity-60">Pay To</p><p id="dispAcctNum" class="font-mono font-bold text-xl tracking-widest select-all" style="color: var(--text-main)"></p><p id="dispBankName" class="text-[10px] uppercase opacity-60 mt-1"></p></div>
                 <button onclick="copyBank()" class="text-[10px] bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition uppercase font-bold tracking-wider">Copy</button>
             </div>
+            
             <div class="space-y-4 mb-6">
                 <input type="text" id="custName" placeholder="YOUR NAME" class="w-full bg-transparent border-b border-gray-500/20 p-3 text-sm outline-none focus:border-green-500 transition" style="color: var(--text-main)">
-                <textarea id="custAddr" rows="1" placeholder="LOCATION" class="w-full bg-transparent border-b border-gray-500/20 p-3 text-sm outline-none focus:border-green-500 transition" style="color: var(--text-main)"></textarea>
+                <div class="relative">
+                    <textarea id="custAddr" rows="1" placeholder="LOCATION" class="w-full bg-transparent border-b border-gray-500/20 p-3 text-sm outline-none focus:border-green-500 transition pr-10" style="color: var(--text-main)"></textarea>
+                    <button onclick="getLocation()" id="geoBtn" class="absolute right-0 top-2 text-gray-500 hover:text-green-500 transition p-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    </button>
+                </div>
             </div>
+            
             <button id="checkoutBtn" onclick="checkout()" disabled class="w-full bg-green-600 hover:bg-green-500 text-white font-black py-5 rounded-2xl uppercase tracking-widest shadow-xl shadow-green-900/20 active:scale-95 transition flex items-center justify-center gap-2 opacity-50 grayscale cursor-not-allowed">SELECT ITEMS FIRST</button>
         </div>
     </div>
@@ -287,7 +302,8 @@
             supabaseUrl: 'https://jkopygadpzkmqrnmzxmc.supabase.co', 
             supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imprb3B5Z2FkcHprbXFybm16eG1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxNDAxNzcsImV4cCI6MjA4MTcxNjE3N30.hnPxhg8rmvGC-oHt7SWXekyG55EBcV26jPFTC8S5IeU',
             whatsapp: '2347068516779',
-            bank: { name: "OPay", acct: "8083000771", holder: "LAWAL OPEYEMI MICHAEL" }
+            bank: { name: "OPay", acct: "8083000771", holder: "LAWAL OPEYEMI MICHAEL" },
+            aiEndpoint: '/api/ai' 
         };
 
         let sb = null, menuItems = [], cart = {}, currentUser = null;
@@ -298,26 +314,120 @@
         }
 
         window.addEventListener('load', () => { 
+            logToSystem("INITIALIZING CORE...");
+            checkSocialHandshake();
+            checkAdminMode(); 
             initApp(); 
             renderBankDetails(); 
             loadTheme();
-            loadIdentity(); // LOAD THE PILOT
+            loadIdentity(); 
         });
 
-        // --- CALLSIGN MEMORY ---
+        // --- ADMIN GHOST WRITER ---
+        function checkAdminMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('edit') === 'true') {
+                const pass = prompt("ENTER ADMIN ACCESS KEY:");
+                if(pass === "1234") { 
+                    document.body.contentEditable = "true";
+                    document.getElementById('adminSaveBtn').classList.remove('hidden');
+                    showToast("ADMIN WRITE MODE ACTIVE");
+                }
+            }
+        }
+
+        async function exportHtml() {
+            document.body.contentEditable = "false";
+            document.getElementById('adminSaveBtn').classList.add('hidden');
+            const code = document.documentElement.outerHTML;
+            await navigator.clipboard.writeText(code);
+            showToast("CODE COPIED TO CLIPBOARD");
+            alert("Paste this into your index.html file in GitHub!");
+        }
+
+        // --- AI ANALYST ---
+        async function askBioAnalyst(productName) {
+            const p = menuItems.find(x => x.name === productName);
+            logToSystem("CONNECTING TO NEURAL CORE...");
+            showToast("ANALYZING BIOMETRICS...");
+            
+            try {
+                if (window.location.hostname.includes('vercel.app')) {
+                    const res = await fetch(CONFIG.aiEndpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ question: `What are the health benefits of ${productName}?`, context: p })
+                    });
+                    const data = await res.json();
+                    logToSystem(`ANALYST: ${data.answer}`);
+                    alert(`BIO-REPORT:\n${data.answer}`);
+                } else {
+                    setTimeout(() => {
+                        const responses = ["OPTIMIZED FOR CELLULAR REGENERATION.", "HIGH VITAMIN DENSITY DETECTED.", "GLUCOSE LEVELS WITHIN SAFE PARAMETERS."];
+                        const randomMsg = responses[Math.floor(Math.random() * responses.length)];
+                        logToSystem(`ANALYST: ${randomMsg}`);
+                        alert(`BIO-REPORT:\n${randomMsg}`);
+                    }, 1000);
+                }
+            } catch (err) { logToSystem("NEURAL UPLINK FAILED"); }
+        }
+
+        // --- GEOLOCATION ---
+        function getLocation() {
+            if (navigator.geolocation) {
+                const btn = document.getElementById('geoBtn');
+                btn.classList.add('geo-pulse');
+                logToSystem("SATELLITE TRIANGULATION INITIATED...");
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    try {
+                        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+                        const data = await response.json();
+                        if(data && data.display_name) {
+                            document.getElementById('custAddr').value = data.display_name;
+                            logToSystem("LOCATION LOCKED");
+                            showToast("ADDRESS ACQUIRED");
+                        }
+                    } catch(err) { logToSystem("MAP SERVER ERROR"); showToast("MANUAL INPUT REQUIRED", "error"); }
+                    btn.classList.remove('geo-pulse');
+                }, () => { logToSystem("GPS PERMISSION DENIED"); showToast("GPS DENIED", "error"); btn.classList.remove('geo-pulse'); });
+            } else { showToast("DEVICE NOT COMPATIBLE", "error"); }
+        }
+
+        // --- SYSTEM LOGGER ---
+        function logToSystem(msg) {
+            const log = document.getElementById('systemLog');
+            log.innerHTML += `<br>> ${msg}`;
+            if(log.innerHTML.split('<br>').length > 5) log.innerHTML = log.innerHTML.split('<br>').slice(1).join('<br>');
+        }
+
+        // --- SOCIAL HANDSHAKE ---
+        function checkSocialHandshake() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const incomingUser = urlParams.get('user'); 
+            const incomingRank = urlParams.get('rank');
+            if (incomingUser) {
+                logToSystem(`HANDSHAKE RECEIVED: ${incomingUser.toUpperCase()}`);
+                callsign.name = incomingUser;
+                callsign.rank = incomingRank || 'PILOT';
+                localStorage.setItem('smoothieIdentity', JSON.stringify(callsign));
+                window.history.replaceState({}, document.title, "/");
+                setTimeout(() => showToast(`🔗 LINK VERIFIED: WELCOME, ${callsign.rank}`), 1000);
+            }
+        }
+
         function loadIdentity() {
             const saved = localStorage.getItem('smoothieIdentity');
             if(saved) {
                 callsign = JSON.parse(saved);
                 document.getElementById('custName').value = callsign.name;
                 document.getElementById('custAddr').value = callsign.addr;
-                
-                // Show Rank in Cart
-                if(callsign.xp > 0) {
+                if(callsign.xp > 0 || callsign.rank !== 'GUEST') {
                     document.getElementById('rankDisplay').classList.remove('hidden');
                     document.getElementById('rankName').innerText = `${callsign.rank} ${callsign.name.toUpperCase()}`;
+                    logToSystem(`IDENTITY LOADED: ${callsign.rank}`);
                 }
-                showToast(`WELCOME BACK, ${callsign.rank}`);
             }
         }
 
@@ -325,12 +435,9 @@
             callsign.name = name;
             callsign.addr = addr;
             callsign.xp += 1;
-            
-            // Calc Rank
             if(callsign.xp > 10) callsign.rank = "COMMANDER";
             else if(callsign.xp > 4) callsign.rank = "PILOT";
-            else if(callsign.xp > 0) callsign.rank = "CADET";
-            
+            else if(callsign.xp > 0 && callsign.rank === 'GUEST') callsign.rank = "CADET";
             localStorage.setItem('smoothieIdentity', JSON.stringify(callsign));
         }
 
@@ -346,13 +453,8 @@
             try {
                 if (window.supabase) {
                     sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
-                    
-                    // Start Global Pulse
+                    logToSystem("CLOUD UPLINK: ACTIVE");
                     updateGlobalPulse();
-                    // NOTE: Ensure you ran the SQL View script to make 'public_feed' accessible!
-                    // If you didn't, this part might just show alerts but no orders. 
-                    // To be safe, we will try fetching from the new View if it exists, fallback to filtering manually.
-                    
                     sb.channel('public:pulse')
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => updateGlobalPulse())
                         .on('postgres_changes', { event: '*', schema: 'public', table: 'alerts' }, () => updateGlobalPulse())
@@ -362,47 +464,36 @@
                     if (products && products.length > 0) {
                         menuItems = products; renderMenu(menuItems);
                         sb.channel('public:products').on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => initApp()).subscribe();
-                        
-                        const status = document.getElementById('connectionStatus');
-                        status.classList.remove('bg-red-500'); status.classList.add('bg-green-500'); status.classList.add('shadow-[0_0_15px_rgba(74,222,128,0.8)]');
+                        document.getElementById('connectionStatus').classList.remove('bg-red-500'); 
+                        document.getElementById('connectionStatus').classList.add('bg-green-500'); 
+                        document.getElementById('connectionStatus').classList.add('shadow-[0_0_15px_rgba(74,222,128,0.8)]');
                         checkSession();
+                        logToSystem("MENU SYNC: COMPLETE");
                     } else { document.getElementById('menuGrid').innerHTML = '<div class="col-span-2 md:col-span-4 text-center mt-20 opacity-50">Offline</div>'; }
                 }
-            } catch (err) { console.error("Init Error", err); }
+            } catch (err) { console.error("Init Error", err); logToSystem("CRITICAL: CLOUD ERROR"); }
         }
 
-        // --- HYBRID PULSE ENGINE (View-Aware) ---
         async function updateGlobalPulse() {
-            // 1. Alerts
             const { data: alerts } = await sb.from('alerts').select('message').eq('is_active', true).order('id', { ascending: false });
-            
-            // 2. Orders (Try the Safe View first, otherwise raw table - be careful with RLS!)
-            // We use a simple select. The RLS or View determines what we get back.
             let recentOrders = [];
             try {
-                // Try fetching from public_feed view first (The Secure Way)
                 const { data, error } = await sb.from('public_feed').select('items').limit(5);
                 if(!error) recentOrders = data;
                 else {
-                    // Fallback to orders table (Only works if RLS allows it)
                     const { data: rawData } = await sb.from('orders').select('items').order('created_at', { ascending: false }).limit(5);
                     recentOrders = rawData || [];
                 }
-            } catch(e) { console.log("Pulse fetch error", e); }
+            } catch(e) { }
 
             let combinedTicker = [];
-
             if (recentOrders && recentOrders.length > 0) {
                 recentOrders.forEach(o => {
                     const cleanItems = o.items ? o.items.split(',')[0].split(' x')[0].toUpperCase() : "SMOOTHIE";
                     combinedTicker.push(`<span class="text-green-400">⚡</span> SOMEONE JUST ORDERED ${cleanItems}`);
                 });
             }
-
-            if (alerts && alerts.length > 0) {
-                alerts.forEach(a => combinedTicker.push(`<span class="text-blue-400">◆</span> ${a.message}`));
-            }
-
+            if (alerts && alerts.length > 0) alerts.forEach(a => combinedTicker.push(`<span class="text-blue-400">◆</span> ${a.message}`));
             if (combinedTicker.length === 0) combinedTicker.push("WATCH THIS SPACE • UPCOMING DEALS • SMOOTHIEPLUS+");
 
             const tickerHtml = combinedTicker.map(msg => `<div class="ticker-item">${msg}</div>`).join('');
@@ -419,7 +510,7 @@
                         <img src="${p.image_url || 'https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=500'}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition duration-500" alt="${p.name}">
                     </div>
                     <div class="relative z-10">
-                        <h3 class="font-black text-sm uppercase mb-1 tracking-wide leading-tight" style="color: var(--text-main)">${p.name}</h3>
+                        <h3 class="font-black text-sm uppercase mb-1 tracking-wide leading-tight editable-text" style="color: var(--text-main)">${p.name}</h3>
                         <div class="flex justify-between items-center mt-3">
                             <span class="font-bold text-sm font-mono" style="color: ${color}">₦${p.price.toLocaleString()}</span>
                             <div class="bg-white/10 p-2 rounded-full"><svg class="w-3 h-3 text-current" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--text-main)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg></div>
@@ -445,7 +536,10 @@
                         <span class="text-xs uppercase tracking-widest opacity-60" style="color: var(--text-main)">Price</span>
                         <span class="text-2xl font-mono font-bold" style="color: ${colorHex}">₦${p.price.toLocaleString()}</span>
                     </div>
-                    <button onclick="addToCart(${p.id}); document.getElementById('productModal').classList.add('hidden')" class="w-full bg-white text-black font-black py-5 rounded-2xl uppercase tracking-widest hover:scale-[1.02] transition shadow-xl">Add to Order</button>
+                    <div class="flex gap-2">
+                        <button onclick="askBioAnalyst('${p.name}')" class="flex-1 bg-blue-500/20 text-blue-400 font-bold py-5 rounded-2xl uppercase text-xs hover:bg-blue-500/30 transition">Bio-Scan</button>
+                        <button onclick="addToCart(${p.id}); document.getElementById('productModal').classList.add('hidden')" class="flex-[2] bg-white text-black font-black py-5 rounded-2xl uppercase tracking-widest hover:scale-[1.02] transition shadow-xl">Add to Order</button>
+                    </div>
                 </div>`;
             modal.classList.remove('hidden');
         }
@@ -476,19 +570,19 @@
             const addr = document.getElementById('custAddr').value.trim();
             if(!name || !addr) return showToast("MISSING IDENTITY", "error");
             
-            // SAVE IDENTITY
             saveIdentity(name, addr);
-
             let items = Object.entries(cart).map(([k,v]) => `${k} x${v.q}`).join(', ');
             let total = document.getElementById('cartTotal').innerText;
             const orderId = `ORD-${Date.now().toString().slice(-4)}-${Math.floor(Math.random()*100)}`;
             
-            if(sb) await sb.from('orders').insert([{ id: orderId, customer: name, items: items, total: total }]);
+            logToSystem("TRANSMITTING ORDER...");
+            if(sb) await sb.from('orders').insert([{ id: orderId, customer: name, items: items, total: total, status: 'PENDING' }]);
             
             const rankEmoji = callsign.rank === 'COMMANDER' ? '👑' : callsign.rank === 'PILOT' ? '🚀' : '👤';
-            
             const msg = `*NEW ORDER: ${orderId}* %0A${rankEmoji} ${callsign.rank} ${name}%0A📍 ${addr}%0A%0A*ITEMS:*%0A${items}%0A%0A*TOTAL: ${total}*`;
+            
             window.open(`https://wa.me/${CONFIG.whatsapp}?text=${msg}`, '_blank');
+            logToSystem("ORDER SENT: HYBRID MODE");
             cart = {}; updateCartUI(); toggleSheet('orderSheet');
         }
 
