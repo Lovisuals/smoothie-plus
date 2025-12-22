@@ -1,71 +1,72 @@
-import axios from 'axios';
-
+// api/webhook.js
 export default async function handler(req, res) {
-  // 1. FACEBOOK VERIFICATION (The Handshake)
-  if (req.method === 'GET') {
-    const mode = req.query['hub.mode'];
-    const token = req.query['hub.verify_token'];
-    const challenge = req.query['hub.challenge'];
+    // 1. VERIFY TOKEN (The Handshake)
+    if (req.method === 'GET') {
+        const mode = req.query['hub.mode'];
+        const token = req.query['hub.verify_token'];
+        const challenge = req.query['hub.challenge'];
 
-    // Check if the token matches what you set in Vercel
-    if (mode === 'subscribe' && token === process.env.VERIFY_TOKEN) {
-      return res.status(200).send(challenge);
-    }
-    return res.status(403).json({ error: 'Forbidden' });
-  }
-
-  // 2. INCOMING MESSAGE (The Trigger)
-  if (req.method === 'POST') {
-    const body = req.body;
-
-    // Check if it's a WhatsApp message
-    if (body.object === 'whatsapp_business_account') {
-      const entry = body.entry?.[0];
-      const changes = entry?.changes?.[0];
-      const message = changes?.value?.messages?.[0];
-
-      // Ensure it's a text message from a user
-      if (message && message.type === 'text') {
-        const userPhone = message.from;
-        const userName = message.profile?.name || "Commander"; // Get their WhatsApp Name
-        const businessPhoneNumberId = changes.value.metadata.phone_number_id;
-
-        // 3. SEND THE REPLY (The Action)
-        try {
-          await axios.post(
-            `https://graph.facebook.com/v18.0/${businessPhoneNumberId}/messages`,
-            {
-              messaging_product: "whatsapp",
-              to: userPhone,
-              type: "interactive",
-              interactive: {
-                type: "cta_url",
-                header: { type: "text", text: "SMOOTHIE PLUS+ OPS" },
-                body: { text: `Welcome back, ${userName}. Systems Online.` },
-                footer: { text: "Tap below to initialize." },
-                action: {
-                  name: "cta_url",
-                  parameters: {
-                    display_text: "🚀 LAUNCH MENU",
-                    // YOUR SPECIFIC LINK WITH AUTO-LOGIN CODE:
-                    url: `https://lovisuals.github.io/smoothie-plus/?user=${encodeURIComponent(userName)}`
-                  }
-                }
-              }
-            },
-            {
-              headers: {
-                // Vercel will pull this from your settings securely
-                Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}`,
-                "Content-Type": "application/json",
-              },
+        if (mode && token) {
+            if (mode === 'subscribe' && token === process.env.VERIFY_TOKEN) {
+                console.log('WEBHOOK_VERIFIED');
+                return res.status(200).send(challenge);
+            } else {
+                return res.status(403).json({ error: 'Forbidden' });
             }
-          );
-        } catch (error) {
-          console.error("Error sending message:", error?.response?.data || error);
         }
-      }
+        return res.status(400).json({ error: 'Bad Request' });
     }
-    return res.status(200).send('EVENT_RECEIVED');
-  }
+
+    // 2. HANDLE MESSAGES (The Chat)
+    if (req.method === 'POST') {
+        const body = req.body;
+        console.log('Incoming Webhook:', JSON.stringify(body, null, 2));
+
+        if (body.object) {
+            if (
+                body.entry &&
+                body.entry[0].changes &&
+                body.entry[0].changes[0] &&
+                body.entry[0].changes[0].value.messages &&
+                body.entry[0].changes[0].value.messages[0]
+            ) {
+                const msg = body.entry[0].changes[0].value.messages[0];
+                const from = msg.from;
+                
+                // SIMPLE REPLY
+                await sendWhatsApp(from, "Hello Commander. Systems Online. 🟢");
+            }
+            return res.status(200).send('EVENT_RECEIVED');
+        } else {
+            return res.status(404).send('Not found');
+        }
+    }
+
+    return res.status(405).send('Method Not Allowed');
+}
+
+async function sendWhatsApp(to, text) {
+    const token = process.env.WHATSAPP_TOKEN;
+    const url = `https://graph.facebook.com/v17.0/me/messages`;
+
+    const payload = {
+        messaging_product: "whatsapp",
+        to: to,
+        text: { body: text }
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        console.log("Message Sent:", data);
+    } catch (e) {
+        console.error("Send Error:", e);
+    }
 }
