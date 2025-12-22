@@ -3,8 +3,8 @@
     --bg-body: #050508;
     --text-main: #ffffff;
     --text-muted: #94a3b8;
-    --glass-bg: rgba(15, 23, 42, 0.9);
-    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-bg: rgba(15, 23, 42, 0.85); /* Slightly more transparency for holo effect */
+    --glass-border: rgba(255, 255, 255, 0.1);
     --card-bg: #0f1115;
     --drawer-bg: #0a0a0c;
     --input-bg: rgba(255, 255, 255, 0.05);
@@ -34,35 +34,61 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
-/* PREMIUM NOISE GRAIN (Base64 for Performance) */
+/* --- UPGRADE 1: NEON SCROLLBARS --- */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-body); }
+::-webkit-scrollbar-thumb { 
+    background: var(--glass-border); 
+    border-radius: 10px; 
+}
+::-webkit-scrollbar-thumb:hover { background: #10b981; }
+
+/* --- UPGRADE 2: CRT SCANLINES (The Cyberpunk Vibe) --- */
+.scanlines {
+    position: fixed; inset: 0; pointer-events: none; z-index: 40;
+    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+    background-size: 100% 4px;
+    opacity: 0.15; /* Subtle texture */
+}
+
+/* PREMIUM NOISE GRAIN */
 .noise-overlay {
-    position: fixed; inset: 0; pointer-events: none; z-index: 50;
+    position: fixed; inset: 0; pointer-events: none; z-index: 39;
     background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAJElEQVQoU2NkYGD4z0AEYKAQYGBgYGBgYGBgYGBgYGBgYGBgYGBgAAAiAgB1J5r0AAAAAElFTkSuQmCC");
-    opacity: 0.04; background-size: 64px;
+    opacity: 0.05; background-size: 64px;
 }
 
 /* --- ACCESSIBILITY --- */
 *:focus-visible { outline: 2px solid var(--ticker-text); outline-offset: 2px; }
-.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
 
-/* --- EDIT MODE --- */
-[contenteditable="true"] { border: 1px dashed var(--ticker-text); padding: 4px; border-radius: 4px; cursor: text; }
-
-/* --- PERFORMANCE CARDS --- */
+/* --- PERFORMANCE CARDS + UPGRADE 3: 3D TILT --- */
 .premium-card {
     background: var(--card-bg);
     border: 1px solid var(--glass-border);
     border-radius: 1.5rem;
-    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
     position: relative; overflow: hidden;
+    
+    /* 3D Engine */
+    transition: transform 0.1s ease-out, box-shadow 0.3s ease, border-color 0.3s ease;
+    transform-style: preserve-3d;
     will-change: transform;
 }
 
 .premium-card:hover {
-    transform: translateY(-4px);
     border-color: rgba(16, 185, 129, 0.4);
-    box-shadow: 0 12px 30px -10px rgba(0,0,0,0.5);
+    box-shadow: 0 20px 40px -10px rgba(16, 185, 129, 0.15);
+    z-index: 10;
 }
+
+/* Inner elements pop out in 3D */
+.premium-card img, .premium-card h3, .premium-card .price-tag {
+    transition: transform 0.2s;
+    transform: translateZ(0); /* Default flat */
+}
+
+/* On hover, pop elements forward */
+.premium-card:hover img { transform: translateZ(20px) scale(1.05); }
+.premium-card:hover h3 { transform: translateZ(10px); }
 
 /* --- SEAMLESS TICKER --- */
 .ticker-wrap {
