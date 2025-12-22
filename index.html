@@ -96,6 +96,24 @@
         💾 Save Code
     </button>
 
+    <div class="ai-trigger" onclick="toggleAI()">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+    </div>
+
+    <div class="ai-terminal" id="aiTerminal">
+        <div class="ai-header">
+            <span>DR. SMOOTHIE // V.9.0</span>
+            <span class="cursor-pointer hover:text-white" onclick="toggleAI()">[X]</span>
+        </div>
+        <div class="ai-log" id="aiLog">
+            </div>
+        <div class="ai-input-area">
+            <span class="text-emerald-500 mr-2">></span>
+            <input type="text" id="aiInput" class="ai-input" placeholder="Enter symptoms..." onkeypress="handleAiKey(event)">
+            <button class="ai-send" onclick="sendAiMessage()">TX</button>
+        </div>
+    </div>
+
     <div id="modalBackdrop" class="modal-backdrop flex items-center justify-center p-4">
         <div id="authModal" class="modal-content glass-panel p-10 relative shadow-2xl hidden max-w-md w-full border-t-2 border-emerald-500">
             <button onclick="closeAllModals()" class="absolute top-4 right-4 text-gray-500 hover:text-white text-xl">✕</button>
@@ -214,14 +232,84 @@
             loadTheme();
             loadIdentity();
             setupKeyboardListeners();
+            setupScrollObserver(); // SCROLLYTELLING
         });
 
+        // --- SCROLLYTELLING OBSERVER ---
+        function setupScrollObserver() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            // We attach this later when elements render
+            window.attachScrollReveal = () => {
+                document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+            };
+        }
+
+        // --- AI LOGIC ---
+        let isAiOpen = false;
+        function toggleAI() {
+            const term = document.getElementById('aiTerminal');
+            isAiOpen = !isAiOpen;
+            if(isAiOpen) {
+                term.classList.add('active');
+                if(document.getElementById('aiLog').innerHTML.trim() === '') {
+                    addAiMessage("bot", "INITIALIZING DIAGNOSTIC CORE...");
+                    setTimeout(() => addAiMessage("bot", "Dr. Smoothie Online. State your symptoms or objective."), 800);
+                }
+            } else { term.classList.remove('active'); }
+        }
+        function handleAiKey(e) { if(e.key === 'Enter') sendAiMessage(); }
+        function sendAiMessage() {
+            const input = document.getElementById('aiInput');
+            const txt = input.value.trim();
+            if(!txt) return;
+            addAiMessage("user", txt);
+            input.value = '';
+            addAiMessage("bot", "ANALYZING BIOMETRICS...", true);
+            setTimeout(() => {
+                const temp = document.querySelector('.ai-msg.temp'); if(temp) temp.remove();
+                let response = "Data insufficient. Specify symptoms: Fatigue? Pain? Stress?";
+                const lower = txt.toLowerCase();
+                if(lower.includes("tired") || lower.includes("fatigue")) response = "Assessment: Adenosine accumulation. Protocol: WAKE PROTOCOL\n- Caffeine\n- Tyrosine\n\nDeploy 'Green Voltage'?";
+                else if (lower.includes("headache") || lower.includes("pain")) response = "Assessment: Vasoconstriction. Protocol: HYDRA-SHOCK\n- Magnesium\n- Potassium\n\nDeploy 'Recovery Red'?";
+                else if (lower.includes("stress")) response = "Assessment: Elevated cortisol. Protocol: CALM STATE\n- Ashwagandha\n- Blue Spirulina\n\nDeploy 'Ocean Mind'?";
+                typeWriterResponse(response);
+            }, 1500);
+        }
+        function addAiMessage(role, text, isTemp = false) {
+            const log = document.getElementById('aiLog');
+            const div = document.createElement('div');
+            div.className = `ai-msg ${role} ${isTemp ? 'temp animate-pulse' : ''}`;
+            div.innerText = text;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+        }
+        function typeWriterResponse(text) {
+            const log = document.getElementById('aiLog');
+            const div = document.createElement('div');
+            div.className = "ai-msg bot";
+            log.appendChild(div);
+            let i = 0;
+            function type() {
+                if (i < text.length) { div.innerText += text.charAt(i); i++; log.scrollTop = log.scrollHeight; setTimeout(type, 20); }
+            }
+            type();
+        }
+
+        // --- OTHER LOGIC ---
         function setupKeyboardListeners() {
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     closeAllModals();
                     document.getElementById('opsDrawer').classList.remove('active');
                     document.getElementById('orderSheet').classList.remove('active');
+                    document.getElementById('aiTerminal').classList.remove('active');
                 }
             });
         }
@@ -274,47 +362,39 @@
             } catch (err) { console.error("Init Error", err); }
         }
 
-        // --- FIXED TICKER LOGIC (NO DUPLICATION) ---
         async function updateGlobalFeed() {
             const { data: alerts } = await sb.from('alerts').select('message').eq('is_active', true).order('id', { ascending: false });
             let recentOrders = [];
             try {
-                const { data, error } = await sb.from('public_feed').select('items').limit(3); // Limit to 3 to keep it clean
+                const { data, error } = await sb.from('public_feed').select('items').limit(3);
                 recentOrders = (!error && data) ? data : [];
             } catch(e) {}
 
             let msgs = [];
-            
-            // 1. Static Messages
             const transparencyLogs = ["SECTOR 7: ORGANIC KALE", "H2O PURITY: 100%", "NEW BATCH: BERRIES"];
             msgs.push(`ℹ ${transparencyLogs[Math.floor(Math.random() * transparencyLogs.length)]}`);
 
-            // 2. Orders
             if (recentOrders.length > 0) {
                 recentOrders.forEach(o => {
                     const cleanItems = o.items ? o.items.split(',')[0].split(' x')[0] : "Order";
                     msgs.push(`⚡ ORDER: ${cleanItems.toUpperCase()}`);
                 });
             }
-            
-            // 3. Alerts
             if (alerts && alerts.length > 0) alerts.forEach(a => msgs.push(`◆ ${a.message.toUpperCase()}`));
-            
-            // 4. Default if empty
             if (msgs.length === 0) msgs.push("SMOOTHIE PLUS SYSTEM ONLINE");
 
-            // --- THE FIX: Create exactly 2 copies of the content for the loop ---
             const content = msgs.map(m => `<div class="ticker-item">${m}</div>`).join('<div class="ticker-item text-gray-600">///</div>');
-            
-            // We inject the content TWICE. The CSS translates -50%, creating a perfect loop.
             document.getElementById('tickerTrack').innerHTML = content + '<div class="ticker-item text-gray-600">///</div>' + content + '<div class="ticker-item text-gray-600">///</div>';
         }
 
         function renderMenu(items) {
             const grid = document.getElementById('menuGrid');
-            grid.innerHTML = items.map(p => {
+            // Add staggered delay index
+            grid.innerHTML = items.map((p, index) => {
                 return `
-                <div onclick="openProductDetail(${p.id})" class="premium-card cursor-pointer group">
+                <div onclick="openProductDetail(${p.id})" 
+                     class="premium-card cursor-pointer group scroll-reveal" 
+                     style="transition-delay: ${index * 100}ms">
                     <div class="card-media">
                         <img src="${p.image_url}" class="img-front" alt="${p.name}" loading="lazy">
                         <img src="${p.image_url}" class="img-back" alt="${p.name}" loading="lazy">
@@ -331,12 +411,14 @@
                     </div>
                 </div>`;
             }).join('');
+            
+            // Activate Scrollytelling
+            if(window.attachScrollReveal) window.attachScrollReveal();
         }
 
         function openProductDetail(id) {
             const p = menuItems.find(x => x.id === id);
             const colorHex = '#10b981';
-            
             document.getElementById('productModalContent').innerHTML = `
                 <div class="bg-black text-white">
                     <div class="relative h-64 w-full overflow-hidden">
@@ -347,12 +429,10 @@
                         <h2 class="text-4xl font-black font-display uppercase italic mb-2">${p.name}</h2>
                         <div class="w-12 h-1 bg-emerald-500 mb-6"></div>
                         <p class="text-gray-400 text-sm leading-relaxed mb-8">${p.description}</p>
-                        
                         <div class="flex items-center justify-between p-4 border border-white/10 bg-white/5 mb-6">
                             <span class="text-xs uppercase tracking-widest font-bold text-gray-500">Unit Cost</span>
                             <span class="text-2xl font-mono font-bold text-emerald-400">₦${p.price.toLocaleString()}</span>
                         </div>
-                        
                         <button onclick="addToCart(${p.id}); closeAllModals()" class="w-full bg-white text-black font-black py-4 uppercase tracking-[0.2em] hover:bg-emerald-400 transition">Add to Manifest</button>
                     </div>
                 </div>`;
@@ -362,8 +442,7 @@
         function addToCart(id) {
             const p = menuItems.find(x => x.id === id);
             if(cart[p.name]) cart[p.name].q++; else cart[p.name] = { p: p.price, q: 1 };
-            updateCartUI(); 
-            showToast('Item Added to Manifest');
+            updateCartUI(); showToast('Item Added to Manifest');
         }
 
         function updateCartUI() {
@@ -374,11 +453,9 @@
             }
             document.getElementById('cartList').innerHTML = html || '<div class="text-center py-12 opacity-30"><p class="text-4xl mb-4">🛒</p><p class="text-[10px] uppercase tracking-widest">Manifest Empty</p></div>';
             document.getElementById('cartTotal').innerText = '₦' + total.toLocaleString();
-            
             const badge = document.getElementById('cartCount');
             badge.innerText = count; 
             if(count > 0) { badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); }
-
             const btn = document.getElementById('checkoutBtn');
             if (count === 0) { btn.disabled = true; btn.innerText = "Await Input"; } 
             else { btn.disabled = false; btn.innerText = "Transmit Order"; }
@@ -387,30 +464,19 @@
         async function checkout() {
             const btn = document.getElementById('checkoutBtn');
             btn.innerText = "Transmitting...";
-            
             const name = document.getElementById('custName').value.trim();
             const addr = document.getElementById('custAddr').value.trim();
             if(!name || !addr) { showToast("Missing Data", "error"); btn.innerText = "Transmit Order"; return; }
-            
             saveIdentity(name, addr);
             let items = Object.entries(cart).map(([k,v]) => `${k} x${v.q}`).join(', ');
             let total = document.getElementById('cartTotal').innerText;
             const orderId = `ORD-${Date.now().toString().slice(-4)}`;
-            
             if(sb) await sb.from('orders').insert([{ id: orderId, customer: name, items: items, total: total, status: 'PENDING' }]);
-            
             const msg = `*ORDER REQUEST ${orderId}* %0A👤 ${name} (${identity.status})%0A📍 ${addr}%0A%0A*ITEMS:*%0A${items}%0A%0A*TOTAL: ${total}*`;
             window.open(`https://wa.me/${CONFIG.whatsapp}?text=${msg}`, '_blank');
-            
             cart = {}; updateCartUI(); toggleSheet('orderSheet'); btn.innerText = "Transmit Order";
         }
 
-        // --- QUIZ LOGIC ---
-        const QUIZ_STEPS = [
-            { q: "Current Status?", options: ["System Drained", "Need Focus", "Recovery Mode"] },
-            { q: "Flavor Profile?", options: ["Sweet", "Creamy", "Green"] },
-            { q: "Objective?", options: ["Energy", "Muscle", "Detox"] }
-        ];
         function initQuiz() { renderQuizStep(0); }
         function renderQuizStep(idx) {
             const container = document.getElementById('quizContent');
@@ -429,27 +495,13 @@
                     ${step.options.map(opt => `<button onclick="renderQuizStep(${idx + 1})" class="bg-black/50 border border-white/10 hover:bg-emerald-500 hover:text-black py-4 text-sm font-bold uppercase transition text-left px-6 tracking-wider text-gray-300">${opt}</button>`).join('')}
                 </div>`;
         }
+        const QUIZ_STEPS = [{q:"Current Status?",options:["System Drained","Need Focus","Recovery Mode"]},{q:"Flavor Profile?",options:["Sweet","Creamy","Green"]},{q:"Objective?",options:["Energy","Muscle","Detox"]}];
 
-        // --- UTILS ---
-        function checkAdminMode() {
-            if (new URLSearchParams(window.location.search).get('edit') === 'true') {
-                if(prompt("Key:") === "1234") { 
-                    document.body.contentEditable = "true";
-                    document.getElementById('adminSaveBtn').classList.remove('hidden');
-                    showToast("Write Mode Active");
-                }
-            }
-        }
-        async function exportHtml() {
-            document.body.contentEditable = "false";
-            document.getElementById('adminSaveBtn').classList.add('hidden');
-            await navigator.clipboard.writeText(document.documentElement.outerHTML);
-            showToast("Code Copied");
-        }
+        function checkAdminMode() { if (new URLSearchParams(window.location.search).get('edit') === 'true') { if(prompt("Key:") === "1234") { document.body.contentEditable = "true"; document.getElementById('adminSaveBtn').classList.remove('hidden'); showToast("Write Mode Active"); } } }
+        async function exportHtml() { document.body.contentEditable = "false"; document.getElementById('adminSaveBtn').classList.add('hidden'); await navigator.clipboard.writeText(document.documentElement.outerHTML); showToast("Code Copied"); }
         function getLocation() {
             if (!navigator.geolocation) return showToast("GPS Error", "error");
-            const btn = document.getElementById('geoBtn');
-            btn.classList.add('text-emerald-500', 'animate-pulse');
+            const btn = document.getElementById('geoBtn'); btn.classList.add('text-emerald-500', 'animate-pulse');
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 try {
                     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
@@ -459,51 +511,19 @@
                 btn.classList.remove('text-emerald-500', 'animate-pulse');
             });
         }
-        function checkSocialLink() {
-            const user = new URLSearchParams(window.location.search).get('user');
-            if (user) { identity.name = user; identity.status = 'Member'; localStorage.setItem('smoothieIdentity', JSON.stringify(identity)); window.history.replaceState({}, document.title, "/"); showToast(`Uplink: ${user}`); }
-        }
-        function loadIdentity() {
-            const saved = localStorage.getItem('smoothieIdentity');
-            if(saved) {
-                identity = JSON.parse(saved);
-                document.getElementById('custName').value = identity.name;
-                document.getElementById('custAddr').value = identity.addr;
-                if(identity.orders > 0) { document.getElementById('rankDisplay').classList.remove('hidden'); document.getElementById('rankName').innerText = identity.status; }
-            }
-        }
-        function saveIdentity(name, addr) {
-            identity.name = name; identity.addr = addr; identity.orders++;
-            identity.status = identity.orders > 10 ? "Gold" : identity.orders > 5 ? "Silver" : "Standard";
-            localStorage.setItem('smoothieIdentity', JSON.stringify(identity));
-        }
-        function toggleSheet(id) { 
-            const el = document.getElementById(id);
-            if(el.classList.contains('active')) el.classList.remove('active');
-            else { el.classList.add('active'); }
-        }
-        function showToast(msg, type='success') { 
-            const t = document.getElementById('toast');
-            document.getElementById('toastMsg').innerText = msg; 
-            t.classList.add('toast-active'); setTimeout(() => t.classList.remove('toast-active'), 3000); 
-        }
+        function checkSocialLink() { const user = new URLSearchParams(window.location.search).get('user'); if (user) { identity.name = user; identity.status = 'Member'; localStorage.setItem('smoothieIdentity', JSON.stringify(identity)); window.history.replaceState({}, document.title, "/"); showToast(`Uplink: ${user}`); } }
+        function loadIdentity() { const saved = localStorage.getItem('smoothieIdentity'); if(saved) { identity = JSON.parse(saved); document.getElementById('custName').value = identity.name; document.getElementById('custAddr').value = identity.addr; if(identity.orders > 0) { document.getElementById('rankDisplay').classList.remove('hidden'); document.getElementById('rankName').innerText = identity.status; } } }
+        function saveIdentity(name, addr) { identity.name = name; identity.addr = addr; identity.orders++; identity.status = identity.orders > 10 ? "Gold" : identity.orders > 5 ? "Silver" : "Standard"; localStorage.setItem('smoothieIdentity', JSON.stringify(identity)); }
+        function toggleSheet(id) { const el = document.getElementById(id); if(el.classList.contains('active')) el.classList.remove('active'); else { el.classList.add('active'); } }
+        function showToast(msg, type='success') { const t = document.getElementById('toast'); document.getElementById('toastMsg').innerText = msg; t.classList.add('toast-active'); setTimeout(() => t.classList.remove('toast-active'), 3000); }
         function renderBankDetails() { document.getElementById('dispBankName').innerText = CONFIG.bank.name; document.getElementById('dispAcctNum').innerText = CONFIG.bank.acct; document.getElementById('dispBankName').innerText = CONFIG.bank.name; }
         function copyBank() { navigator.clipboard.writeText(CONFIG.bank.acct).then(() => showToast("Copied")); }
-        
-        // --- AUTH ---
         async function checkSession() { const { data } = await sb.auth.getSession(); if (data.session) { currentUser = data.session.user; document.getElementById('userEmailDisplay').innerText = currentUser.email; updateAuthUI(true); initRealtimeOps(); } }
         function checkAuth() { currentUser ? openOpsCenter() : openModal('authModal'); }
         function openOpsCenter() { closeAllModals(); toggleSheet('opsDrawer'); }
-        async function handleLogin() { 
-            const email = document.getElementById('emailInput').value; 
-            const password = document.getElementById('passInput').value;
-            const { data, error } = await sb.auth.signInWithPassword({ email, password });
-            if (error) { document.getElementById('authError').innerText = error.message; document.getElementById('authError').classList.remove('hidden'); }
-            else { currentUser = data.user; updateAuthUI(true); initRealtimeOps(); openOpsCenter(); }
-        }
+        async function handleLogin() { const email = document.getElementById('emailInput').value; const password = document.getElementById('passInput').value; const { data, error } = await sb.auth.signInWithPassword({ email, password }); if (error) { document.getElementById('authError').innerText = error.message; document.getElementById('authError').classList.remove('hidden'); } else { currentUser = data.user; updateAuthUI(true); initRealtimeOps(); openOpsCenter(); } }
         async function handleLogout() { localStorage.clear(); if(sb) sb.auth.signOut(); currentUser = null; updateAuthUI(false); location.reload(); }
         function updateAuthUI(isLoggedIn) { document.getElementById('loginForm').classList.toggle('hidden', isLoggedIn); document.getElementById('loggedInView').classList.toggle('hidden', !isLoggedIn); }
-        
         function initRealtimeOps() { fetchTasks(); sb.channel('tasks').on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => fetchTasks()).subscribe(); }
         async function fetchTasks() { const { data } = await sb.from('tasks').select('*').order('created_at', { ascending: false }); const list = document.getElementById('taskList'); list.innerHTML = data.map(t => `<div class="flex items-start gap-3 p-4 bg-white/5 border border-white/10"><input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask('${t.id}', this.checked)" class="mt-1"><div class="flex-1"><span class="text-[9px] uppercase font-bold text-blue-400">${t.role}</span><p class="text-sm mt-1 text-white">${t.text}</p></div><button onclick="deleteTask('${t.id}')" class="text-red-500">✕</button></div>`).join(''); }
         async function addTask() { const text = document.getElementById('newTaskInput').value.trim(); if(text) { await sb.from('tasks').insert([{ text, role: document.getElementById('taskRole').value }]); document.getElementById('newTaskInput').value = ''; } }
