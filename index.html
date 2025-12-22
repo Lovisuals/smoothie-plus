@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>smoothiePlus+ | OPS</title>
+    <title>smoothiePlus+ | Organic Fuel</title>
     <meta name="description" content="High-performance organic fuel system.">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥤</text></svg>">
     
@@ -17,7 +17,7 @@
             darkMode: 'class',
             theme: { 
                 extend: { 
-                    colors: { brand: '#10b981', dark: '#050508' },
+                    colors: { brand: '#33c160', dark: '#002626' },
                     screens: { 'xs': '480px' }
                 } 
             }
@@ -33,26 +33,26 @@
         <div class="ticker-track" id="tickerTrack"></div>
     </div>
 
-    <div id="toast" role="status" aria-live="polite" class="fixed bg-zinc-900 text-white px-6 py-4 rounded-full text-xs font-bold uppercase tracking-widest shadow-2xl z-[9999] flex items-center gap-3 border border-white/10 backdrop-blur-md">
-        <span id="toastIcon" class="text-emerald-400 text-lg">●</span> <span id="toastMsg">System Online</span>
+    <div id="toast" role="status" aria-live="polite" class="fixed bg-[#002626] text-white px-6 py-4 rounded-full text-xs font-bold uppercase tracking-widest shadow-xl z-[9999] flex items-center gap-3 border border-white/10 backdrop-blur-md">
+        <span id="toastIcon" class="text-[#33c160] text-lg">●</span> <span id="toastMsg">System Online</span>
     </div>
 
     <header class="fixed top-0 left-0 right-0 z-50 pt-16 pb-4 pointer-events-none transition-all duration-300" id="mainHeader">
         <div class="max-w-7xl mx-auto flex justify-between items-center pointer-events-auto px-6 md:px-12">
             <div>
-                <h1 class="text-4xl font-black italic tracking-tighter leading-none text-white" style="font-family: 'Oswald', sans-serif;">
-                    SMOOTHIE<span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-500">PLUS+</span>
+                <h1 class="text-4xl font-black italic tracking-tighter leading-none" style="font-family: 'Oswald', sans-serif; color: var(--text-main);">
+                    SMOOTHIE<span class="text-transparent bg-clip-text bg-gradient-to-r from-[#33c160] to-[#002626]">PLUS+</span>
                 </h1>
-                <p class="text-[9px] tracking-[0.4em] uppercase mt-1 font-bold text-gray-500">Organic Fuel Systems</p>
+                <p class="text-[10px] tracking-[0.4em] uppercase mt-1 font-bold" style="color: var(--text-muted);">Organic Fuel Systems</p>
             </div>
             
             <div class="flex items-center gap-4">
-                <button onclick="openModal('quizModal')" class="hidden md:flex bg-white/5 border border-white/10 text-emerald-400 px-6 py-3 rounded-none text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition items-center gap-2">
+                <button onclick="openModal('quizModal')" class="hidden md:flex bg-[#33c160]/10 border border-[#33c160]/20 text-[#002626] dark:text-[#33c160] px-6 py-3 rounded-none text-[10px] font-bold uppercase tracking-widest hover:bg-[#33c160] hover:text-white transition items-center gap-2">
                     <span>⚡</span> MATCH PROTOCOL
                 </button>
 
-                <button onclick="toggleTheme()" class="w-12 h-12 bg-white/5 border border-white/10 flex items-center justify-center transition hover:bg-white/10 text-xl text-white" aria-label="Toggle Theme">
-                    <span id="themeIcon">☀️</span>
+                <button onclick="toggleTheme()" class="w-12 h-12 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 flex items-center justify-center transition hover:bg-black/10 text-xl text-[#002626] dark:text-white" aria-label="Toggle Theme">
+                    <span id="themeIcon">🌙</span>
                 </button>
                 <div id="connectionStatus" class="w-2 h-2 rounded-full bg-red-500 transition-colors duration-700" title="DB Status"></div>
             </div>
@@ -62,34 +62,34 @@
     <div class="max-w-7xl mx-auto w-full pt-40 px-6 md:px-12">
         
         <div class="mb-12 md:hidden">
-            <button onclick="openModal('quizModal')" class="w-full bg-emerald-900/20 border border-emerald-500/30 text-emerald-400 py-5 rounded-none text-xs font-black uppercase tracking-widest hover:bg-emerald-900/30 transition flex items-center justify-center gap-2">
+            <button onclick="openModal('quizModal')" class="w-full bg-[#33c160]/10 border border-[#33c160]/30 text-[#002626] dark:text-[#33c160] py-5 rounded-none text-xs font-black uppercase tracking-widest hover:bg-[#33c160] hover:text-white transition flex items-center justify-center gap-2">
                 <span>⚡</span> INITIATE MATCH PROTOCOL
             </button>
         </div>
 
         <main id="menuGrid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-12 relative z-10 pb-32">
             <div class="col-span-full text-center mt-24 opacity-50">
-                <div class="inline-block w-8 h-8 border-2 border-t-transparent border-emerald-500 rounded-full animate-spin mb-4"></div>
-                <p class="text-xs uppercase tracking-[0.2em] font-bold">Establishing Uplink...</p>
+                <div class="inline-block w-8 h-8 border-2 border-t-transparent border-[#33c160] rounded-full animate-spin mb-4"></div>
+                <p class="text-xs uppercase tracking-[0.2em] font-bold" style="color: var(--text-muted);">Establishing Uplink...</p>
             </div>
         </main>
         
-        <div id="systemLog" class="text-[10px] font-mono opacity-30 mt-12 uppercase leading-relaxed text-center pointer-events-none pb-12">
+        <div id="systemLog" class="text-[10px] font-mono opacity-30 mt-12 uppercase leading-relaxed text-center pointer-events-none pb-12" style="color: var(--text-main);">
             Term_ID: 884-X • Secure Connection
         </div>
     </div>
 
     <footer class="fixed bottom-8 left-0 right-0 flex justify-center z-40 pointer-events-none">
-        <div class="pointer-events-auto inline-flex bg-black/80 backdrop-blur-xl border border-white/10 px-1 py-1 rounded-full shadow-2xl">
-            <button onclick="checkAuth()" class="text-[10px] font-bold uppercase tracking-widest px-8 py-3 rounded-full transition flex items-center gap-2 hover:bg-white/10 text-gray-400 hover:text-white">
+        <div class="pointer-events-auto inline-flex bg-white dark:bg-black/80 backdrop-blur-xl border border-black/10 dark:border-white/10 px-1 py-1 rounded-full shadow-2xl">
+            <button onclick="checkAuth()" class="text-[10px] font-bold uppercase tracking-widest px-8 py-3 rounded-full transition flex items-center gap-2 hover:bg-black/5 dark:hover:bg-white/10 text-[#5e6d66] dark:text-gray-400 hover:text-black dark:hover:text-white">
                 Staff Ops
             </button>
         </div>
     </footer>
 
-    <button onclick="toggleSheet('orderSheet')" class="fixed bottom-8 right-8 bg-white text-black w-16 h-16 shadow-[0_0_40px_rgba(16,185,129,0.4)] z-50 flex items-center justify-center active:scale-95 transition hover:scale-110 group rounded-none" style="clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);">
-        <svg class="w-6 h-6 group-hover:text-emerald-600 transition" fill="currentColor" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
-        <span id="cartCount" class="absolute top-0 right-0 bg-red-600 text-white text-[9px] font-bold w-5 h-5 flex items-center justify-center hidden">0</span>
+    <button onclick="toggleSheet('orderSheet')" class="fixed bottom-8 right-8 bg-[#002626] text-white w-16 h-16 shadow-[0_10px_30px_rgba(0,38,38,0.3)] z-50 flex items-center justify-center active:scale-95 transition hover:scale-110 group rounded-none" style="clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);">
+        <svg class="w-6 h-6 group-hover:text-[#33c160] transition" fill="currentColor" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+        <span id="cartCount" class="absolute top-0 right-0 bg-[#33c160] text-white text-[9px] font-bold w-5 h-5 flex items-center justify-center hidden">0</span>
     </button>
 
     <button id="adminSaveBtn" onclick="exportHtml()" class="fixed top-24 right-6 bg-blue-600 text-white p-3 shadow-2xl z-[9999] hidden text-xs font-bold uppercase tracking-widest hover:bg-blue-500">
@@ -108,35 +108,35 @@
         <div class="ai-log" id="aiLog">
             </div>
         <div class="ai-input-area">
-            <span class="text-emerald-500 mr-2">></span>
+            <span class="text-[#33c160] mr-2">></span>
             <input type="text" id="aiInput" class="ai-input" placeholder="Enter symptoms..." onkeypress="handleAiKey(event)">
             <button class="ai-send" onclick="sendAiMessage()">TX</button>
         </div>
     </div>
 
     <div id="modalBackdrop" class="modal-backdrop flex items-center justify-center p-4">
-        <div id="authModal" class="modal-content glass-panel p-10 relative shadow-2xl hidden max-w-md w-full border-t-2 border-emerald-500">
-            <button onclick="closeAllModals()" class="absolute top-4 right-4 text-gray-500 hover:text-white text-xl">✕</button>
-            <h2 class="text-3xl font-black mb-1 tracking-tighter uppercase font-display text-white">Access Portal</h2>
+        <div id="authModal" class="modal-content glass-panel p-10 relative shadow-2xl hidden max-w-md w-full border-t-4 border-[#33c160]">
+            <button onclick="closeAllModals()" class="absolute top-4 right-4 text-gray-500 hover:text-black dark:hover:text-white text-xl">✕</button>
+            <h2 class="text-3xl font-black mb-1 tracking-tighter uppercase font-display" style="color: var(--text-main);">Access Portal</h2>
             <div id="loginForm" class="space-y-6 mt-8">
-                <input type="email" id="emailInput" placeholder="OPERATOR ID" class="w-full bg-black/50 border border-white/10 p-4 text-sm font-mono focus:border-emerald-500 outline-none text-white tracking-wider">
-                <input type="password" id="passInput" placeholder="SECURITY KEY" class="w-full bg-black/50 border border-white/10 p-4 text-sm font-mono focus:border-emerald-500 outline-none text-white tracking-wider">
-                <button onclick="handleLogin()" class="w-full bg-white text-black font-black py-4 mt-4 hover:bg-emerald-400 transition text-sm uppercase tracking-[0.2em]">Authenticate</button>
+                <input type="email" id="emailInput" placeholder="OPERATOR ID" class="w-full bg-black/5 dark:bg-black/50 border border-black/10 dark:border-white/10 p-4 text-sm font-mono focus:border-[#33c160] outline-none tracking-wider" style="color: var(--text-main);">
+                <input type="password" id="passInput" placeholder="SECURITY KEY" class="w-full bg-black/5 dark:bg-black/50 border border-black/10 dark:border-white/10 p-4 text-sm font-mono focus:border-[#33c160] outline-none tracking-wider" style="color: var(--text-main);">
+                <button onclick="handleLogin()" class="w-full bg-[#002626] text-white font-black py-4 mt-4 hover:bg-[#33c160] transition text-sm uppercase tracking-[0.2em]">Authenticate</button>
                 <p id="authError" class="text-red-500 text-xs text-center hidden font-bold mt-2 font-mono">ACCESS DENIED</p>
             </div>
             <div id="loggedInView" class="hidden text-center mt-6">
-                <p class="font-bold text-xl mb-1 text-white">ID Verified</p>
-                <p id="userEmailDisplay" class="text-xs mb-8 font-mono opacity-50 text-emerald-400">user@system</p>
+                <p class="font-bold text-xl mb-1">ID Verified</p>
+                <p id="userEmailDisplay" class="text-xs mb-8 font-mono opacity-50 text-[#33c160]">user@system</p>
                 <button onclick="openOpsCenter()" class="w-full bg-blue-600 text-white font-bold py-4 mb-3 uppercase tracking-widest text-xs">Launch Ops</button>
                 <button onclick="handleLogout()" class="text-xs opacity-50 hover:opacity-100 transition mt-4 uppercase">Terminate Session</button>
             </div>
         </div>
 
-        <div id="quizModal" class="modal-content glass-panel p-10 relative shadow-2xl hidden max-w-md w-full border-t-2 border-emerald-500">
-            <button onclick="closeAllModals()" class="absolute top-4 right-4 text-gray-500 hover:text-white">✕</button>
+        <div id="quizModal" class="modal-content glass-panel p-10 relative shadow-2xl hidden max-w-md w-full border-t-4 border-[#33c160]">
+            <button onclick="closeAllModals()" class="absolute top-4 right-4 text-gray-500 hover:text-black">✕</button>
             <div class="text-center mb-10">
-                <h2 class="text-2xl font-black uppercase font-display text-emerald-400">Fuel Analyst</h2>
-                <p class="text-[10px] uppercase tracking-[0.2em] opacity-60 mt-2">Biometric Optimization</p>
+                <h2 class="text-2xl font-black uppercase font-display text-[#33c160]">Fuel Analyst</h2>
+                <p class="text-[10px] uppercase tracking-[0.2em] opacity-60 mt-2" style="color: var(--text-muted);">Biometric Optimization</p>
             </div>
             <div id="quizContent" class="space-y-4"></div>
         </div>
@@ -148,21 +148,21 @@
     </div>
 
     <div id="opsDrawer" class="drawer p-8">
-        <div class="flex justify-between items-center pb-8 border-b border-white/10 mb-8">
+        <div class="flex justify-between items-center pb-8 border-b border-black/10 dark:border-white/10 mb-8">
             <div>
-                <h2 class="text-xl font-black uppercase font-display text-white">Ops Center</h2>
+                <h2 class="text-xl font-black uppercase font-display" style="color: var(--text-main);">Ops Center</h2>
                 <div class="flex items-center gap-2 mt-1">
-                    <span class="w-2 h-2 bg-emerald-500 animate-pulse"></span>
+                    <span class="w-2 h-2 bg-[#33c160] animate-pulse"></span>
                     <p class="text-[9px] uppercase tracking-widest text-gray-500">Live Feed</p>
                 </div>
             </div>
-            <button onclick="toggleSheet('opsDrawer')" class="text-gray-500 hover:text-white text-xl">✕</button>
+            <button onclick="toggleSheet('opsDrawer')" class="text-gray-500 hover:text-black dark:hover:text-white text-xl">✕</button>
         </div>
         <div class="flex-1 overflow-hidden flex flex-col">
-            <div class="border border-white/10 p-5 mb-6 bg-black/50">
-                <input type="text" id="newTaskInput" placeholder="New Directive..." class="w-full bg-transparent text-sm outline-none mb-4 border-b border-white/10 pb-3 font-mono text-white">
+            <div class="border border-black/10 dark:border-white/10 p-5 mb-6 bg-black/5 dark:bg-black/50">
+                <input type="text" id="newTaskInput" placeholder="New Directive..." class="w-full bg-transparent text-sm outline-none mb-4 border-b border-black/10 dark:border-white/10 pb-3 font-mono" style="color: var(--text-main);">
                 <div class="flex justify-between items-center">
-                    <select id="taskRole" class="bg-black border border-white/10 text-xs px-3 py-2 outline-none font-bold text-gray-400 uppercase"><option value="GENERAL">General</option><option value="URGENT">Urgent</option><option value="KITCHEN">Kitchen</option></select>
+                    <select id="taskRole" class="bg-transparent border border-black/10 dark:border-white/10 text-xs px-3 py-2 outline-none font-bold text-gray-500 uppercase"><option value="GENERAL">General</option><option value="URGENT">Urgent</option><option value="KITCHEN">Kitchen</option></select>
                     <button onclick="addTask()" class="text-[10px] bg-blue-600 text-white px-5 py-2 font-bold uppercase tracking-widest hover:bg-blue-500">Add</button>
                 </div>
             </div>
@@ -171,44 +171,44 @@
     </div>
 
     <div id="orderSheet" class="drawer p-8">
-        <div class="flex justify-between items-center pb-8 border-b border-white/10 mb-8">
-            <h3 class="text-xl font-black uppercase font-display text-white">Manifest</h3>
+        <div class="flex justify-between items-center pb-8 border-b border-black/10 dark:border-white/10 mb-8">
+            <h3 class="text-xl font-black uppercase font-display" style="color: var(--text-main);">Manifest</h3>
             <button onclick="toggleSheet('orderSheet')" class="text-xs font-bold opacity-60 hover:opacity-100 transition">CLOSE</button>
         </div>
         
         <div class="overflow-y-auto h-[70vh] pb-20 no-scrollbar">
-            <div id="rankDisplay" class="hidden mb-8 bg-emerald-900/20 p-5 border border-emerald-500/30 flex items-center gap-4">
+            <div id="rankDisplay" class="hidden mb-8 bg-[#33c160]/10 p-5 border border-[#33c160]/30 flex items-center gap-4">
                 <div class="text-2xl">🔰</div>
                 <div>
-                    <p class="text-[9px] uppercase tracking-widest text-emerald-400 font-bold mb-0.5">Clearance Level</p>
-                    <p id="rankName" class="text-sm font-bold text-white font-mono"></p>
+                    <p class="text-[9px] uppercase tracking-widest text-[#33c160] font-bold mb-0.5">Clearance Level</p>
+                    <p id="rankName" class="text-sm font-bold font-mono" style="color: var(--text-main);"></p>
                 </div>
             </div>
 
-            <div id="cartList" class="space-y-4 mb-8 text-sm text-gray-400"></div>
+            <div id="cartList" class="space-y-4 mb-8 text-sm text-gray-500"></div>
             
-            <div class="p-6 mb-8 border border-white/10 bg-white/5">
-                <div class="flex justify-between items-end"><span class="text-xs uppercase tracking-widest font-bold opacity-60">Total</span><span id="cartTotal" class="text-3xl font-mono font-bold text-emerald-500 tracking-tight">₦0</span></div>
+            <div class="p-6 mb-8 border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5">
+                <div class="flex justify-between items-end"><span class="text-xs uppercase tracking-widest font-bold opacity-60">Total</span><span id="cartTotal" class="text-3xl font-mono font-bold text-[#33c160] tracking-tight">₦0</span></div>
             </div>
 
-            <div class="p-5 mb-8 border border-white/10 bg-white/5 flex justify-between items-center">
-                <div><p class="text-[10px] uppercase font-bold mb-1 opacity-60">Bank Transfer</p><p id="dispAcctNum" class="font-mono font-bold text-lg tracking-widest select-all text-white"></p><p id="dispBankName" class="text-[10px] uppercase opacity-60 mt-1"></p></div>
-                <button onclick="copyBank()" class="text-[10px] bg-white/10 hover:bg-white/20 px-4 py-2 uppercase font-bold tracking-wider text-white">Copy</button>
+            <div class="p-5 mb-8 border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 flex justify-between items-center">
+                <div><p class="text-[10px] uppercase font-bold mb-1 opacity-60">Bank Transfer</p><p id="dispAcctNum" class="font-mono font-bold text-lg tracking-widest select-all" style="color: var(--text-main);"></p><p id="dispBankName" class="text-[10px] uppercase opacity-60 mt-1"></p></div>
+                <button onclick="copyBank()" class="text-[10px] bg-black/10 dark:bg-white/10 hover:bg-black/20 px-4 py-2 uppercase font-bold tracking-wider" style="color: var(--text-main);">Copy</button>
             </div>
             
             <div class="space-y-6 mb-8">
                 <div class="relative group">
-                    <input type="text" id="custName" placeholder=" " class="block w-full bg-transparent border-b border-gray-600 py-2 text-white focus:border-emerald-500 outline-none peer">
+                    <input type="text" id="custName" placeholder=" " class="block w-full bg-transparent border-b border-gray-400 py-2 text-current focus:border-[#33c160] outline-none peer">
                     <label class="absolute text-xs text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 uppercase tracking-widest">Callsign / Name</label>
                 </div>
                 <div class="relative group">
-                    <textarea id="custAddr" rows="1" placeholder=" " class="block w-full bg-transparent border-b border-gray-600 py-2 text-white focus:border-emerald-500 outline-none peer resize-none"></textarea>
+                    <textarea id="custAddr" rows="1" placeholder=" " class="block w-full bg-transparent border-b border-gray-400 py-2 text-current focus:border-[#33c160] outline-none peer resize-none"></textarea>
                     <label class="absolute text-xs text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 uppercase tracking-widest">Drop Zone / Address</label>
-                    <button onclick="getLocation()" id="geoBtn" class="absolute right-0 bottom-2 text-gray-500 hover:text-emerald-500 transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
+                    <button onclick="getLocation()" id="geoBtn" class="absolute right-0 bottom-2 text-gray-500 hover:text-[#33c160] transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
                 </div>
             </div>
             
-            <button id="checkoutBtn" onclick="checkout()" disabled class="w-full bg-emerald-600 hover:bg-emerald-500 text-black font-black py-5 text-sm uppercase tracking-[0.2em] shadow-xl disabled:opacity-50 disabled:grayscale transition-all">Await Input</button>
+            <button id="checkoutBtn" onclick="checkout()" disabled class="w-full bg-[#33c160] hover:bg-[#002626] text-white font-black py-5 text-sm uppercase tracking-[0.2em] shadow-xl disabled:opacity-50 disabled:grayscale transition-all">Await Input</button>
         </div>
     </div>
 
@@ -232,8 +232,27 @@
             loadTheme();
             loadIdentity();
             setupKeyboardListeners();
-            setupScrollObserver(); // SCROLLYTELLING
+            setupScrollObserver(); 
         });
+
+        // --- THEME LOGIC (Defaults to Light) ---
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            document.getElementById('themeIcon').innerText = isDark ? '☀️' : '🌙';
+            localStorage.setItem('smoothieTheme', isDark ? 'dark' : 'light');
+        }
+        function loadTheme() { 
+            // Default to Light, check storage
+            const saved = localStorage.getItem('smoothieTheme');
+            if(saved === 'dark') { 
+                document.body.classList.add('dark-mode'); 
+                document.getElementById('themeIcon').innerText = '☀️'; 
+            } else {
+                // Light mode is default (no class needed)
+                document.getElementById('themeIcon').innerText = '🌙'; 
+            }
+        }
 
         // --- SCROLLYTELLING OBSERVER ---
         function setupScrollObserver() {
@@ -244,8 +263,6 @@
                     }
                 });
             }, { threshold: 0.1 });
-
-            // We attach this later when elements render
             window.attachScrollReveal = () => {
                 document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
             };
@@ -330,14 +347,6 @@
             }, 300);
         }
 
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
-            const isLight = document.body.classList.contains('light-mode');
-            document.getElementById('themeIcon').innerText = isLight ? '🌙' : '☀️';
-            localStorage.setItem('smoothieTheme', isLight ? 'light' : 'dark');
-        }
-        function loadTheme() { if(localStorage.getItem('smoothieTheme') === 'light') { document.body.classList.add('light-mode'); document.getElementById('themeIcon').innerText = '🌙'; } }
-
         async function initApp() {
             try {
                 if (window.supabase) {
@@ -389,7 +398,6 @@
 
         function renderMenu(items) {
             const grid = document.getElementById('menuGrid');
-            // Add staggered delay index
             grid.innerHTML = items.map((p, index) => {
                 return `
                 <div onclick="openProductDetail(${p.id})" 
@@ -411,29 +419,26 @@
                     </div>
                 </div>`;
             }).join('');
-            
-            // Activate Scrollytelling
             if(window.attachScrollReveal) window.attachScrollReveal();
         }
 
         function openProductDetail(id) {
             const p = menuItems.find(x => x.id === id);
-            const colorHex = '#10b981';
             document.getElementById('productModalContent').innerHTML = `
-                <div class="bg-black text-white">
+                <div class="bg-white dark:bg-black text-[#002626] dark:text-white">
                     <div class="relative h-64 w-full overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent z-10"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-white dark:from-black to-transparent z-10"></div>
                         <img src="${p.image_url}" class="w-full h-full object-cover">
                     </div>
                     <div class="p-8 relative z-20 -mt-10">
                         <h2 class="text-4xl font-black font-display uppercase italic mb-2">${p.name}</h2>
-                        <div class="w-12 h-1 bg-emerald-500 mb-6"></div>
-                        <p class="text-gray-400 text-sm leading-relaxed mb-8">${p.description}</p>
-                        <div class="flex items-center justify-between p-4 border border-white/10 bg-white/5 mb-6">
+                        <div class="w-12 h-1 bg-[#33c160] mb-6"></div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed mb-8">${p.description}</p>
+                        <div class="flex items-center justify-between p-4 border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 mb-6">
                             <span class="text-xs uppercase tracking-widest font-bold text-gray-500">Unit Cost</span>
-                            <span class="text-2xl font-mono font-bold text-emerald-400">₦${p.price.toLocaleString()}</span>
+                            <span class="text-2xl font-mono font-bold text-[#33c160]">₦${p.price.toLocaleString()}</span>
                         </div>
-                        <button onclick="addToCart(${p.id}); closeAllModals()" class="w-full bg-white text-black font-black py-4 uppercase tracking-[0.2em] hover:bg-emerald-400 transition">Add to Manifest</button>
+                        <button onclick="addToCart(${p.id}); closeAllModals()" class="w-full bg-[#002626] dark:bg-white text-white dark:text-black font-black py-4 uppercase tracking-[0.2em] hover:bg-[#33c160] transition">Add to Manifest</button>
                     </div>
                 </div>`;
             openModal('productModal');
@@ -442,16 +447,16 @@
         function addToCart(id) {
             const p = menuItems.find(x => x.id === id);
             if(cart[p.name]) cart[p.name].q++; else cart[p.name] = { p: p.price, q: 1 };
-            updateCartUI(); showToast('Item Added to Manifest');
+            updateCartUI(); showToast('Item Added');
         }
 
         function updateCartUI() {
             let total = 0, count = 0, html = '';
             for(const [name, item] of Object.entries(cart)) {
                 total += item.p * item.q; count += item.q;
-                html += `<div class="flex justify-between items-center p-4 border-b border-white/10"><div><p class="font-bold text-white text-sm">${name}</p><p class="text-[10px] uppercase opacity-60 text-emerald-500">Qty: ${item.q}</p></div><span class="font-mono text-white text-sm">₦${(item.p * item.q).toLocaleString()}</span></div>`;
+                html += `<div class="flex justify-between items-center p-4 border-b border-black/10 dark:border-white/10"><div><p class="font-bold text-current text-sm">${name}</p><p class="text-[10px] uppercase opacity-60 text-[#33c160]">Qty: ${item.q}</p></div><span class="font-mono text-current text-sm">₦${(item.p * item.q).toLocaleString()}</span></div>`;
             }
-            document.getElementById('cartList').innerHTML = html || '<div class="text-center py-12 opacity-30"><p class="text-4xl mb-4">🛒</p><p class="text-[10px] uppercase tracking-widest">Manifest Empty</p></div>';
+            document.getElementById('cartList').innerHTML = html || '<div class="text-center py-12 opacity-30"><p class="text-4xl mb-4">🛒</p><p class="text-[10px] uppercase tracking-widest">Cart Empty</p></div>';
             document.getElementById('cartTotal').innerText = '₦' + total.toLocaleString();
             const badge = document.getElementById('cartCount');
             badge.innerText = count; 
@@ -481,18 +486,18 @@
         function renderQuizStep(idx) {
             const container = document.getElementById('quizContent');
             if (idx >= QUIZ_STEPS.length) {
-                container.innerHTML = `<div class="text-center py-8"><div class="inline-block w-12 h-12 border-4 border-t-emerald-500 rounded-full animate-spin mb-4"></div><h3 class="font-bold text-white uppercase tracking-widest">Calculating...</h3></div>`;
+                container.innerHTML = `<div class="text-center py-8"><div class="inline-block w-12 h-12 border-4 border-t-[#33c160] rounded-full animate-spin mb-4"></div><h3 class="font-bold uppercase tracking-widest" style="color: var(--text-main);">Calculating...</h3></div>`;
                 setTimeout(() => {
                     const randomItem = menuItems[Math.floor(Math.random() * menuItems.length)];
-                    closeAllModals(); openProductDetail(randomItem.id); showToast("Optimal Fuel Found");
+                    closeAllModals(); openProductDetail(randomItem.id); showToast("Match Found");
                 }, 1200);
                 return;
             }
             const step = QUIZ_STEPS[idx];
             container.innerHTML = `
-                <h3 class="text-xl font-bold mb-6 text-center text-white font-display uppercase italic">${step.q}</h3>
+                <h3 class="text-xl font-bold mb-6 text-center font-display uppercase italic" style="color: var(--text-main);">${step.q}</h3>
                 <div class="grid gap-3">
-                    ${step.options.map(opt => `<button onclick="renderQuizStep(${idx + 1})" class="bg-black/50 border border-white/10 hover:bg-emerald-500 hover:text-black py-4 text-sm font-bold uppercase transition text-left px-6 tracking-wider text-gray-300">${opt}</button>`).join('')}
+                    ${step.options.map(opt => `<button onclick="renderQuizStep(${idx + 1})" class="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 hover:bg-[#33c160] hover:text-white py-4 text-sm font-bold uppercase transition text-left px-6 tracking-wider text-gray-500 dark:text-gray-300">${opt}</button>`).join('')}
                 </div>`;
         }
         const QUIZ_STEPS = [{q:"Current Status?",options:["System Drained","Need Focus","Recovery Mode"]},{q:"Flavor Profile?",options:["Sweet","Creamy","Green"]},{q:"Objective?",options:["Energy","Muscle","Detox"]}];
@@ -501,17 +506,17 @@
         async function exportHtml() { document.body.contentEditable = "false"; document.getElementById('adminSaveBtn').classList.add('hidden'); await navigator.clipboard.writeText(document.documentElement.outerHTML); showToast("Code Copied"); }
         function getLocation() {
             if (!navigator.geolocation) return showToast("GPS Error", "error");
-            const btn = document.getElementById('geoBtn'); btn.classList.add('text-emerald-500', 'animate-pulse');
+            const btn = document.getElementById('geoBtn'); btn.classList.add('text-[#33c160]', 'animate-pulse');
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 try {
                     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
                     const data = await res.json();
                     if(data.display_name) { document.getElementById('custAddr').value = data.display_name; showToast("Lock Acquired"); }
                 } catch(e) { showToast("Map Error", "error"); }
-                btn.classList.remove('text-emerald-500', 'animate-pulse');
+                btn.classList.remove('text-[#33c160]', 'animate-pulse');
             });
         }
-        function checkSocialLink() { const user = new URLSearchParams(window.location.search).get('user'); if (user) { identity.name = user; identity.status = 'Member'; localStorage.setItem('smoothieIdentity', JSON.stringify(identity)); window.history.replaceState({}, document.title, "/"); showToast(`Uplink: ${user}`); } }
+        function checkSocialLink() { const user = new URLSearchParams(window.location.search).get('user'); if (user) { identity.name = user; identity.status = 'Member'; localStorage.setItem('smoothieIdentity', JSON.stringify(identity)); window.history.replaceState({}, document.title, "/"); showToast(`Welcome: ${user}`); } }
         function loadIdentity() { const saved = localStorage.getItem('smoothieIdentity'); if(saved) { identity = JSON.parse(saved); document.getElementById('custName').value = identity.name; document.getElementById('custAddr').value = identity.addr; if(identity.orders > 0) { document.getElementById('rankDisplay').classList.remove('hidden'); document.getElementById('rankName').innerText = identity.status; } } }
         function saveIdentity(name, addr) { identity.name = name; identity.addr = addr; identity.orders++; identity.status = identity.orders > 10 ? "Gold" : identity.orders > 5 ? "Silver" : "Standard"; localStorage.setItem('smoothieIdentity', JSON.stringify(identity)); }
         function toggleSheet(id) { const el = document.getElementById(id); if(el.classList.contains('active')) el.classList.remove('active'); else { el.classList.add('active'); } }
@@ -525,7 +530,7 @@
         async function handleLogout() { localStorage.clear(); if(sb) sb.auth.signOut(); currentUser = null; updateAuthUI(false); location.reload(); }
         function updateAuthUI(isLoggedIn) { document.getElementById('loginForm').classList.toggle('hidden', isLoggedIn); document.getElementById('loggedInView').classList.toggle('hidden', !isLoggedIn); }
         function initRealtimeOps() { fetchTasks(); sb.channel('tasks').on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, () => fetchTasks()).subscribe(); }
-        async function fetchTasks() { const { data } = await sb.from('tasks').select('*').order('created_at', { ascending: false }); const list = document.getElementById('taskList'); list.innerHTML = data.map(t => `<div class="flex items-start gap-3 p-4 bg-white/5 border border-white/10"><input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask('${t.id}', this.checked)" class="mt-1"><div class="flex-1"><span class="text-[9px] uppercase font-bold text-blue-400">${t.role}</span><p class="text-sm mt-1 text-white">${t.text}</p></div><button onclick="deleteTask('${t.id}')" class="text-red-500">✕</button></div>`).join(''); }
+        async function fetchTasks() { const { data } = await sb.from('tasks').select('*').order('created_at', { ascending: false }); const list = document.getElementById('taskList'); list.innerHTML = data.map(t => `<div class="flex items-start gap-3 p-4 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10"><input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask('${t.id}', this.checked)" class="mt-1"><div class="flex-1"><span class="text-[9px] uppercase font-bold text-blue-500">${t.role}</span><p class="text-sm mt-1 text-current">${t.text}</p></div><button onclick="deleteTask('${t.id}')" class="text-red-500">✕</button></div>`).join(''); }
         async function addTask() { const text = document.getElementById('newTaskInput').value.trim(); if(text) { await sb.from('tasks').insert([{ text, role: document.getElementById('taskRole').value }]); document.getElementById('newTaskInput').value = ''; } }
         async function toggleTask(id, status) { await sb.from('tasks').update({ done: status }).eq('id', id); }
         async function deleteTask(id) { await sb.from('tasks').delete().eq('id', id); }
