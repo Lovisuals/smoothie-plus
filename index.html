@@ -2,237 +2,401 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smoothie Plus | Systems Online</title>
-    <meta name="description" content="Smoothie Plus control dashboard – seamless, neon-futuristic interface.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>smoothiePlus+ | OPS CENTER</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥤</text></svg>">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { 
+                extend: { 
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] }, 
+                    colors: { neon: '#39ff14', cyanCustom: 'hsl(185, 100%, 50%)' },
+                } 
+            }
+        }
+    </script>
+
     <style>
         :root {
+            --bg-body: #000000;
+            --card-bg: rgba(8, 8, 18, 0.65);
             --hue-cyan: 185;
             --hue-pink: 340;
-            --hue-purple: 275;
-            --speed: 45s;
+            --ticker-bg: rgba(0, 255, 255, 0.05);
+            --ticker-text: #4ade80;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            min-height: 100vh;
-            background: #000;
-            color: #fff;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            display: grid;
-            place-items: center;
-            overflow: hidden;
-            position: relative;
+        body.light-mode {
+            --bg-body: #f0f2f5;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --ticker-bg: rgba(0, 0, 0, 0.03);
         }
 
-        /* Animated radial background */
+        /* --- NEON DRIFT BACKGROUND --- */
+        body { 
+            background-color: var(--bg-body); 
+            color: white; 
+            overflow-x: hidden;
+            transition: background 0.4s;
+        }
+
         body::after {
-            content: "";
-            position: absolute;
-            inset: 0;
+            content: ""; position: fixed; inset: 0;
             background: 
-                radial-gradient(circle at 20% 80%, hsl(var(--hue-pink), 100%, 50%, 0.3), transparent 50%),
-                radial-gradient(circle at 80% 20%, hsl(var(--hue-cyan), 100%, 50%, 0.3), transparent 50%);
-            animation: bgFlow 25s ease infinite;
-            pointer-events: none;
+                radial-gradient(circle at 15% 70%, hsl(var(--hue-pink), 100%, 50%, 0.15), transparent 45%),
+                radial-gradient(circle at 85% 30%, hsl(var(--hue-cyan), 100%, 50%, 0.15), transparent 45%);
+            animation: bgDrift 30s ease infinite;
+            z-index: -1; pointer-events: none;
         }
 
-        @keyframes bgFlow {
+        @keyframes bgDrift {
             0%, 100% { transform: translate(0, 0) scale(1); }
             50% { transform: translate(5%, -5%) scale(1.1); }
         }
 
-        /* Lightweight static noise - pre-rendered, zero CPU cost */
-        body::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAPklEQVQYlWNgYGBYCcL///8Z/v37l+N/5z8GHKkDYb4BodYQ4u04A3H6Y/5z/OP4z/GP4z/Hf44/Gf44GGAABcIAuKzB5uMAAAAASUVORK5CYII=");
-            background-size: 50px 50px;
-            opacity: 0.04;
-            pointer-events: none;
-            z-index: 1;
+        /* --- GLASSMORPHISM CARDS --- */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        .scene {
-            width: 100%;
-            max-width: 1600px;
-            padding: 40px 0;
-            position: relative;
-            overflow: hidden;
+        .stream-card:hover {
+            transform: translateY(-12px) scale(1.03);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 40px hsla(var(--hue-cyan), 80%, 60%, 0.2);
+            border-color: hsla(var(--hue-cyan), 100%, 50%, 0.4);
         }
 
-        .scene::before, .scene::after {
-            content: "";
-            position: absolute;
-            top: 0; bottom: 0;
-            width: 250px;
-            z-index: 10;
-            pointer-events: none;
+        /* --- GLOBAL TICKER --- */
+        .ticker-wrap {
+            position: fixed; top: 0; left: 0; width: 100%; height: 44px;
+            background: var(--ticker-bg); backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 999;
         }
-        .scene::before { left: 0; background: linear-gradient(to right, #000, transparent); }
-        .scene::after  { right: 0; background: linear-gradient(to left, #000, transparent); }
+        .ticker { display: flex; white-space: nowrap; animation: ticker 60s linear infinite; }
+        @keyframes ticker { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+        .ticker-item { padding: 0 2rem; font-size: 10px; font-weight: 900; color: var(--ticker-text); letter-spacing: 0.1em; }
 
-        .track-wrapper {
-            display: flex;
-            width: 200%;
-            animation: drift var(--speed) linear infinite;
-            will-change: transform;
-        }
-
-        @keyframes drift {
-            from { transform: translateX(0); }
-            to   { transform: translateX(-50%); }
-        }
-
-        .track {
-            display: flex;
-            gap: 40px;
-            padding: 0 20px;
-            width: 100%;
-            flex-shrink: 0;
-        }
-
-        /* Pause on hover + reduced motion */
-        @media (prefers-reduced-motion: no-preference) {
-            .scene:hover .track-wrapper { animation-play-state: paused; }
-        }
-
-        .card {
-            --card-hue: var(--hue-cyan);
-            flex: 0 0 320px;
-            height: 400px;
-            background: rgba(10, 10, 20, 0.6);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid hsla(var(--card-hue), 70%, 50%, 0.2);
-            border-radius: 28px;
-            padding: 36px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.5s ease;
-            will-change: transform;
-        }
-
-        /* Inner glowing border */
-        .card::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            border-radius: inherit;
-            padding: 2px;
-            background: linear-gradient(45deg, hsla(var(--card-hue), 90%, 70%, 0.8), transparent);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            opacity: 0;
-            transition: opacity 0.4s;
-        }
-
-        .card:hover::before { opacity: 1; }
-
-        .card:hover {
-            transform: translateY(-20px) scale(1.05);
-            box-shadow: 0 30px 60px rgba(0,0,0,0.7),
-                        0 0 80px hsla(var(--card-hue), 80%, 60%, 0.4);
-        }
-
-        /* Parallax content */
-        .card-content {
-            transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-        .card:hover .card-content {
-            transform: perspective(800px) rotateX(8deg) rotateY(6deg);
-        }
-
-        .card h2 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
-
-        .card p {
-            font-size: 0.98rem;
-            line-height: 1.6;
-            color: #ddd;
-        }
-
-        .btn {
-            align-self: flex-start;
-            padding: 16px 32px;
-            border-radius: 16px;
-            background: linear-gradient(45deg, hsl(var(--card-hue), 80%, 60%), hsl(calc(var(--card-hue) + 40), 80%, 55%));
-            color: #000;
-            font-weight: 700;
-            text-decoration: none;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .btn::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            transform: translateX(-100%);
-            transition: transform 0.7s;
-        }
-
-        .btn:hover::after { transform: translateX(100%); }
-        .btn:hover { transform: translateY(-4px); box-shadow: 0 15px 30px rgba(0,0,0,0.5); }
-
-        /* Variants */
-        .card.pink   { --card-hue: var(--hue-pink); }
-        .card.purple { --card-hue: var(--hue-purple); }
-
-        /* Accessibility */
-        .btn:focus-visible {
-            outline: 3px solid hsla(var(--card-hue), 90%, 70%, 0.8);
-            outline-offset: 4px;
-        }
-
-        @media (max-width: 768px) {
-            .card { flex: 0 0 280px; height: 360px; padding: 28px; }
-            .track { gap: 30px; }
-            .scene { padding: 20px 0; }
-        }
+        /* --- UI UTILS --- */
+        .drawer { position: fixed; z-index: 1000; transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); background: rgba(5,5,8,0.95); backdrop-filter: blur(20px); }
+        .drawer.active { transform: translate(0) !important; }
+        .geo-pulse { animation: geoPulse 1.5s infinite; color: #4ade80 !important; }
+        @keyframes geoPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     </style>
 </head>
-<body>
+<body class="font-sans">
 
-    <main class="scene" role="region" aria-label="Smoothie Plus feature carousel">
-        <div class="track-wrapper" id="trackWrapper">
-            <!-- Duplicated via JS -->
+    <div class="ticker-wrap flex items-center">
+        <div class="ticker" id="alertTicker">
+            <div class="ticker-item text-cyan-400">SYNCING WITH NEURAL CORE...</div>
+        </div>
+    </div>
+
+    <header class="fixed top-0 left-0 right-0 z-[100] pt-16 px-6">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-black italic tracking-tighter uppercase leading-none">
+                    smoothie<span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-green-400">Plus+</span>
+                </h1>
+                <p id="rankLabel" class="text-[9px] font-bold tracking-[0.4em] uppercase opacity-50 mt-1">Guest Terminal</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="toggleTheme()" class="w-10 h-10 rounded-full glass-card flex items-center justify-center">☀️</button>
+                <div id="connectionStatus" class="w-3 h-3 rounded-full bg-red-500 shadow-lg self-center"></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto pt-44 px-6 pb-32">
+        <div id="menuGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div class="col-span-full text-center py-20 opacity-30">
+                <div class="w-10 h-10 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p class="text-xs uppercase tracking-widest">Uplinking to Satellite...</p>
+            </div>
+        </div>
+
+        <div id="systemLog" class="mt-20 text-[9px] font-mono opacity-40 uppercase leading-relaxed border-l border-white/10 pl-4 select-none">
+            > SYSTEM INITIALIZED...
         </div>
     </main>
 
-    <script>
-        const cards = [
-            { title: "🟢 Status", desc: "Check the system health and connectivity of your bot engine.", link: "https://wa.me/15556205335?text=Status", btn: "Check Status", color: "" },
-            { title: "🚀 Telegram", desc: "Connect to the secondary backup channel for redundancy.", link: "#", btn: "Open Channel", color: "pink" },
-            { title: "⚙️ Config", desc: "Adjust the neural parameters and response speed.", link: "#", btn: "Configure", color: "purple" },
-            { title: "📊 Data", desc: "View real-time traffic logs and user interactions.", link: "#", btn: "View Logs", color: "" },
-        ];
+    <footer class="fixed bottom-8 left-0 right-0 z-50 flex justify-center pointer-events-none">
+        <div class="pointer-events-auto glass-card p-1.5 flex gap-2">
+            <button onclick="checkAuth()" class="px-8 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-white/5 transition">Staff Ops</button>
+        </div>
+    </footer>
 
-        function createCard(card) {
-            return `
-                <div class="card ${card.color}">
-                    <div class="card-content">
-                        <h2>${card.title}</h2>
-                        <p>${card.desc}</p>
-                    </div>
-                    <a href="${card.link}" class="btn" aria-label="${card.btn}">${card.btn}</a>
-                </div>
-            `;
+    <button onclick="toggleSheet('orderSheet')" class="fixed bottom-8 right-6 w-16 h-16 rounded-full bg-white text-black shadow-2xl z-[100] flex items-center justify-center transition-transform active:scale-90 hover:scale-110">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+        <span id="cartCount" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-6 h-6 flex items-center justify-center rounded-full border-2 border-black hidden">0</span>
+    </button>
+
+    <div id="orderSheet" class="drawer fixed inset-y-0 right-0 w-full md:w-[450px] translate-x-full border-l border-white/10 p-8 flex flex-col">
+        <div class="flex justify-between items-center mb-10">
+            <h2 class="text-2xl font-black italic">MANIFEST</h2>
+            <button onclick="toggleSheet('orderSheet')" class="opacity-50 hover:opacity-100">✕</button>
+        </div>
+
+        <div id="rankDisplay" class="hidden glass-card p-5 mb-6 flex items-center gap-4 border-cyan-500/20">
+            <div class="text-3xl">🚀</div>
+            <div>
+                <p class="text-[9px] uppercase font-bold text-cyan-400">Identity Confirmed</p>
+                <p id="rankName" class="font-bold text-lg"></p>
+            </div>
+        </div>
+
+        <div id="cartList" class="flex-1 overflow-y-auto space-y-4 mb-8 pr-2"></div>
+
+        <div class="glass-card p-6 mb-6">
+            <div class="flex justify-between items-end">
+                <span class="text-[10px] font-bold opacity-50 uppercase">Total Points</span>
+                <span id="cartTotal" class="text-3xl font-black font-mono text-green-400">₦0</span>
+            </div>
+        </div>
+
+        <div class="space-y-4 mb-8">
+            <input type="text" id="custName" placeholder="USER ID" class="w-full bg-transparent border-b border-white/10 p-4 outline-none focus:border-cyan-400 transition font-mono uppercase text-sm">
+            <div class="relative">
+                <input type="text" id="custAddr" placeholder="SECTOR LOCATION" class="w-full bg-transparent border-b border-white/10 p-4 outline-none focus:border-cyan-400 transition font-mono uppercase text-sm pr-12">
+                <button onclick="getLocation()" id="geoBtn" class="absolute right-2 top-4 opacity-50 hover:opacity-100 transition">🛰️</button>
+            </div>
+        </div>
+
+        <button id="checkoutBtn" onclick="checkout()" disabled class="w-full bg-white text-black py-5 rounded-2xl font-black uppercase tracking-widest disabled:opacity-20 transition-all">Select Fuel First</button>
+    </div>
+
+    <div id="productModal" class="fixed inset-0 z-[200] bg-black/90 backdrop-blur-md flex items-end md:items-center justify-center p-0 md:p-6 hidden">
+        <div class="glass-card w-full max-w-lg p-10 relative">
+            <button onclick="toggleSheet('productModal')" class="absolute top-6 right-6 opacity-30">✕</button>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <div id="authModal" class="fixed inset-0 z-[150] bg-black/95 flex items-center justify-center p-6 hidden">
+        <div class="glass-card w-full max-w-sm p-10">
+            <h2 class="text-3xl font-black mb-8 italic">PORTAL</h2>
+            <div id="loginForm" class="space-y-4">
+                <input type="email" id="emailInput" placeholder="SYSTEM ID" class="w-full bg-white/5 p-4 rounded-xl outline-none focus:ring-1 ring-cyan-500 transition">
+                <input type="password" id="passInput" placeholder="ACCESS KEY" class="w-full bg-white/5 p-4 rounded-xl outline-none focus:ring-1 ring-cyan-500 transition">
+                <button onclick="handleLogin()" class="w-full bg-cyan-600 py-4 rounded-xl font-bold uppercase tracking-widest">Connect</button>
+            </div>
+            <div id="loggedInView" class="hidden text-center">
+                <p class="mb-8 opacity-50">Uplink Stable</p>
+                <button onclick="openOpsCenter()" class="w-full bg-blue-600 py-4 rounded-xl font-bold mb-4">Open Ops Center</button>
+                <button onclick="handleLogout()" class="text-xs opacity-30">Disconnect</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CONFIG = {
+            supabaseUrl: 'https://jkopygadpzkmqrnmzxmc.supabase.co', 
+            supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imprb3B5Z2FkcHprbXFybm16eG1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxNDAxNzcsImV4cCI6MjA4MTcxNjE3N30.hnPxhg8rmvGC-oHt7SWXekyG55EBcV26jPFTC8S5IeU',
+            whatsapp: '2347068516779',
+            bank: { name: "OPay", acct: "8083000771" }
+        };
+
+        let sb = null, menuItems = [], cart = {}, currentUser = null;
+        let callsign = { name: '', addr: '', rank: 'GUEST', xp: 0 };
+
+        window.addEventListener('load', () => { 
+            logToSystem("BOOTING HYBRID OS...");
+            checkSocialHandshake();
+            initApp(); 
+            loadTheme();
+            loadIdentity(); 
+        });
+
+        // --- CORE FUNCTIONS ---
+        function logToSystem(msg) {
+            const log = document.getElementById('systemLog');
+            log.innerHTML += `<br>> ${msg}`;
+            const lines = log.innerHTML.split('<br>');
+            if(lines.length > 6) log.innerHTML = lines.slice(lines.length - 6).join('<br>');
         }
 
-        const trackHTML = `<div class="track">${cards.map(createCard).join('')}</div>`;
-        document.getElementById('trackWrapper').innerHTML = trackHTML + trackHTML;
+        async function initApp() {
+            try {
+                if (window.supabase) {
+                    sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
+                    logToSystem("SUPABASE UPLINK: OK");
+                    updateGlobalPulse();
+                    
+                    sb.channel('db-changes')
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => updateGlobalPulse())
+                        .subscribe();
+
+                    const { data: products } = await sb.from('products').select('*').eq('active', true).order('id');
+                    if (products) {
+                        menuItems = products; 
+                        renderMenu(menuItems);
+                        logToSystem("MANIFEST DOWNLOADED");
+                        document.getElementById('connectionStatus').classList.replace('bg-red-500', 'bg-green-500');
+                        checkSession();
+                    }
+                }
+            } catch (err) { logToSystem("UPLINK FAILED"); }
+        }
+
+        function renderMenu(items) {
+            const grid = document.getElementById('menuGrid');
+            grid.innerHTML = items.map(p => {
+                const colorHue = p.color === 'green' ? 140 : p.color === 'purple' ? 270 : p.color === 'orange' ? 30 : 185;
+                return `
+                <div onclick="openProduct(${p.id})" class="stream-card glass-card p-6 flex flex-col justify-between h-[350px] cursor-pointer" style="--card-hue: ${colorHue}">
+                    <div class="h-40 w-full rounded-2xl bg-black/20 overflow-hidden relative">
+                        <img src="${p.image_url}" class="w-full h-full object-cover opacity-80" alt="${p.name}">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    </div>
+                    <div>
+                        <h3 class="font-black uppercase text-sm tracking-widest leading-none mb-2">${p.name}</h3>
+                        <div class="flex justify-between items-center">
+                            <span class="font-mono text-cyan-400 font-bold">₦${p.price.toLocaleString()}</span>
+                            <div class="p-2 bg-white/5 rounded-full">+</div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // --- IDENTITY & GEOLOCATION ---
+        function loadIdentity() {
+            const saved = localStorage.getItem('smoothieIdentity');
+            if(saved) {
+                callsign = JSON.parse(saved);
+                document.getElementById('custName').value = callsign.name;
+                document.getElementById('custAddr').value = callsign.addr;
+                document.getElementById('rankLabel').innerText = `${callsign.rank} TERMINAL`;
+                if(callsign.xp > 0) {
+                    document.getElementById('rankDisplay').classList.remove('hidden');
+                    document.getElementById('rankName').innerText = `${callsign.rank} ${callsign.name}`;
+                }
+            }
+        }
+
+        function getLocation() {
+            if (!navigator.geolocation) return;
+            const btn = document.getElementById('geoBtn');
+            btn.classList.add('geo-pulse');
+            logToSystem("TRIANGULATING SECTOR...");
+            
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
+                    const data = await res.json();
+                    document.getElementById('custAddr').value = data.display_name.split(',')[0] + ', ' + data.display_name.split(',')[1];
+                    logToSystem("LOCATION LOCKED");
+                } catch(e) { logToSystem("GPS SYNC ERROR"); }
+                btn.classList.remove('geo-pulse');
+            });
+        }
+
+        // --- CART LOGIC ---
+        function openProduct(id) {
+            const p = menuItems.find(x => x.id === id);
+            const modal = document.getElementById('productModal');
+            document.getElementById('modalContent').innerHTML = `
+                <div class="text-center">
+                    <img src="${p.image_url}" class="w-48 h-48 rounded-full mx-auto mb-8 object-cover border-4 border-cyan-500/20 shadow-2xl">
+                    <h2 class="text-4xl font-black italic uppercase mb-4 tracking-tighter">${p.name}</h2>
+                    <p class="text-sm opacity-60 mb-10 leading-relaxed">${p.description}</p>
+                    <button onclick="addToCart(${p.id}); toggleSheet('productModal')" class="w-full bg-cyan-500 py-5 rounded-2xl font-black uppercase tracking-widest text-black">UPLINK TO MANIFEST</button>
+                </div>`;
+            modal.classList.remove('hidden');
+        }
+
+        function addToCart(id) {
+            const p = menuItems.find(x => x.id === id);
+            if(cart[p.name]) cart[p.name].q++; else cart[p.name] = { p: p.price, q: 1 };
+            updateCartUI();
+            logToSystem(`MANIFEST UPDATED: ${p.name.toUpperCase()}`);
+        }
+
+        function updateCartUI() {
+            let total = 0, count = 0, html = '';
+            for(const [name, item] of Object.entries(cart)) {
+                total += item.p * item.q; count += item.q;
+                html += `<div class="glass-card p-4 flex justify-between items-center"><div class="font-bold uppercase text-xs">${name} (x${item.q})</div><div class="font-mono text-cyan-400">₦${(item.p * item.q).toLocaleString()}</div></div>`;
+            }
+            document.getElementById('cartList').innerHTML = html;
+            document.getElementById('cartTotal').innerText = '₦' + total.toLocaleString();
+            document.getElementById('cartCount').innerText = count;
+            document.getElementById('cartCount').classList.toggle('hidden', count === 0);
+            document.getElementById('checkoutBtn').disabled = count === 0;
+            document.getElementById('checkoutBtn').innerText = count === 0 ? "Select Fuel First" : "INITIALIZE ORDER";
+        }
+
+        async function checkout() {
+            const name = document.getElementById('custName').value.trim();
+            const addr = document.getElementById('custAddr').value.trim();
+            if(!name || !addr) return;
+            
+            // Save Progress
+            callsign.name = name; callsign.addr = addr; callsign.xp += 1;
+            if(callsign.xp > 10) callsign.rank = "COMMANDER"; else if(callsign.xp > 4) callsign.rank = "PILOT"; else callsign.rank = "CADET";
+            localStorage.setItem('smoothieIdentity', JSON.stringify(callsign));
+
+            const orderId = `ORD-${Date.now().toString().slice(-4)}`;
+            const items = Object.entries(cart).map(([k,v]) => `${k} x${v.q}`).join(', ');
+            const total = document.getElementById('cartTotal').innerText;
+
+            logToSystem("TRANSMITTING...");
+            await sb.from('orders').insert([{ id: orderId, customer: name, items, total, status: 'PENDING' }]);
+            
+            const msg = `*NEW ORDER: ${orderId}*%0A🚀 ${callsign.rank} ${name}%0A📍 ${addr}%0A%0A*ITEMS:* ${items}%0A*TOTAL:* ${total}`;
+            window.open(`https://wa.me/${CONFIG.whatsapp}?text=${msg}`, '_blank');
+            cart = {}; updateCartUI(); toggleSheet('orderSheet');
+        }
+
+        // --- SYSTEM ENGINE ---
+        async function updateGlobalPulse() {
+            const { data: alerts } = await sb.from('alerts').select('message').eq('is_active', true);
+            const { data: orders } = await sb.from('orders').select('items').order('created_at', { ascending: false }).limit(3);
+            
+            let combined = [];
+            if (orders) orders.forEach(o => combined.push(`⚡ RECENT FUEL: ${o.items.toUpperCase()}`));
+            if (alerts) alerts.forEach(a => combined.push(`◆ ${a.message.toUpperCase()}`));
+            
+            const html = combined.map(m => `<div class="ticker-item">${m}</div>`).join('');
+            document.getElementById('alertTicker').innerHTML = html + html + html;
+        }
+
+        function checkSocialHandshake() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('user')) {
+                callsign.name = params.get('user');
+                callsign.rank = params.get('rank') || 'PILOT';
+                localStorage.setItem('smoothieIdentity', JSON.stringify(callsign));
+                window.history.replaceState({}, '', '/');
+            }
+        }
+
+        function toggleTheme() { document.body.classList.toggle('light-mode'); }
+        function loadTheme() { if(localStorage.getItem('smoothieTheme') === 'light') document.body.classList.add('light-mode'); }
+        function toggleSheet(id) { document.getElementById(id).classList.toggle('hidden'); document.getElementById(id).classList.toggle('active'); }
+        
+        async function checkSession() { const { data } = await sb.auth.getSession(); if (data.session) { currentUser = data.session.user; updateAuthUI(true); initRealtimeOps(); } }
+        function checkAuth() { currentUser ? openOpsCenter() : toggleSheet('authModal'); }
+        async function handleLogin() { 
+            const email = document.getElementById('emailInput').value; 
+            const password = document.getElementById('passInput').value;
+            const { data, error } = await sb.auth.signInWithPassword({ email, password });
+            if (!error) { currentUser = data.user; updateAuthUI(true); initRealtimeOps(); toggleSheet('authModal'); }
+        }
+        function updateAuthUI(isLoggedIn) { 
+            document.getElementById('loginForm').classList.toggle('hidden', isLoggedIn); 
+            document.getElementById('loggedInView').classList.toggle('hidden', !isLoggedIn); 
+        }
     </script>
 </body>
 </html>
