@@ -2,6 +2,7 @@
   "name": "smoothie-bot",
   "version": "1.0.0",
   "dependencies": {
-    "axios": "^1.6.0"
+    "axios": "^1.6.0",
+    "openai": "^4.0.0"
   }
 }
